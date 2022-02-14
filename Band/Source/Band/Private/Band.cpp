@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Band.h"
+#include "BandLibraryWrapper.h"
 #include "Core.h"
 #include "Modules/ModuleManager.h"
 #include "Interfaces/IPluginManager.h"
@@ -31,8 +32,11 @@ void FBandModule::StartupModule()
 
 	if (ExampleLibraryHandle)
 	{
+		LoadBandFunction(ExampleLibraryHandle);
+		const char* tfLiteVersion = TfLiteVersion();
+		FString version(tfLiteVersion);
 		// Call the test function in the third party library that opens a message box
-		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("ThirdPartyLibraryError", "Successfully load example third party library"));
+		FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(version));
 	}
 	else
 	{

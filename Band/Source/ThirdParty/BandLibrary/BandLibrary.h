@@ -6,7 +6,5 @@
 #define BANDLIBRARY_IMPORT
 #endif
 
-#include "c_api.h"
-#include "c_api_experimental.h"
 #include "common.h"
 #include "builtin_op_data.h"
