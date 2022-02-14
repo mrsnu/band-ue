@@ -15,9 +15,9 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_C_C_API_EXPERIMENTAL_H_
 #define TENSORFLOW_LITE_C_C_API_EXPERIMENTAL_H_
 
-#include "tensorflow/lite/builtin_ops.h"
-#include "tensorflow/lite/c/c_api.h"
-#include "tensorflow/lite/c/common.h"
+#include "builtin_ops.h"
+#include "c_api.h"
+#include "common.h"
 
 #ifdef __cplusplus
 extern "C" {

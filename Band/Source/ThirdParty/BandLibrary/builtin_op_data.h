@@ -17,7 +17,7 @@ limitations under the License.
 
 #include <stdint.h>
 
-#include "tensorflow/lite/c/common.h"
+#include "common.h"
 
 #ifdef __cplusplus
 extern "C" {

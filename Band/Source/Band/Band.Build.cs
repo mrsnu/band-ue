@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
-using System.IO;
 
 public class Band : ModuleRules
 {
@@ -11,7 +10,6 @@ public class Band : ModuleRules
 		
 		PublicIncludePaths.AddRange(
 			new string[] {
-				Path.Combine(ModuleDirectory, "Public"),
 				// ... add public include paths required here ...
 			}
 			);
@@ -19,8 +17,6 @@ public class Band : ModuleRules
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
-				Path.Combine(ModuleDirectory, "Private"),
-				Path.Combine(ModuleDirectory, Path.Combine("Library", "Header")),
 				// ... add other private include paths required here ...
 			}
 			);
@@ -30,6 +26,8 @@ public class Band : ModuleRules
 			new string[]
 			{
 				"Core",
+				"BandLibrary",
+				"Projects"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -39,9 +37,7 @@ public class Band : ModuleRules
 			new string[]
 			{
 				"CoreUObject",
-				"Engine",
-				"Slate",
-				"SlateCore",
+				"Engine"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
@@ -50,7 +46,6 @@ public class Band : ModuleRules
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
-				Path.Combine(ModuleDirectory, Path.Combine("Library", Path.Combine("Bin", "tensorflowlite_c.dll"))),
 				// ... add any modules that your module loads dynamically here ...
 			}
 			);
