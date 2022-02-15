@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Band.h"
-#include "BandBlueprintLibrary.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "BandBlueprintLibrary.generated.h"
 

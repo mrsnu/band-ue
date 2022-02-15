@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "IAssetTypeActions.h"
 #include "Modules/ModuleManager.h"
 
 class BAND_API FBandModule : public IModuleInterface
@@ -13,4 +14,6 @@ public:
 private:
 	void* LibraryHandle;
 	bool LoadDllFunction();
+
+	TArray<TSharedPtr<IAssetTypeActions>> CreatedAssetTypeActions;
 };

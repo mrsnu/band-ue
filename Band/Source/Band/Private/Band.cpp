@@ -2,10 +2,14 @@
 
 #include "Band.h"
 #include "BandLibraryWrapper.h"
+#include "BandLibrary/BandLibrary.h"
+#include "BandModelTypeActions.h"
+
 #include "Core.h"
 #include "Modules/ModuleManager.h"
+#include "IAssetTools.h"
+#include "AssetToolsModule.h"
 #include "Interfaces/IPluginManager.h"
-#include "BandLibrary/BandLibrary.h"
 
 #include <iostream>
 
@@ -27,12 +31,33 @@ void FBandModule::StartupModule()
 	{
 		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("BandLibrary", "Failed to load Band third party library"));
 	}
+
+
+	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+	// add custom category
+	EAssetTypeCategories::Type ExampleCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Band")), FText::FromString("Band"));
+	// register our custom asset with example category
+	TSharedPtr<IAssetTypeActions> Action = MakeShareable(new FBandModelTypeActions(ExampleCategory));
+	AssetTools.RegisterAssetTypeActions(Action.ToSharedRef());
+	// saved it here for unregister later
+	CreatedAssetTypeActions.Add(Action);
 }
 
 void FBandModule::ShutdownModule()
 {
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
+
+	// Unregister all the asset types that we registered
+	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
+	{
+		IAssetTools& AssetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
+		for (int32 i = 0; i < CreatedAssetTypeActions.Num(); ++i)
+		{
+			AssetTools.UnregisterAssetTypeActions(CreatedAssetTypeActions[i].ToSharedRef());
+		}
+	}
+	CreatedAssetTypeActions.Empty();
 
 	// Free the dll handle
 	FPlatformProcess::FreeDllHandle(LibraryHandle);

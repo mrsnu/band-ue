@@ -36,9 +36,10 @@ public class Band : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AssetTools",
 				"CoreUObject",
-				"UnrealEd",
-				"Engine"
+				"Engine",
+				"UnrealEd"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
