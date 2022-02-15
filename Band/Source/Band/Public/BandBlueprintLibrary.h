@@ -6,9 +6,10 @@
 #include "BandBlueprintLibrary.generated.h"
 
 UCLASS()
-class UBandBlueprintLibrary : public UBlueprintFunctionLibrary {
+class BAND_API UBandBlueprintLibrary : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()
 
 	UFUNCTION(BlueprintCallable, Category="Band")
-	static void GetTfLiteVersion();
+	static FString Version();
+
 };

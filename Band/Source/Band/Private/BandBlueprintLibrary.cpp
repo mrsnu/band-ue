@@ -1,7 +1,9 @@
 #include "BandBlueprintLibrary.h"
+#include "BandLibraryWrapper.h"
 #include "BandLibrary/BandLibrary.h"
 
-void UBandBlueprintLibrary::GetTfLiteVersion()
+FString UBandBlueprintLibrary::Version()
 {
-	// const char* tfLiteVersion = TfLiteVersion();
+	const char* tfLiteVersion = TfLiteVersion();
+	return FString(tfLiteVersion);
 }

@@ -11,36 +11,21 @@
 
 #define LOCTEXT_NAMESPACE "FBandModule"
 
+#define LoadFunction(DllHandle, Function) \
+    Function = reinterpret_cast<p##Function>(FPlatformProcess::GetDllExport(DllHandle, L#Function)); \
+    if (!Function) { \
+		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("BandLibrary", "Failed to load "#Function)); \
+		return false; \
+	}
+
+using namespace Band;
+
 void FBandModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
-
-	// Get the base directory of this plugin
-	FString BaseDir = IPluginManager::Get().FindPlugin("Band")->GetBaseDir();
-
-	// Add on the relative location of the third party dll and load it
-	FString LibraryPath;
-#if PLATFORM_WINDOWS
-	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Binaries/ThirdParty/BandLibrary/Win64/tensorflowlite_c.dll"));
-#elif PLATFORM_MAC
-    LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/BandLibrary/Mac/Release/libExampleLibrary.dylib"));
-#elif PLATFORM_LINUX
-	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Binaries/ThirdParty/BandLibrary/Linux/x86_64-unknown-linux-gnu/libExampleLibrary.so"));
-#endif // PLATFORM_WINDOWS
-
-	ExampleLibraryHandle = !LibraryPath.IsEmpty() ? FPlatformProcess::GetDllHandle(*LibraryPath) : nullptr;
-
-	if (ExampleLibraryHandle)
+	if (!LoadDllFunction())
 	{
-		LoadBandFunction(ExampleLibraryHandle);
-		const char* tfLiteVersion = TfLiteVersion();
-		FString version(tfLiteVersion);
-		// Call the test function in the third party library that opens a message box
-		FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(version));
-	}
-	else
-	{
-		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("ThirdPartyLibraryError", "Failed to load example third party library"));
+		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("BandLibrary", "Failed to load Band third party library"));
 	}
 }
 
@@ -50,8 +35,56 @@ void FBandModule::ShutdownModule()
 	// we call this function before unloading the module.
 
 	// Free the dll handle
-	FPlatformProcess::FreeDllHandle(ExampleLibraryHandle);
-	ExampleLibraryHandle = nullptr;
+	FPlatformProcess::FreeDllHandle(LibraryHandle);
+	LibraryHandle = nullptr;
+}
+
+bool FBandModule::LoadDllFunction() {
+	// Get the base directory of this plugin
+	FString BaseDir = IPluginManager::Get().FindPlugin("Band")->GetBaseDir();
+
+	// Add on the relative location of the third party dll and load it
+	FString LibraryPath;
+#if PLATFORM_WINDOWS
+	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Binaries/ThirdParty/BandLibrary/Win64/tensorflowlite_c.dll"));
+#elif PLATFORM_MAC
+	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/BandLibrary/Mac/Release/libExampleLibrary.dylib"));
+#elif PLATFORM_LINUX
+	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Binaries/ThirdParty/BandLibrary/Linux/x86_64-unknown-linux-gnu/libExampleLibrary.so"));
+#endif // PLATFORM_WINDOWS
+
+	LibraryHandle = !LibraryPath.IsEmpty() ? FPlatformProcess::GetDllHandle(*LibraryPath) : nullptr;
+
+	if (!LibraryHandle) {
+		return false;
+	}
+
+	LoadFunction(LibraryHandle, TfLiteVersion);
+	LoadFunction(LibraryHandle, TfLiteModelCreate);
+	LoadFunction(LibraryHandle, TfLiteModelCreateFromFile);
+	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsCreate);
+	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsDelete);
+	LoadFunction(LibraryHandle, TfLiteInterpreterCreate);
+	LoadFunction(LibraryHandle, TfLiteInterpreterDelete);
+	LoadFunction(LibraryHandle, TfLiteInterpreterRegisterModel);
+	LoadFunction(LibraryHandle, TfLiteInterpreterInvokeSync);
+	LoadFunction(LibraryHandle, TfLiteInterpreterInvokeAsync);
+	LoadFunction(LibraryHandle, TfLiteInterpreterWait);
+	LoadFunction(LibraryHandle, TfLiteInterpreterGetInputTensorCount);
+	LoadFunction(LibraryHandle, TfLiteInterpreterGetOutputTensorCount);
+	LoadFunction(LibraryHandle, TfLiteInterpreterAllocateInputTensor);
+	LoadFunction(LibraryHandle, TfLiteInterpreterAllocateOutputTensor);
+	LoadFunction(LibraryHandle, TfLiteTensorDeallocate);
+	LoadFunction(LibraryHandle, TfLiteTensorType);
+	LoadFunction(LibraryHandle, TfLiteTensorNumDims);
+	LoadFunction(LibraryHandle, TfLiteTensorDim);
+	LoadFunction(LibraryHandle, TfLiteTensorByteSize);
+	LoadFunction(LibraryHandle, TfLiteTensorData);
+	LoadFunction(LibraryHandle, TfLiteTensorName);
+	LoadFunction(LibraryHandle, TfLiteTensorQuantizationParams);
+	LoadFunction(LibraryHandle, TfLiteTensorCopyFromBuffer);
+	LoadFunction(LibraryHandle, TfLiteTensorCopyToBuffer);
+	return true;
 }
 
 #undef LOCTEXT_NAMESPACE

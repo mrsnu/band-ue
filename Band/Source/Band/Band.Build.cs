@@ -37,6 +37,7 @@ public class Band : ModuleRules
 			new string[]
 			{
 				"CoreUObject",
+				"UnrealEd",
 				"Engine"
 				// ... add private dependencies that you statically link with here ...	
 			}
