@@ -1,14 +1,12 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Band.h"
+#include "BandModel.h"
 #include "BandLibraryWrapper.h"
 #include "BandLibrary/BandLibrary.h"
-#include "BandModelTypeActions.h"
 
 #include "Core.h"
 #include "Modules/ModuleManager.h"
-#include "IAssetTools.h"
-#include "AssetToolsModule.h"
 #include "Interfaces/IPluginManager.h"
 
 #include <iostream>
@@ -41,16 +39,6 @@ void FBandModule::StartupModule()
 		TfLiteInterpreterOptionsSetErrorReporter(InterpreterOptions, FBandModule::ReportError, this);
 		TfLiteStatus success = TfLiteInterpreterOptionsSetConfigPath(InterpreterOptions, TCHAR_TO_ANSI(*ConfigPath));
 		Interpreter = TfLiteInterpreterCreate(InterpreterOptions);
-
-		// TODO(dostos): Separate editor logic?
-		IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-		// add custom category
-		EAssetTypeCategories::Type ExampleCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Band")), FText::FromString("Band"));
-		// register our custom asset with example category
-		TSharedPtr<IAssetTypeActions> Action = MakeShareable(new FBandModelTypeActions(ExampleCategory));
-		AssetTools.RegisterAssetTypeActions(Action.ToSharedRef());
-		// saved it here for unregister later
-		CreatedAssetTypeActions.Add(Action);
 	}
 	else
 	{
@@ -63,17 +51,6 @@ void FBandModule::ShutdownModule()
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
 
-	// Unregister all the asset types that we registered
-	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
-	{
-		IAssetTools& AssetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-		for (int32 i = 0; i < CreatedAssetTypeActions.Num(); ++i)
-		{
-			AssetTools.UnregisterAssetTypeActions(CreatedAssetTypeActions[i].ToSharedRef());
-		}
-	}
-	CreatedAssetTypeActions.Empty();
-
 	if (Interpreter != nullptr) {
 		TfLiteInterpreterDelete(Interpreter);
 		Interpreter = nullptr;
@@ -83,6 +60,31 @@ void FBandModule::ShutdownModule()
 	FPlatformProcess::FreeDllHandle(LibraryHandle);
 	LibraryHandle = nullptr;
 	IsDllLoaded = false;
+}
+
+FBandModule& FBandModule::Get()
+{
+	return *reinterpret_cast<FBandModule*>(FModuleManager::Get().GetModule("Band"));
+}
+
+FString FBandModule::GetVersion()
+{
+	return TfLiteVersion();
+}
+
+int32 FBandModule::GetInputTensorCount(UBandModel* Model)
+{
+	return TfLiteInterpreterGetInputTensorCount(Interpreter, Model->GetModelHandle());
+}
+
+int32 FBandModule::GetOutputTensorCount(UBandModel* Model)
+{
+	return TfLiteInterpreterGetOutputTensorCount(Interpreter, Model->GetModelHandle());
+}
+
+int32 FBandModule::RegisterModel(TfLiteModel* ModelPtr)
+{
+	return TfLiteInterpreterRegisterModel(Interpreter, ModelPtr);
 }
 
 #define LoadFunction(DllHandle, Function) \
@@ -103,6 +105,7 @@ bool FBandModule::LoadDllFunction(FString LibraryPath) {
 	LoadFunction(LibraryHandle, TfLiteVersion);
 	LoadFunction(LibraryHandle, TfLiteModelCreate);
 	LoadFunction(LibraryHandle, TfLiteModelCreateFromFile);
+	LoadFunction(LibraryHandle, TfLiteModelDelete);
 	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsCreate);
 	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsDelete);
 	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsSetConfigPath);

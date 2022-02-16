@@ -2,12 +2,12 @@
 
 using UnrealBuildTool;
 
-public class Band : ModuleRules
+public class BandEditor : ModuleRules
 {
-	public Band(ReadOnlyTargetRules Target) : base(Target)
+	public BandEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
+		
 		PublicIncludePaths.AddRange(
 			new string[] {
 				// ... add public include paths required here ...
@@ -26,6 +26,7 @@ public class Band : ModuleRules
 			new string[]
 			{
 				"Core",
+				"Band",
 				"BandLibrary",
 				"Projects"
 				// ... add other public dependencies that you statically link with here ...
@@ -36,8 +37,10 @@ public class Band : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AssetTools",
 				"CoreUObject",
 				"Engine",
+				"UnrealEd"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

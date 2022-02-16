@@ -9,12 +9,14 @@ namespace Band {
 	struct TfLiteModel;
 }
 
-UCLASS()
+UCLASS(Blueprintable)
 class BAND_API UBandModel : public UObject
 {
 	GENERATED_BODY()
 
-	Band::TfLiteModel* ModelHandle = nullptr;
+	int32 ModelHandle = -1;
+	
 public:
+	const int32 GetModelHandle() const;
 	static UBandModel* LoadModel(UObject* InParent, FName InName, EObjectFlags Flags, const uint8*& Buffer, size_t Size);
 };

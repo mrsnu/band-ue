@@ -25,3 +25,8 @@ UObject *UBandModelFactory::FactoryCreateBinary(UClass *InClass, UObject *InPare
 	FEditorDelegates::OnAssetPostImport.Broadcast(this, Model);
 	return Model;
 }
+
+UObject* UBandModelFactory::ImportObject(UClass* InClass, UObject* InOuter, FName InName, EObjectFlags Flags, const FString& Filename, const TCHAR* Parms, bool& OutCanceled)
+{
+	return nullptr;
+}
