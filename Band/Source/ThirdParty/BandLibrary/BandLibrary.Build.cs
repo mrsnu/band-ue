@@ -8,6 +8,7 @@ public class BandLibrary : ModuleRules
 	public BandLibrary(ReadOnlyTargetRules Target) : base(Target)
 	{
 		Type = ModuleType.External;
+		RuntimeDependencies.Add(new RuntimeDependency("$(ProjectDir)/Binaries/ThirdParty/BandLibrary/Data/runtime_config.json"));
 
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{
@@ -15,7 +16,7 @@ public class BandLibrary : ModuleRules
 			PublicDelayLoadDLLs.Add("tensorflowlite_c.dll");
 
 			// Ensure that the DLL is staged along with the executable
-			RuntimeDependencies.Add("$(PluginDir)/Binaries/ThirdParty/BandLibrary/Win64/tensorflowlite_c.dll");
+			RuntimeDependencies.Add("$(PluginDir)/Source/ThirdParty/BandLibrary/x64/Release/tensorflowlite_c.dll");
         }
         else if (Target.Platform == UnrealTargetPlatform.Mac)
         {

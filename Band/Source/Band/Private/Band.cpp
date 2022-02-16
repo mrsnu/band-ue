@@ -71,7 +71,7 @@ bool FBandModule::LoadDllFunction() {
 	// Add on the relative location of the third party dll and load it
 	FString LibraryPath;
 #if PLATFORM_WINDOWS
-	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Binaries/ThirdParty/BandLibrary/Win64/tensorflowlite_c.dll"));
+	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/BandLibrary/x64/Release/tensorflowlite_c.dll"));
 #elif PLATFORM_MAC
 	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/BandLibrary/Mac/Release/libExampleLibrary.dylib"));
 #elif PLATFORM_LINUX
