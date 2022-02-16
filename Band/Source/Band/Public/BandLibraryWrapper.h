@@ -6,6 +6,7 @@ namespace Band {
     typedef struct TfLiteModel TfLiteModel;
     typedef struct TfLiteInterpreterOptions TfLiteInterpreterOptions;
     typedef struct TfLiteInterpreter TfLiteInterpreter;
+    typedef void (*TfLiteErrorReporter)(void* user_data, const char* format, va_list args);
     /*
         function pointer definitions (corresponds to c_api.h)
     */
@@ -110,6 +111,9 @@ namespace Band {
     pTfLiteModelDelete TfLiteModelDelete;
     pTfLiteInterpreterOptionsCreate TfLiteInterpreterOptionsCreate;
     pTfLiteInterpreterOptionsDelete TfLiteInterpreterOptionsDelete;
+    pTfLiteInterpreterOptionsSetConfigPath TfLiteInterpreterOptionsSetConfigPath;
+    pTfLiteInterpreterOptionsSetConfigFile TfLiteInterpreterOptionsSetConfigFile;
+    pTfLiteInterpreterOptionsSetErrorReporter TfLiteInterpreterOptionsSetErrorReporter;
     pTfLiteInterpreterCreate TfLiteInterpreterCreate;
     pTfLiteInterpreterDelete TfLiteInterpreterDelete;
     pTfLiteInterpreterRegisterModel TfLiteInterpreterRegisterModel;

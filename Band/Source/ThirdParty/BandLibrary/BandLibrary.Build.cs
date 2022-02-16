@@ -8,7 +8,7 @@ public class BandLibrary : ModuleRules
 	public BandLibrary(ReadOnlyTargetRules Target) : base(Target)
 	{
 		Type = ModuleType.External;
-		RuntimeDependencies.Add(new RuntimeDependency("$(ProjectDir)/Binaries/ThirdParty/BandLibrary/Data/runtime_config.json"));
+		RuntimeDependencies.Add(new RuntimeDependency("$(ProjectDir)/Source/ThirdParty/BandLibrary/Data/runtime_config.json"));
 
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{

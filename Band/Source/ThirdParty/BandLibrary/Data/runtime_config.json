@@ -1,8 +1,8 @@
 {
     "allow_worksteal": false,
     "cpu_masks": "BIG",
-    "log_path": "/data/data/com.example.retinaface/model_execution_log.csv",
-    "model_profile": "/data/data/com.example.retinaface/model_profile.json",
+    "log_path": "",
+    "model_profile": "",
     "planner_cpu_masks": "BIG",
     "profile_num_runs": 3,
     "profile_online": true,
