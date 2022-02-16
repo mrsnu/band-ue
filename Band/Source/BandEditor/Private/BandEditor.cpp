@@ -9,6 +9,7 @@
 #include "Modules/ModuleManager.h"
 #include "IAssetTools.h"
 #include "AssetToolsModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "Interfaces/IPluginManager.h"
 
 #include <iostream>

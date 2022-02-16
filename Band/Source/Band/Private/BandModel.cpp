@@ -1,18 +1,37 @@
 #include "BandModel.h"
 #include "Band.h"
 #include "BandLibraryWrapper.h"
+#include "FileHelpers.h"
+#include "PackageTools.h"
 
-const int32 UBandModel::GetModelHandle() const
+bool UBandModel::IsRegistered() const
 {
+    return Registered;
+}
+const int32 UBandModel::GetModelHandle()
+{
+    // Delay-register model 
+    // TODO(dostos): figure out how to register
+    // when UObject imported to editor as an uasset
+    if (!IsRegistered()) {
+        RegisterModel();
+    }
     return ModelHandle;
 }
 
+void UBandModel::RegisterModel() {
+    if (ModelBinary.Num() > 0) {
+        Band::TfLiteModel* TfLiteModel = Band::TfLiteModelCreate(ModelBinary.GetData(), ModelBinary.Num());
+        ModelHandle = FBandModule::Get().RegisterModel(TfLiteModel);
+        Band::TfLiteModelDelete(TfLiteModel);
+        Registered = true;
+    }
+}
+
 UBandModel* UBandModel::LoadModel(UObject* InParent, FName InName, EObjectFlags Flags, const uint8*& Buffer, size_t Size)
-{   
+{
     UBandModel* Model = NewObject<UBandModel>(InParent, InName, Flags);
-    Band::TfLiteModel* ModelPtr = Band::TfLiteModelCreate(Buffer, Size);
-    Model->ModelHandle = FBandModule::Get().RegisterModel(ModelPtr);
-    UE_LOG(LogTemp, Log, TEXT("Band model registered %d"), Model->ModelHandle);
-    Band::TfLiteModelDelete(ModelPtr);
-    return Model->ModelHandle != -1 ? Model : nullptr;
+    Model->ModelBinary = TArray<uint8>(Buffer, Size);
+    Model->RegisterModel();
+    return Model;
 }

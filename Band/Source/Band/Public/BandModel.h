@@ -10,13 +10,23 @@ namespace Band {
 }
 
 UCLASS(Blueprintable)
-class BAND_API UBandModel : public UObject
+class BAND_API UBandModel : public UDataAsset
 {
 	GENERATED_BODY()
 
+	UPROPERTY(VisibleAnywhere)
 	int32 ModelHandle = -1;
+
+	UPROPERTY(Transient)
+	bool Registered = false;
+
+	UPROPERTY()
+	TArray<uint8> ModelBinary;
 	
 public:
-	const int32 GetModelHandle() const;
+	bool IsRegistered() const;
+	const int32 GetModelHandle();
+	void RegisterModel();
+
 	static UBandModel* LoadModel(UObject* InParent, FName InName, EObjectFlags Flags, const uint8*& Buffer, size_t Size);
 };
