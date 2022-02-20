@@ -4,6 +4,7 @@
 #include "Band.h"
 #include "BandModel.h"
 #include "BandModelTypeActions.h"
+#include "BandTensorTypeActions.h"
 
 #include "Core.h"
 #include "Modules/ModuleManager.h"
@@ -19,12 +20,15 @@
 void FBandEditorModule::StartupModule()
 {
 	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-    EAssetTypeCategories::Type ExampleCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Band")), FText::FromString("Band"));
+    EAssetTypeCategories::Type BandCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Band")), FText::FromString("Band"));
     // register our custom asset with example category
-    TSharedPtr<IAssetTypeActions> Action = MakeShareable(new FBandModelTypeActions(ExampleCategory));
-    AssetTools.RegisterAssetTypeActions(Action.ToSharedRef());
+    TSharedPtr<IAssetTypeActions> ModelAction = MakeShareable(new FBandModelTypeActions(BandCategory));
+    AssetTools.RegisterAssetTypeActions(ModelAction.ToSharedRef());
+	TSharedPtr<IAssetTypeActions> TensorAction = MakeShareable(new FBandTensorTypeActions(BandCategory));
+	AssetTools.RegisterAssetTypeActions(TensorAction.ToSharedRef());
     // saved it here for unregister later
-    CreatedAssetTypeActions.Add(Action);
+    CreatedAssetTypeActions.Add(ModelAction);
+	CreatedAssetTypeActions.Add(TensorAction);
 }
 
 void FBandEditorModule::ShutdownModule()

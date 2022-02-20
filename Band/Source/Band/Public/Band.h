@@ -3,13 +3,28 @@
 #pragma once
 
 #include "Modules/ModuleManager.h"
+#include "BandLibrary/BandLibrary.h"
 
 namespace Band {
 	struct TfLiteInterpreter;
-	struct TfLiteModel;
 }
+struct TfLiteTensor;
 class UBandModel;
+class UBandTensor;
 
+/*
+	UEnum for TfLIteStatus in common.h
+*/
+UENUM(BlueprintType)
+enum class EBandStatus : uint8 {
+	Ok       UMETA(DisplayName = "Ok"),
+	Error        UMETA(DisplayName = "Error"),
+	DelegateError        UMETA(DisplayName = "DelegateError"),
+};
+
+/*
+	DLL interfaces for Band / owns main interpreter
+*/
 class BAND_API FBandModule : public IModuleInterface
 {
 public:
@@ -19,12 +34,22 @@ public:
 	/* Returns singleton object (Note: avoid calling this in shutdown phase) */
 	static FBandModule& Get();
 
+	/* Inpterpreter interfaces */
 	FString GetVersion();
 	int32 GetInputTensorCount(UBandModel* Model);
 	int32 GetOutputTensorCount(UBandModel* Model);
-	int32 RegisterModel(Band::TfLiteModel* ModelPtr);
+	UBandTensor* AllocateInputTensor(UBandModel* Model, int32 InputIndex);
+	UBandTensor* AllocateOutputTensor(UBandModel* Model, int32 OutputIndex);
+
+	void InvokeSync(UBandModel* Model, const TArray<UBandTensor*>& InputTensors, TArray<UBandTensor*>& OutputTensors);
+	int32 InvokeAsync(UBandModel* Model, const TArray<UBandTensor*>& InputTensors);
+	EBandStatus Wait(int32 JobHandle, TArray<UBandTensor*>& OutputTensors);
+
+	/* Helper functions for UBandModel */
+	Band::TfLiteInterpreter* GetInterpreter();
 
 private:
+	TArray<TfLiteTensor*> TensorsFromTArray(const TArray<UBandTensor*>& Tensors);
 	bool LoadDllFunction(FString LibraryPath);
 	// Callback function for TfLiteErrorReporter
 	static void ReportError(void* user_data, const char* format, va_list args);

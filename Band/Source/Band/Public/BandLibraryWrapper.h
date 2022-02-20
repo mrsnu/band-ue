@@ -18,6 +18,7 @@ namespace Band {
         const char* model_path);
     typedef void (*pTfLiteModelDelete)(
         TfLiteModel* model);
+    /* Interpreter helper methods */
     typedef TfLiteInterpreterOptions* (*pTfLiteInterpreterOptionsCreate)();
     typedef void (*pTfLiteInterpreterOptionsDelete)(
         TfLiteInterpreterOptions* options);
@@ -65,6 +66,7 @@ namespace Band {
         const TfLiteInterpreter* interpreter,
         int32_t model_id,
         int32_t output_index);
+    /* Tensor helper methods */
     typedef void (*pTfLiteTensorDeallocate)(
         TfLiteTensor* tensor);
     typedef TfLiteType(*pTfLiteTensorType)(

@@ -9,6 +9,7 @@ namespace Band {
 	struct TfLiteModel;
 }
 
+// TODO(dostos): Make sure variable of this class is non-nullable in BP.
 UCLASS(Blueprintable)
 class BAND_API UBandModel : public UDataAsset
 {

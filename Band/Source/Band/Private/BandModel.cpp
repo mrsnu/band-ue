@@ -22,7 +22,7 @@ const int32 UBandModel::GetModelHandle()
 void UBandModel::RegisterModel() {
     if (ModelBinary.Num() > 0) {
         Band::TfLiteModel* TfLiteModel = Band::TfLiteModelCreate(ModelBinary.GetData(), ModelBinary.Num());
-        ModelHandle = FBandModule::Get().RegisterModel(TfLiteModel);
+        ModelHandle = Band::TfLiteInterpreterRegisterModel(FBandModule::Get().GetInterpreter(), TfLiteModel);
         Band::TfLiteModelDelete(TfLiteModel);
         Registered = true;
     }

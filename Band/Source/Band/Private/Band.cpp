@@ -2,6 +2,7 @@
 
 #include "Band.h"
 #include "BandModel.h"
+#include "BandTensor.h"
 #include "BandLibraryWrapper.h"
 #include "BandLibrary/BandLibrary.h"
 
@@ -82,10 +83,51 @@ int32 FBandModule::GetOutputTensorCount(UBandModel* Model)
 	return TfLiteInterpreterGetOutputTensorCount(Interpreter, Model->GetModelHandle());
 }
 
-int32 FBandModule::RegisterModel(TfLiteModel* ModelPtr)
+UBandTensor* FBandModule::AllocateInputTensor(UBandModel* Model, int32 InputIndex)
 {
-	return TfLiteInterpreterRegisterModel(Interpreter, ModelPtr);
+	UBandTensor* Tensor = NewObject<UBandTensor>();
+	Tensor->TensorHandle = TfLiteInterpreterAllocateInputTensor(Interpreter, Model->GetModelHandle(), InputIndex);
+	return Tensor;
 }
+
+UBandTensor* FBandModule::AllocateOutputTensor(UBandModel* Model, int32 OutputIndex)
+{
+	UBandTensor* Tensor = NewObject<UBandTensor>();
+	Tensor->TensorHandle = TfLiteInterpreterAllocateOutputTensor(Interpreter, Model->GetModelHandle(), OutputIndex);
+	return Tensor;
+}
+
+TArray<TfLiteTensor*> FBandModule::TensorsFromTArray(const TArray<UBandTensor*>& Tensors)
+{
+	TArray<TfLiteTensor*> OutTensors;
+
+	for (int i = 0; i < Tensors.Num(); i++) {
+		OutTensors.Push(Tensors[i]->TensorHandle);
+	}
+
+	return OutTensors;
+}
+
+void FBandModule::InvokeSync(UBandModel* Model, const TArray<UBandTensor*>& InputTensors, TArray<UBandTensor*>& OutputTensors)
+{
+	TfLiteInterpreterInvokeSync(Interpreter, Model->GetModelHandle(), TensorsFromTArray(InputTensors).GetData(), TensorsFromTArray(OutputTensors).GetData());
+}
+
+int32 FBandModule::InvokeAsync(UBandModel* Model, const TArray<UBandTensor*>& InputTensors)
+{
+	return TfLiteInterpreterInvokeAsync(Interpreter, Model->GetModelHandle(), TensorsFromTArray(InputTensors).GetData());
+}
+
+EBandStatus FBandModule::Wait(int32 JobHandle, TArray<UBandTensor*>& OutputTensors)
+{
+	return EBandStatus(TfLiteInterpreterWait(Interpreter, JobHandle, TensorsFromTArray(OutputTensors).GetData()));
+}
+
+Band::TfLiteInterpreter* FBandModule::GetInterpreter()
+{
+	return Interpreter;
+}
+
 
 #define LoadFunction(DllHandle, Function) \
     Function = reinterpret_cast<p##Function>(FPlatformProcess::GetDllExport(DllHandle, L#Function)); \
