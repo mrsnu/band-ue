@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Factories/Factory.h"
 #include "UObject/ObjectMacros.h"
 #include "BandLibrary/BandLibrary.h"
 #include "BandEnum.h"

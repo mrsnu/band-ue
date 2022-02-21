@@ -26,7 +26,6 @@ class BAND_API UBandBlueprintLibrary : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	static UBandTensor *AllocateOutputTensor(UPARAM(ref) UBandModel *Model, int32 OutputIndex);
 
-	// TODO(dostos): How to save output tensors?
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	static void InvokeSync(UPARAM(ref) UBandModel *Model, UPARAM(ref) TArray<UBandTensor *> InputTensors, UPARAM(ref) TArray<UBandTensor *> OutputTensors);
 

@@ -1,8 +1,6 @@
 #include "BandModel.h"
 #include "Band.h"
 #include "BandLibraryWrapper.h"
-#include "FileHelpers.h"
-#include "PackageTools.h"
 
 bool UBandModel::IsRegistered() const
 {

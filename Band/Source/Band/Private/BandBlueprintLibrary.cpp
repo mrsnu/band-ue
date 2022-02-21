@@ -61,6 +61,8 @@ int32 UBandBlueprintLibrary::ByteSize(UBandTensor* Tensor)
 
 TArray<uint8> UBandBlueprintLibrary::Data(UBandTensor* Tensor)
 {
+	TArray<uint8> Buffer = Tensor->Data();
+	UE_LOG(LogTemp, Log, TEXT("%s"), *BytesToString(Buffer.GetData(), Buffer.Num()));
 	return Tensor->Data();
 }
 

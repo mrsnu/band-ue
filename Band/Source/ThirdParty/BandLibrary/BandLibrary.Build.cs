@@ -8,24 +8,21 @@ public class BandLibrary : ModuleRules
 	public BandLibrary(ReadOnlyTargetRules Target) : base(Target)
 	{
 		Type = ModuleType.External;
-		RuntimeDependencies.Add(new RuntimeDependency("$(ProjectDir)/Source/ThirdParty/BandLibrary/Data/runtime_config.json"));
+		RuntimeDependencies.Add(new RuntimeDependency("$(PluginDir)/Source/ThirdParty/BandLibrary/Data/runtime_config.json"));
 
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{
-			// Delay-load the DLL, so we can load it from the right place first
 			PublicDelayLoadDLLs.Add("tensorflowlite_c.dll");
-
-			// Ensure that the DLL is staged along with the executable
-			RuntimeDependencies.Add("$(PluginDir)/Source/ThirdParty/BandLibrary/x64/Release/tensorflowlite_c.dll");
+			RuntimeDependencies.Add("$(PluginDir)/Source/ThirdParty/BandLibrary/Data/Release/tensorflowlite_c.dll");
         }
         else if (Target.Platform == UnrealTargetPlatform.Mac)
         {
-            PublicDelayLoadDLLs.Add(Path.Combine(ModuleDirectory, "Mac", "Release", "libExampleLibrary.dylib"));
-            RuntimeDependencies.Add("$(PluginDir)/Source/ThirdParty/BandLibrary/Mac/Release/libExampleLibrary.dylib");
+            PublicDelayLoadDLLs.Add("libtensorflowlite_c.dylib");
+            RuntimeDependencies.Add("$(PluginDir)/Source/ThirdParty/BandLibrary/Data/Release/libtensorflowlite_c.dylib");
         }
-        else if (Target.Platform == UnrealTargetPlatform.Linux)
+        else if (Target.Platform == UnrealTargetPlatform.Android)
 		{
-			string ExampleSoPath = Path.Combine("$(PluginDir)", "Binaries", "ThirdParty", "BandLibrary", "Linux", "x86_64-unknown-linux-gnu", "libExampleLibrary.so");
+			string ExampleSoPath = Path.Combine("$(PluginDir)", "Source", "ThirdParty", "BandLibrary", "Data", "Release", "libtensorflowlite_c.so");
 			PublicAdditionalLibraries.Add(ExampleSoPath);
 			PublicDelayLoadDLLs.Add(ExampleSoPath);
 			RuntimeDependencies.Add(ExampleSoPath);

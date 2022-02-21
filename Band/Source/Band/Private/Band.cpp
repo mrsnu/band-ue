@@ -26,9 +26,9 @@ void FBandModule::StartupModule()
 #if PLATFORM_WINDOWS
 	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/BandLibrary/x64/Release/tensorflowlite_c.dll"));
 #elif PLATFORM_MAC
-	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/BandLibrary/Mac/Release/libExampleLibrary.dylib"));
-#elif PLATFORM_LINUX
-	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Binaries/ThirdParty/BandLibrary/Linux/x86_64-unknown-linux-gnu/libExampleLibrary.so"));
+	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/BandLibrary/Data/Release/tensorflowlite_c.dylib"));
+#elif PLATFORM_LINUX || PLATFORM_ANDROID
+	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/BandLibrary/Data/Release/tensorflowlite_c.so"));
 #endif // PLATFORM_WINDOWS
 
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
@@ -130,7 +130,7 @@ Band::TfLiteInterpreter* FBandModule::GetInterpreter()
 
 
 #define LoadFunction(DllHandle, Function) \
-    Function = reinterpret_cast<p##Function>(FPlatformProcess::GetDllExport(DllHandle, L#Function)); \
+    Function = reinterpret_cast<p##Function>(FPlatformProcess::GetDllExport(DllHandle, ANSI_TO_TCHAR(#Function))); \
     if (!Function) { \
 		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("BandLibrary", "Failed to load "#Function)); \
 		return false; \
