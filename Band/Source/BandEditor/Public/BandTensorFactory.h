@@ -8,7 +8,7 @@ UCLASS()
 class BANDEDITOR_API UBandTensorFactory : public UFactory
 {
 	GENERATED_BODY()
-	
+
 public:
 	UBandTensorFactory(const FObjectInitializer& ObjectInitializer);
 };

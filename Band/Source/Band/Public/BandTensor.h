@@ -3,6 +3,7 @@
 #include "Factories/Factory.h"
 #include "UObject/ObjectMacros.h"
 #include "BandLibrary/BandLibrary.h"
+#include "BandEnum.h"
 #include "BandTensor.generated.h"
 
 UCLASS(Blueprintable)
@@ -16,12 +17,12 @@ class BAND_API UBandTensor : public UObject
 	friend class FBandModule;
 public:
 
-	TfLiteType Type();
+	EBandTensorType Type();
 	int32 NumDims();
 	uint64 ByteSize();
-	void* Data();
+	TArray<uint8> Data();
 	FString Name();
 
-	TfLiteStatus CopyFromBuffer(const TArray<uint8>& Buffer);
-	TfLiteStatus CopyToBuffer(TArray<uint8>& Buffer);
+	EBandStatus CopyFromBuffer(TArray<uint8> Buffer);
+	EBandStatus CopyToBuffer(TArray<uint8> Buffer);
 };

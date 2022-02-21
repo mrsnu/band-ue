@@ -7,11 +7,12 @@ void UBandTensor::BeginDestroy()
 		Band::TfLiteTensorDeallocate(TensorHandle);
 		TensorHandle = nullptr;
 	}
+	Super::BeginDestroy();
 }
 
-TfLiteType UBandTensor::Type()
+EBandTensorType UBandTensor::Type()
 {
-	return Band::TfLiteTensorType(TensorHandle);
+	return EBandTensorType(Band::TfLiteTensorType(TensorHandle));
 }
 
 int32 UBandTensor::NumDims()
@@ -24,9 +25,9 @@ uint64 UBandTensor::ByteSize()
 	return Band::TfLiteTensorByteSize(TensorHandle);
 }
 
-void* UBandTensor::Data()
+TArray<uint8> UBandTensor::Data()
 {
-	return Band::TfLiteTensorData(TensorHandle);
+	return TArray<uint8>((uint8*)Band::TfLiteTensorData(TensorHandle), ByteSize());
 }
 
 FString UBandTensor::Name()
@@ -34,12 +35,12 @@ FString UBandTensor::Name()
 	return FString(Band::TfLiteTensorName(TensorHandle));
 }
 
-TfLiteStatus UBandTensor::CopyFromBuffer(const TArray<uint8>& Buffer)
+EBandStatus UBandTensor::CopyFromBuffer(TArray<uint8> Buffer)
 {
-	return Band::TfLiteTensorCopyFromBuffer(TensorHandle, Buffer.GetData(), Buffer.GetAllocatedSize());
+	return EBandStatus(Band::TfLiteTensorCopyFromBuffer(TensorHandle, Buffer.GetData(), Buffer.GetAllocatedSize()));
 }
 
-TfLiteStatus UBandTensor::CopyToBuffer(TArray<uint8>& Buffer)
+EBandStatus UBandTensor::CopyToBuffer(TArray<uint8> Buffer)
 {
-	return Band::TfLiteTensorCopyToBuffer(TensorHandle, Buffer.GetData(), Buffer.GetAllocatedSize());
+	return EBandStatus(Band::TfLiteTensorCopyToBuffer(TensorHandle, Buffer.GetData(), Buffer.GetAllocatedSize()));
 }

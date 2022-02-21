@@ -97,7 +97,7 @@ UBandTensor* FBandModule::AllocateOutputTensor(UBandModel* Model, int32 OutputIn
 	return Tensor;
 }
 
-TArray<TfLiteTensor*> FBandModule::TensorsFromTArray(const TArray<UBandTensor*>& Tensors)
+TArray<TfLiteTensor*> FBandModule::TensorsFromTArray(TArray<UBandTensor*> Tensors)
 {
 	TArray<TfLiteTensor*> OutTensors;
 
@@ -108,17 +108,17 @@ TArray<TfLiteTensor*> FBandModule::TensorsFromTArray(const TArray<UBandTensor*>&
 	return OutTensors;
 }
 
-void FBandModule::InvokeSync(UBandModel* Model, const TArray<UBandTensor*>& InputTensors, TArray<UBandTensor*>& OutputTensors)
+void FBandModule::InvokeSync(UBandModel* Model, TArray<UBandTensor*> InputTensors, TArray<UBandTensor*> OutputTensors)
 {
 	TfLiteInterpreterInvokeSync(Interpreter, Model->GetModelHandle(), TensorsFromTArray(InputTensors).GetData(), TensorsFromTArray(OutputTensors).GetData());
 }
 
-int32 FBandModule::InvokeAsync(UBandModel* Model, const TArray<UBandTensor*>& InputTensors)
+int32 FBandModule::InvokeAsync(UBandModel* Model, TArray<UBandTensor*> InputTensors)
 {
 	return TfLiteInterpreterInvokeAsync(Interpreter, Model->GetModelHandle(), TensorsFromTArray(InputTensors).GetData());
 }
 
-EBandStatus FBandModule::Wait(int32 JobHandle, TArray<UBandTensor*>& OutputTensors)
+EBandStatus FBandModule::Wait(int32 JobHandle, TArray<UBandTensor*> OutputTensors)
 {
 	return EBandStatus(TfLiteInterpreterWait(Interpreter, JobHandle, TensorsFromTArray(OutputTensors).GetData()));
 }
