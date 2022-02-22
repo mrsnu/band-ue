@@ -27,7 +27,7 @@ void FBandModule::StartupModule()
 	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/BandLibrary/Data/Release/tensorflowlite_c.dll"));
 #elif PLATFORM_MAC
 	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/BandLibrary/Data/Release/tensorflowlite_c.dylib"));
-#elif PLATFORM_LINUX || PLATFORM_ANDROID
+#elif PLATFORM_ANDROID
 	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/BandLibrary/Data/Release/tensorflowlite_c.so"));
 #endif // PLATFORM_WINDOWS
 
