@@ -19,6 +19,7 @@ public class BandLibrary : ModuleRules
 		// TODO(dostos): not tested on iOS yet
         else if (Target.Platform == UnrealTargetPlatform.Mac)
         {
+            PublicDelayLoadDLLs.Add("tensorflowlite_c.dylib");
             RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Data", "Release", "libtensorflowlite_c.dylib"));
         }
         else if (Target.Platform == UnrealTargetPlatform.Android)

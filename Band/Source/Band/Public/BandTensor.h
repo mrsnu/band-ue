@@ -14,14 +14,15 @@ class BAND_API UBandTensor : public UObject
 
 	TfLiteTensor* TensorHandle = nullptr;
 	friend class FBandModule;
-public:
 
+public:
 	EBandTensorType Type();
 	int32 NumDims();
 	uint64 ByteSize();
 	TArray<uint8> Data();
 	FString Name();
 
+	EBandStatus CopyFromBuffer(uint8* Buffer, int32 Bytes);
 	EBandStatus CopyFromBuffer(TArray<uint8> Buffer);
 	EBandStatus CopyToBuffer(TArray<uint8> Buffer);
 };

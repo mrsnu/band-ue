@@ -44,39 +44,61 @@ EBandStatus UBandBlueprintLibrary::Wait(int32 JobHandle, UPARAM(ref) TArray<UBan
 	return FBandModule::Get().Wait(JobHandle, OutputTensors);
 }
 
-EBandTensorType UBandBlueprintLibrary::GetTensorType(UBandTensor* Tensor)
+EBandTensorType UBandBlueprintLibrary::GetTensorType(UPARAM(ref) UBandTensor* Tensor)
 {
 	return Tensor->Type();
 }
 
-int32 UBandBlueprintLibrary::NumDims(UBandTensor* Tensor)
+int32 UBandBlueprintLibrary::NumDims(UPARAM(ref) UBandTensor* Tensor)
 {
 	return Tensor->NumDims();
 }
 
-int32 UBandBlueprintLibrary::ByteSize(UBandTensor* Tensor)
+int32 UBandBlueprintLibrary::ByteSize(UPARAM(ref) UBandTensor* Tensor)
 {
 	return Tensor->ByteSize();
 }
 
-TArray<uint8> UBandBlueprintLibrary::Data(UBandTensor* Tensor)
+TArray<uint8> UBandBlueprintLibrary::GetRawBuffer(UPARAM(ref) UBandTensor* Tensor)
 {
 	TArray<uint8> Buffer = Tensor->Data();
 	UE_LOG(LogTemp, Log, TEXT("%s"), *BytesToString(Buffer.GetData(), Buffer.Num()));
 	return Tensor->Data();
 }
 
-FString UBandBlueprintLibrary::Name(UBandTensor* Tensor)
+TArray<float> UBandBlueprintLibrary::GetF32Buffer(UPARAM(ref)UBandTensor* Tensor)
+{
+	return TArray<float>((float*)(Tensor->Data().GetData()), Tensor->ByteSize() / sizeof(float));
+}
+
+FString UBandBlueprintLibrary::GetName(UPARAM(ref) UBandTensor* Tensor)
 {
 	return Tensor->Name();
 }
 
-EBandStatus UBandBlueprintLibrary::CopyFromBuffer(UBandTensor* Tensor, TArray<uint8> Buffer)
+EBandStatus UBandBlueprintLibrary::CopyFromBuffer(UPARAM(ref) UBandTensor* Tensor, TArray<uint8> Buffer)
 {
 	return Tensor->CopyFromBuffer(Buffer);
 }
 
-EBandStatus UBandBlueprintLibrary::CopyToBuffer(UBandTensor* Tensor, TArray<uint8> Buffer)
+EBandStatus UBandBlueprintLibrary::CopyFromTexture(UPARAM(ref) UBandTensor* Tensor, UTexture* Texture)
+{
+	FTextureSource& Source = Texture->Source;
+	if (Source.GetFormat() == TSF_BGRA8) {
+		uint8* OffsetSource = Source.LockMip(0);
+		Tensor->CopyFromBuffer(OffsetSource, Tensor->ByteSize());
+		Source.UnlockMip(0);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Unknown source format %d"), Source.GetFormat());
+		return EBandStatus::Error;
+	}
+
+	return EBandStatus::Ok;
+}
+
+EBandStatus UBandBlueprintLibrary::CopyToBuffer(UPARAM(ref) UBandTensor* Tensor, TArray<uint8> Buffer)
 {
 	return Tensor->CopyToBuffer(Buffer);
 }

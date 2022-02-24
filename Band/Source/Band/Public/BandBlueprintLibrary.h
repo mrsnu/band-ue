@@ -36,23 +36,29 @@ class BAND_API UBandBlueprintLibrary : public UBlueprintFunctionLibrary
 	static EBandStatus Wait(int32 JobHandle, UPARAM(ref) TArray<UBandTensor *> OutputTensors);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	static EBandTensorType GetTensorType(UBandTensor *Tensor);
+	static EBandTensorType GetTensorType(UPARAM(ref) UBandTensor *Tensor);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	static int32 NumDims(UBandTensor *Tensor);
+	static int32 NumDims(UPARAM(ref) UBandTensor *Tensor);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	static int32 ByteSize(UBandTensor *Tensor);
+	static int32 ByteSize(UPARAM(ref) UBandTensor *Tensor);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	static TArray<uint8> Data(UBandTensor *Tensor);
+	static TArray<uint8> GetRawBuffer(UPARAM(ref) UBandTensor *Tensor);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	static FString Name(UBandTensor *Tensor);
+	static TArray<float> GetF32Buffer(UPARAM(ref) UBandTensor* Tensor);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	static EBandStatus CopyFromBuffer(UBandTensor *Tensor, TArray<uint8> Buffer);
+	static FString GetName(UPARAM(ref) UBandTensor *Tensor);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	static EBandStatus CopyToBuffer(UBandTensor *Tensor, TArray<uint8> Buffer);
+	static EBandStatus CopyFromBuffer(UPARAM(ref) UBandTensor *Tensor, TArray<uint8> Buffer);
+
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	static EBandStatus CopyFromTexture(UPARAM(ref) UBandTensor* Tensor, UTexture* Texture);
+
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	static EBandStatus CopyToBuffer(UPARAM(ref) UBandTensor *Tensor, TArray<uint8> Buffer);
 };
