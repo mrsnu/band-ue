@@ -13,6 +13,7 @@
 #include <iostream>
 
 #define LOCTEXT_NAMESPACE "FBandModule"
+DEFINE_LOG_CATEGORY(LogBand);
 
 using namespace Band;
 
@@ -31,7 +32,7 @@ void FBandModule::StartupModule()
 	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/BandLibrary/Data/Release/tensorflowlite_c.so"));
 #endif // PLATFORM_WINDOWS
 
-	UE_LOG(LogTemp, Display, TEXT("Band: Selected library path %s"), *LibraryPath);
+	UE_LOG(LogBand, Display, TEXT("Band: Selected library path %s"), *LibraryPath);
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 	if (LoadDllFunction(LibraryPath))
 	{	
@@ -44,7 +45,7 @@ void FBandModule::StartupModule()
 			Interpreter = TfLiteInterpreterCreate(InterpreterOptions);
 		}
 		else {
-			UE_LOG(LogTemp, Display, TEXT("File not exists!"));
+			UE_LOG(LogBand, Display, TEXT("File not exists!"));
 			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("BandLibrary", "Failed to load Band third party library"));
 		}
 	}
@@ -198,7 +199,7 @@ void FBandModule::ReportError(void* UserData, const char* Format, va_list Args)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Log, TEXT("%s"), *LogMessage);
+		UE_LOG(LogBand, Log, TEXT("%s"), *LogMessage);
 	}
 }
 

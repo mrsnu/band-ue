@@ -14,6 +14,8 @@ struct TfLiteTensor;
 class UBandModel;
 class UBandTensor;
 
+DECLARE_LOG_CATEGORY_EXTERN(LogBand, Log, All);
+
 /*
 	DLL interfaces for Band / owns main interpreter
 */
