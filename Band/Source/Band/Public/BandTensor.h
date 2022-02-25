@@ -18,11 +18,12 @@ class BAND_API UBandTensor : public UObject
 public:
 	EBandTensorType Type();
 	int32 NumDims();
-	uint64 ByteSize();
-	TArray<uint8> Data();
+	int32 ByteSize();
+	uint8* Data();
 	FString Name();
 
 	EBandStatus CopyFromBuffer(uint8* Buffer, int32 Bytes);
 	EBandStatus CopyFromBuffer(TArray<uint8> Buffer);
+	EBandStatus CopyFromTexture(UTexture* Texture);
 	EBandStatus CopyToBuffer(TArray<uint8> Buffer);
 };

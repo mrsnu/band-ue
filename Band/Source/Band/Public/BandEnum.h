@@ -1,7 +1,8 @@
 #pragma once
-#pragma once
 
 #include "Modules/ModuleManager.h"
+#include "BandEnum.generated.h"
+
 /*
 	UEnum for TfLiteType in common.h
 */
@@ -21,6 +22,11 @@ enum class EBandTensorType : uint8
 	Float16 UMETA(DisplayName = "Float16"),
 	Float64 UMETA(DisplayName = "Float64"),
 };
+
+namespace BandEnum
+{
+	size_t TensorTypeBytes(const EBandTensorType& Type);
+}
 
 /*
 	UEnum for TfLiteStatus in common.h
