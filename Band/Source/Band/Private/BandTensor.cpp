@@ -54,38 +54,49 @@ EBandStatus UBandTensor::CopyFromBuffer(TArray<uint8> Buffer)
 	return EBandStatus(Band::TfLiteTensorCopyFromBuffer(TensorHandle, Buffer.GetData(), Buffer.GetAllocatedSize()));
 }
 
-EBandStatus UBandTensor::CopyFromTexture(UTexture* Texture)
+EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture)
 {
-	FTextureSource& Source = Texture->Source;
+	if (!Texture->PlatformData->Mips.Num())
+	{
+		UE_LOG(LogBand, Log, TEXT("No available mips from texture"));
+		return EBandStatus::Error;
+	}
+	FTexture2DMipMap& MipMap = Texture->PlatformData->Mips[0];
+	
 	const size_t TypeBytes = BandEnum::TensorTypeBytes(Type());
 	const size_t NumTensorElements = ByteSize() / 3 / TypeBytes;
-	const size_t NumTextureElements = Source.GetSizeX() * Source.GetSizeY();
+	const size_t NumTextureElements = MipMap.SizeX * MipMap.SizeY;
+	bool Processed = true;
 	if (NumTensorElements != NumTextureElements)
 	{
-		switch (Type())
+		const void* Source = MipMap.BulkData.Lock(LOCK_READ_ONLY);
+		EBandTensorType TensorType = Type();
+		EPixelFormat PixelFormat = Texture->GetPixelFormat();
+		switch (TensorType)
 		{
 		case EBandTensorType::Float32:
-			BandTensorUtil::TextureToRGBArray<float>(Source, (float*)Data(), 127.5f, 127.5f);
+			BandTensorUtil::TextureToRGBArray<float>(Source, PixelFormat, reinterpret_cast<float*>(Data()), NumTensorElements, 127.5f, 127.5f);
 			break;
 		case EBandTensorType::UInt8:
-			BandTensorUtil::TextureToRGBArray<uint8>(Source, Data(), 0, 255);
+			BandTensorUtil::TextureToRGBArray<uint8>(Source, PixelFormat, Data(), NumTensorElements, 0, 255);
 			break;
 		case EBandTensorType::Int8:
-			BandTensorUtil::TextureToRGBArray<int8>(Source, (int8*)Data(), 0, 127);
+			BandTensorUtil::TextureToRGBArray<int8>(Source, PixelFormat, reinterpret_cast<int8_t*>(Data()), NumTensorElements, 0, 127);
 			break;
 		default:
 			UE_LOG(LogBand, Log, TEXT("Texture elements %d != tensor elements %d"), NumTextureElements, NumTensorElements);
-			return EBandStatus::Error;
+			Processed = false;
 			break;
 		}
+		MipMap.BulkData.Unlock();
 	}
 	else
 	{
 		UE_LOG(LogBand, Log, TEXT("Texture elements %d != tensor elements %d"), NumTextureElements, NumTensorElements);
-		return EBandStatus::Error;
+		Processed = false;
 	}
 
-	return EBandStatus::Ok;
+	return Processed ? EBandStatus::Ok : EBandStatus::Error;
 }
 
 EBandStatus UBandTensor::CopyToBuffer(TArray<uint8> Buffer)

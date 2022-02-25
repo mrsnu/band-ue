@@ -10,9 +10,9 @@ namespace BandTensorUtil
 	{
 		for (size_t i = 0, j = 0; i < NumElements; i++)
 		{
-			Dst[j++] = (T)((Src[i * 4 + 2] - Mean) / Std); // R
-			Dst[j++] = (T)((Src[i * 4 + 1] - Mean) / Std); // G
-			Dst[j++] = (T)((Src[i * 4] - Mean) / Std); // B
+			Dst[j++] = static_cast<T>((Src[i * 4 + 2] - Mean) / Std); // R
+			Dst[j++] = static_cast<T>((Src[i * 4 + 1] - Mean) / Std); // G
+			Dst[j++] = static_cast<T>((Src[i * 4] - Mean) / Std); // B
 		}
 	}
 
@@ -21,29 +21,26 @@ namespace BandTensorUtil
 	{
 		for (size_t i = 0, j = 0; i < NumElements; i++)
 		{
-			Dst[j++] = (T)((Src[i * 4] - Mean) / Std); // R
-			Dst[j++] = (T)((Src[i * 4 + 1] - Mean) / Std); // G
-			Dst[j++] = (T)((Src[i * 4 + 2] - Mean) / Std); // B
+			Dst[j++] = static_cast<T>((Src[i * 4] - Mean) / Std); // R
+			Dst[j++] = static_cast<T>((Src[i * 4 + 1] - Mean) / Std); // G
+			Dst[j++] = static_cast<T>((Src[i * 4 + 2] - Mean) / Std); // B
 		}
 	}
 
 	template <typename T>
-	bool TextureToRGBArray(FTextureSource& Source, T* Dst, T Mean, T Std)
+	bool TextureToRGBArray(const void* Source, EPixelFormat PixelFormat, T* Dst, size_t NumElements, T Mean, T Std)
 	{
-		uint8* SourceData = Source.LockMip(0);
-		switch (Source.GetFormat())
+		switch (PixelFormat)
 		{
-		case TSF_RGBA8:
-			RGBA8ToRGBArray<T>(SourceData, Dst, Source.GetSizeX() * Source.GetSizeY(), Mean, Std);
+		case PF_R8G8B8A8:
+			RGBA8ToRGBArray<T>(reinterpret_cast<const uint8_t*>(Source), Dst, NumElements, Mean, Std);
 			break;
-		case TSF_BGRA8:
-			BGRA8ToRGBArray<T>(SourceData, Dst, Source.GetSizeX() * Source.GetSizeY(), Mean, Std);
+		case PF_B8G8R8A8:
+			BGRA8ToRGBArray<T>(reinterpret_cast<const uint8_t*>(Source), Dst, NumElements, Mean, Std);
 			break;
 		default:
-			Source.UnlockMip(0);
 			return false;
 		}
-		Source.UnlockMip(0);
 		return true;
 	}
 }

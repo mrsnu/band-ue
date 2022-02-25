@@ -79,7 +79,7 @@ EBandStatus UBandBlueprintLibrary::CopyFromBuffer(UPARAM(ref) UBandTensor* Tenso
 	return Tensor->CopyFromBuffer(Buffer);
 }
 
-EBandStatus UBandBlueprintLibrary::CopyFromTexture(UPARAM(ref) UBandTensor* Tensor, UTexture* Texture)
+EBandStatus UBandBlueprintLibrary::CopyFromTexture(UPARAM(ref) UBandTensor* Tensor, UTexture2D* Texture)
 {
 	return Tensor->CopyFromTexture(Texture);
 }
