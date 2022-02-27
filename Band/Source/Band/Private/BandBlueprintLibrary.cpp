@@ -2,7 +2,7 @@
 #include "Band.h"
 #include "BandModel.h"
 #include "BandLibraryWrapper.h"
-#include "BandLibrary/BandLibrary.h"
+#include "BandLibrary.h"
 
 FString UBandBlueprintLibrary::GetVersion()
 {

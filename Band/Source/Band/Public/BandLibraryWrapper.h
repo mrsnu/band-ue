@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BandLibrary/BandLibrary.h"
+#include "BandLibrary.h"
 
 namespace Band {
     typedef struct TfLiteModel TfLiteModel;

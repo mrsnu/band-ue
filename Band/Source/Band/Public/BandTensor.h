@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UObject/ObjectMacros.h"
-#include "BandLibrary/BandLibrary.h"
+#include "BandLibrary.h"
 #include "BandEnum.h"
 #include "BandTensor.generated.h"
 

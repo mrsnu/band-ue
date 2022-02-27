@@ -4,7 +4,7 @@
 #include "BandModel.h"
 #include "BandTensor.h"
 #include "BandLibraryWrapper.h"
-#include "BandLibrary/BandLibrary.h"
+#include "BandLibrary.h"
 
 #include "Core.h"
 #include "Modules/ModuleManager.h"
@@ -25,18 +25,18 @@ void FBandModule::StartupModule()
 	// Add on the relative location of the third party dll and load it
 	FString LibraryPath;
 #if PLATFORM_WINDOWS
-	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/BandLibrary/Data/Release/tensorflowlite_c.dll"));
+	LibraryPath = FString("tensorflowlite_c.dll");
 #elif PLATFORM_MAC
-	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/BandLibrary/Data/Release/tensorflowlite_c.dylib"));
+	LibraryPath = FString("libtensorflowlite_c.dylib");
 #elif PLATFORM_ANDROID
-	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/BandLibrary/Data/Release/tensorflowlite_c.so"));
+	LibraryPath = FString("libtensorflowlite_c.so");
 #endif // PLATFORM_WINDOWS
 
 	UE_LOG(LogBand, Display, TEXT("Band: Selected library path %s"), *LibraryPath);
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 	if (LoadDllFunction(LibraryPath))
 	{	
-		FString ConfigPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/BandLibrary/Data/runtime_config.json"));
+		FString ConfigPath("runtime_config.json");
 
 		if (FPaths::FileExists(ConfigPath)) {
 			TfLiteInterpreterOptions* InterpreterOptions = TfLiteInterpreterOptionsCreate();

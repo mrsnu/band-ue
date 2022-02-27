@@ -27,7 +27,6 @@ public class BandEditor : ModuleRules
 			{
 				"Core",
 				"Band",
-				"BandLibrary",
 				"Projects"
 				// ... add other public dependencies that you statically link with here ...
 			}

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Modules/ModuleManager.h"
-#include "BandLibrary/BandLibrary.h"
+#include "BandLibrary.h"
 #include "BandEnum.h"
 
 namespace Band
