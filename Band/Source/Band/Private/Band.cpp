@@ -25,7 +25,7 @@ void FBandModule::StartupModule()
 	// Add on the relative location of the third party dll and load it
 	FString LibraryPath;
 #if PLATFORM_WINDOWS
-	LibraryPath = FString("tensorflowlite_c.dll");
+	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/Band/Data/Release/tensorflowlite_c.dll"));
 #elif PLATFORM_MAC
 	LibraryPath = FString("libtensorflowlite_c.dylib");
 #elif PLATFORM_ANDROID
@@ -36,7 +36,8 @@ void FBandModule::StartupModule()
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 	if (LoadDllFunction(LibraryPath))
 	{	
-		FString ConfigPath("runtime_config.json");
+		FString ConfigFile = "runtime_config.json";
+		FString ConfigPath = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Assets"), ConfigFile);
 
 		if (FPaths::FileExists(ConfigPath)) {
 			TfLiteInterpreterOptions* InterpreterOptions = TfLiteInterpreterOptionsCreate();
@@ -44,9 +45,10 @@ void FBandModule::StartupModule()
 			TfLiteStatus success = TfLiteInterpreterOptionsSetConfigPath(InterpreterOptions, TCHAR_TO_ANSI(*ConfigPath));
 			Interpreter = TfLiteInterpreterCreate(InterpreterOptions);
 		}
-		else {
-			UE_LOG(LogBand, Display, TEXT("File not exists!"));
-			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("BandLibrary", "Failed to load Band third party library"));
+		else 
+		{
+			UE_LOG(LogBand, Display, TEXT("File not exists %s!"), *ConfigPath);
+			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("BandLibrary", "Cannot find config file!"));
 		}
 	}
 	else

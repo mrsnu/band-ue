@@ -9,25 +9,27 @@ public class Band : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		RuntimeDependencies.Add("$(TargetOutputDir)/runtime_config.json", Path.Combine(ModuleDirectory, "Data", "runtime_config.json"), StagedFileType.UFS);
+		RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Data/runtime_config.json"), StagedFileType.UFS);
 
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{
-				RuntimeDependencies.Add("$(TargetOutputDir)/tensorflowlite_c.dll", Path.Combine(ModuleDirectory, "Data", "Release", "tensorflowlite_c.dll"));
+			RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Data/Release/tensorflowlite_c.dll"));
+			PublicDelayLoadDLLs.Add("tensorflowlite_c.dll");
 		}
 		// TODO(dostos): not tested on iOS yet
 		else if (Target.Platform == UnrealTargetPlatform.Mac)
 		{
-				RuntimeDependencies.Add("$(TargetOutputDir)/libtensorflowlite_c.dylib", Path.Combine(ModuleDirectory, "Data", "Release", "libtensorflowlite_c.dylib"));
+			RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Data/Release/libtensorflowlite_c.dylib"));
+			PublicDelayLoadDLLs.Add("libtensorflowlite_c.dylib");
 		}
 		else if (Target.Platform == UnrealTargetPlatform.Android)
 		{
-				string ExampleSoPath = Path.Combine(ModuleDirectory, "Data", "Release", "libtensorflowlite_c.so");
-				PublicAdditionalLibraries.Add(ExampleSoPath);
-				RuntimeDependencies.Add("$(TargetOutputDir)/libtensorflowlite_c.so", ExampleSoPath);
-				
-			
-				AdditionalPropertiesForReceipt.Add(new ReceiptProperty("AndroidPlugin", Path.Combine(ModuleDirectory, "Band.xml")));
+			string ExampleSoPath = Path.Combine(ModuleDirectory, "Data/Release/libtensorflowlite_c.so");
+			PublicAdditionalLibraries.Add(ExampleSoPath);
+			RuntimeDependencies.Add(ExampleSoPath);
+			PublicDelayLoadDLLs.Add("libtensorflowlite_c.so");
+
+			AdditionalPropertiesForReceipt.Add(new ReceiptProperty("AndroidPlugin", Path.Combine(ModuleDirectory, "Band.xml")));
 		}
 
 		PublicIncludePaths.AddRange(
