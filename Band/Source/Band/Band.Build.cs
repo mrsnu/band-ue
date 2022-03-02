@@ -9,8 +9,6 @@ public class Band : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Data/runtime_config.json"), StagedFileType.UFS);
-
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{
 			RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Data/Release/tensorflowlite_c.dll"));
@@ -62,6 +60,7 @@ public class Band : ModuleRules
 			{
 				"CoreUObject",
 				"Engine",
+				"RHI"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

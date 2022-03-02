@@ -39,6 +39,7 @@ namespace BandTensorUtil
 			BGRA8ToRGBArray<T>(reinterpret_cast<const uint8_t*>(Source), Dst, NumElements, Mean, Std);
 			break;
 		default:
+			UE_LOG(LogBand, Log, TEXT("Not support pixel format %d"), PixelFormat);
 			return false;
 		}
 		return true;

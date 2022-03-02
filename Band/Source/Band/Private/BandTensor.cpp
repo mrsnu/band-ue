@@ -1,6 +1,7 @@
 #include "BandTensor.h"
 #include "BandTensorUtil.h"
 #include "BandLibraryWrapper.h"
+#include "Rendering/Texture2DResource.h"
 
 void UBandTensor::BeginDestroy()
 {
@@ -61,17 +62,24 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture)
 		UE_LOG(LogBand, Log, TEXT("No available mips from texture"));
 		return EBandStatus::Error;
 	}
-	FTexture2DMipMap& MipMap = Texture->PlatformData->Mips[0];
+
+	FTexture2DResource* Resource = (FTexture2DResource*)Texture->Resource;
 	
 	const size_t TypeBytes = BandEnum::TensorTypeBytes(Type());
 	const size_t NumTensorElements = ByteSize() / 3 / TypeBytes;
-	const size_t NumTextureElements = MipMap.SizeX * MipMap.SizeY;
+	const size_t NumTextureElements = Resource->GetSizeX() * Resource->GetSizeY();
 	bool Processed = true;
 	if (NumTensorElements != NumTextureElements)
 	{
-		const void* Source = MipMap.BulkData.Lock(LOCK_READ_ONLY);
+		uint32 Stride = 0; // Assigned by RHILockTexture2D.
+		const FColor* Source = static_cast<const FColor*>(RHILockTexture2D(
+			Resource->GetTexture2DRHI(),
+			0,
+			RLM_ReadOnly,
+			Stride,
+			false));
 		EBandTensorType TensorType = Type();
-		EPixelFormat PixelFormat = Texture->GetPixelFormat();
+		EPixelFormat PixelFormat = Resource->GetPixelFormat();
 		switch (TensorType)
 		{
 		case EBandTensorType::Float32:
@@ -88,7 +96,7 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture)
 			Processed = false;
 			break;
 		}
-		MipMap.BulkData.Unlock();
+		RHIUnlockTexture2D(Resource->GetTexture2DRHI(), 0, false);
 	}
 	else
 	{
