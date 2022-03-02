@@ -32,28 +32,25 @@ void FBandModule::StartupModule()
 	LibraryPath = FString("libtensorflowlite_c.so");
 #endif // PLATFORM_WINDOWS
 
-	UE_LOG(LogBand, Display, TEXT("Band: Selected library path %s"), *LibraryPath);
+	UE_LOG(LogBand, Display, TEXT("Selected library path %s"), *LibraryPath);
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 	if (LoadDllFunction(LibraryPath))
-	{	
-		FString ConfigFile = "runtime_config.json";
-		FString ConfigPath = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Assets"), ConfigFile);
-
-		if (FPaths::FileExists(ConfigPath)) {
-			TfLiteInterpreterOptions* InterpreterOptions = TfLiteInterpreterOptionsCreate();
-			TfLiteInterpreterOptionsSetErrorReporter(InterpreterOptions, FBandModule::ReportError, this);
-			TfLiteStatus success = TfLiteInterpreterOptionsSetConfigPath(InterpreterOptions, TCHAR_TO_ANSI(*ConfigPath));
-			Interpreter = TfLiteInterpreterCreate(InterpreterOptions);
-		}
-		else 
-		{
-			UE_LOG(LogBand, Display, TEXT("File not exists %s!"), *ConfigPath);
-			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("BandLibrary", "Cannot find config file!"));
-		}
+	{
+		UE_LOG(LogBand, Display, TEXT("Successfully loaded Band library"));
 	}
 	else
 	{
-		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("BandLibrary", "Failed to load Band third party library"));
+		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("BandLibrary", "Failed to load Band library"));
+	}
+	
+	// TODO(dostos): Post-initialize in BeginEvent of the main BP?
+	if (InitializeInterpreter(""))
+	{
+		UE_LOG(LogBand, Display, TEXT("Successfully initialized Interpreter"));
+	}
+	else
+	{
+		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("BandLibrary", "Failed to initialize Interpreter"));
 	}
 }
 
@@ -76,6 +73,33 @@ void FBandModule::ShutdownModule()
 FBandModule& FBandModule::Get()
 {
 	return *reinterpret_cast<FBandModule*>(FModuleManager::Get().GetModule("Band"));
+}
+
+bool FBandModule::InitializeInterpreter(FString ConfigPath)
+{
+	// TODO(dostos): implement BandConfig class / replace this with default object in a project
+	static const char* DEFAULT_CONFIG = "{\"allow_worksteal\":false,\"cpu_masks\":\"BIG\",\"log_path\":\"\",\"model_profile\":\"\",\"planner_cpu_masks\":\"BIG\",\"profile_num_runs\":3,\"profile_online\":true,\"profile_smoothing_factor\":0.1,\"profile_warmup_runs\":3,\"schedule_window_size\":5,\"schedulers\":[6],\"subgraph_preparation_type\":\"merge_unit_subgraph\"}";
+
+	TfLiteInterpreterOptions* InterpreterOptions = TfLiteInterpreterOptionsCreate();
+	TfLiteInterpreterOptionsSetErrorReporter(InterpreterOptions, FBandModule::ReportError, this);
+	TfLiteStatus ConfigStatus = TfLiteStatus::kTfLiteError;
+
+	if (FPaths::FileExists(ConfigPath)) {
+		UE_LOG(LogBand, Display, TEXT("Try to load config file from %s!"), *ConfigPath);
+		ConfigStatus = TfLiteInterpreterOptionsSetConfigPath(InterpreterOptions, TCHAR_TO_ANSI(*ConfigPath));
+	}
+	else
+	{
+		UE_LOG(LogBand, Display, TEXT("Try to load default config"));
+		ConfigStatus = TfLiteInterpreterOptionsSetConfigFile(InterpreterOptions, DEFAULT_CONFIG, strlen(DEFAULT_CONFIG));
+	}
+
+	if (ConfigStatus == TfLiteStatus::kTfLiteOk)
+	{
+		Interpreter = TfLiteInterpreterCreate(InterpreterOptions);
+	}
+
+	return Interpreter != nullptr;
 }
 
 FString FBandModule::GetVersion()

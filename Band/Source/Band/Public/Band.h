@@ -28,6 +28,8 @@ public:
 	/* Returns singleton object (Note: avoid calling this in shutdown phase) */
 	static FBandModule &Get();
 
+	bool InitializeInterpreter(FString ConfigPath);
+
 	/* Inpterpreter interfaces */
 	FString GetVersion();
 	int32 GetInputTensorCount(UBandModel *Model);

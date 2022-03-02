@@ -10,11 +10,6 @@
 		<log text="Band APL copying .so files for $S(Architecture)/"/>
 	    <copyFile src="$S(PluginDir)/Data/Release/libtensorflowlite_c.so"
 	                dst="$S(BuildDir)/libs/$S(Architecture)/libtensorflowlite_c.so" />
-    
-    <log text="Band APL copying config files for $S(Architecture)/"/>
-    <copyFile src="$S(PluginDir)/Data/runtime_config.json"
-                dst="$S(BuildDir)/assets/runtime_config.json" />
-    
 	</resourceCopies>
     
 	<soLoadLibrary>
