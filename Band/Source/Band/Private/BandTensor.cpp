@@ -63,46 +63,54 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture)
 		return EBandStatus::Error;
 	}
 
-#ifdef WITH_EDITOR
-	FTextureSource* Source = &Texture->Source;
-#else
-	FTexture2DResource* Source = (FTexture2DResource*)Texture->Resource;
-#endif
+
+	bool ChangedTexture2D = false;
+	bool PreviousSRGB = Texture->SRGB;
+	TextureCompressionSettings PreviousCompressionSettings = Texture->CompressionSettings;
+
+	auto CleanUp = [&]()
+	{
+		if (ChangedTexture2D)
+		{
+			Texture->SRGB = PreviousSRGB;
+			Texture->CompressionSettings = PreviousCompressionSettings;
+			Texture->UpdateResource();
+		}
+	};
+
+	if ((PreviousSRGB != false) || (PreviousCompressionSettings != TC_VectorDisplacementmap))
+	{
+		ChangedTexture2D = true;
+		Texture->SRGB = false;
+		Texture->CompressionSettings = TC_VectorDisplacementmap;
+		Texture->UpdateResource();
+	}
+
+	FTexture2DMipMap& Mip = Texture->PlatformData->Mips[0];
 	const size_t TypeBytes = BandEnum::TensorTypeBytes(Type());
+	const int32 SizeX = Mip.SizeX;
+	const int32 SizeY = Mip.SizeY;
+
+	if (&Mip.BulkData == nullptr)
+	{
+		CleanUp();
+		UE_LOG(LogBand, Log, TEXT("Texture Mip0 has nullptr"));
+		return EBandStatus::Error;
+	}
+
 	const size_t NumTensorElements = ByteSize() / 3 / TypeBytes;
-	const size_t NumTextureElements = Source->GetSizeX() * Source->GetSizeY();
+	const size_t NumTextureElements = SizeX * SizeY;
 
 	bool Processed = true;
 	if (NumTensorElements != NumTextureElements)
 	{
 
-#ifdef WITH_EDITOR
-		const uint8* SourceData = Source->LockMip(0);
-		ETextureSourceFormat TextureSourceFormat = Source->GetFormat();
-		EPixelFormat PixelFormat = PF_Unknown;
-		
-		// TODO(dostos): find a better way to remove switch?
-		switch (TextureSourceFormat)
-		{
-		case TSF_BGRA8:
-			PixelFormat = PF_B8G8R8A8;
-			break;
-		case TSF_RGBA8:
-			PixelFormat = PF_R8G8B8A8;
-			break;
-		default:
-			break;
-		}
-#else
-		uint32 Stride = 0; // Assigned by RHILockTexture2D.
-		const FColor* SourceData = static_cast<const FColor*>(RHILockTexture2D(
-			Resource->GetTexture2DRHI(),
-			0,
-			RLM_ReadOnly,
-			Stride,
-			false));
-		EPixelFormat PixelFormat = Source->GetPixelFormat();
+		EPixelFormat PixelFormat = PF_B8G8R8A8;
+#if !PLATFORM_LITTLE_ENDIAN
+		PixelFormat = PF_R8G8B8A8;
 #endif
+		const uint8* SourceData = static_cast<const uint8*>(Mip.BulkData.Lock(LOCK_READ_ONLY));
+		
 		switch (Type())
 		{
 		case EBandTensorType::Float32:
@@ -119,11 +127,8 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture)
 			Processed = false;
 			break;
 		}
-#ifdef WITH_EDITOR
-		Source->UnlockMip(0);
-#else
-		RHIUnlockTexture2D(Source->GetTexture2DRHI(), 0, false);
-#endif
+
+		Mip.BulkData.Unlock();
 	}
 	else
 	{
@@ -131,6 +136,7 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture)
 		Processed = false;
 	}
 
+	CleanUp();
 	return Processed ? EBandStatus::Ok : EBandStatus::Error;
 }
 
