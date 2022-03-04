@@ -63,40 +63,67 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture)
 		return EBandStatus::Error;
 	}
 
-	FTexture2DResource* Resource = (FTexture2DResource*)Texture->Resource;
-	
+#ifdef WITH_EDITOR
+	FTextureSource* Source = &Texture->Source;
+#else
+	FTexture2DResource* Source = (FTexture2DResource*)Texture->Resource;
+#endif
 	const size_t TypeBytes = BandEnum::TensorTypeBytes(Type());
 	const size_t NumTensorElements = ByteSize() / 3 / TypeBytes;
-	const size_t NumTextureElements = Resource->GetSizeX() * Resource->GetSizeY();
+	const size_t NumTextureElements = Source->GetSizeX() * Source->GetSizeY();
+
 	bool Processed = true;
 	if (NumTensorElements != NumTextureElements)
 	{
+
+#ifdef WITH_EDITOR
+		const uint8* SourceData = Source->LockMip(0);
+		ETextureSourceFormat TextureSourceFormat = Source->GetFormat();
+		EPixelFormat PixelFormat = PF_Unknown;
+		
+		// TODO(dostos): find a better way to remove switch?
+		switch (TextureSourceFormat)
+		{
+		case TSF_BGRA8:
+			PixelFormat = PF_B8G8R8A8;
+			break;
+		case TSF_RGBA8:
+			PixelFormat = PF_R8G8B8A8;
+			break;
+		default:
+			break;
+		}
+#else
 		uint32 Stride = 0; // Assigned by RHILockTexture2D.
-		const FColor* Source = static_cast<const FColor*>(RHILockTexture2D(
+		const FColor* SourceData = static_cast<const FColor*>(RHILockTexture2D(
 			Resource->GetTexture2DRHI(),
 			0,
 			RLM_ReadOnly,
 			Stride,
 			false));
-		EBandTensorType TensorType = Type();
-		EPixelFormat PixelFormat = Resource->GetPixelFormat();
-		switch (TensorType)
+		EPixelFormat PixelFormat = Source->GetPixelFormat();
+#endif
+		switch (Type())
 		{
 		case EBandTensorType::Float32:
-			BandTensorUtil::TextureToRGBArray<float>(Source, PixelFormat, reinterpret_cast<float*>(Data()), NumTensorElements, 127.5f, 127.5f);
+			BandTensorUtil::TextureToRGBArray<float>(SourceData, PixelFormat, reinterpret_cast<float*>(Data()), NumTensorElements, 127.5f, 127.5f);
 			break;
 		case EBandTensorType::UInt8:
-			BandTensorUtil::TextureToRGBArray<uint8>(Source, PixelFormat, Data(), NumTensorElements, 0, 255);
+			BandTensorUtil::TextureToRGBArray<uint8>(SourceData, PixelFormat, Data(), NumTensorElements, 0, 1);
 			break;
 		case EBandTensorType::Int8:
-			BandTensorUtil::TextureToRGBArray<int8>(Source, PixelFormat, reinterpret_cast<int8_t*>(Data()), NumTensorElements, 0, 127);
+			BandTensorUtil::TextureToRGBArray<int8>(SourceData, PixelFormat, reinterpret_cast<int8_t*>(Data()), NumTensorElements, 0, 1);
 			break;
 		default:
 			UE_LOG(LogBand, Log, TEXT("Texture elements %d != tensor elements %d"), NumTextureElements, NumTensorElements);
 			Processed = false;
 			break;
 		}
-		RHIUnlockTexture2D(Resource->GetTexture2DRHI(), 0, false);
+#ifdef WITH_EDITOR
+		Source->UnlockMip(0);
+#else
+		RHIUnlockTexture2D(Source->GetTexture2DRHI(), 0, false);
+#endif
 	}
 	else
 	{

@@ -9,6 +9,7 @@ public class Band : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
+		// TODO(dostos): change `Data` dir to better name/structure
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{
 			RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Data/Release/tensorflowlite_c.dll"));

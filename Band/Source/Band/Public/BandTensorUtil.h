@@ -10,9 +10,9 @@ namespace BandTensorUtil
 	{
 		for (size_t i = 0, j = 0; i < NumElements; i++)
 		{
-			Dst[j++] = static_cast<T>((Src[i * 4 + 2] - Mean) / Std); // R
-			Dst[j++] = static_cast<T>((Src[i * 4 + 1] - Mean) / Std); // G
-			Dst[j++] = static_cast<T>((Src[i * 4] - Mean) / Std); // B
+			Dst[j++] = (static_cast<T>(Src[i * 4 + 2]) - Mean) / Std; // R
+			Dst[j++] = (static_cast<T>(Src[i * 4 + 1]) - Mean) / Std; // G
+			Dst[j++] = (static_cast<T>(Src[i * 4]) - Mean) / Std; // B
 		}
 	}
 
@@ -21,9 +21,9 @@ namespace BandTensorUtil
 	{
 		for (size_t i = 0, j = 0; i < NumElements; i++)
 		{
-			Dst[j++] = static_cast<T>((Src[i * 4] - Mean) / Std); // R
-			Dst[j++] = static_cast<T>((Src[i * 4 + 1] - Mean) / Std); // G
-			Dst[j++] = static_cast<T>((Src[i * 4 + 2] - Mean) / Std); // B
+			Dst[j++] = (static_cast<T>(Src[i * 4]) - Mean) / Std; // R
+			Dst[j++] = (static_cast<T>(Src[i * 4 + 1]) - Mean) / Std; // G
+			Dst[j++] = (static_cast<T>(Src[i * 4 + 2]) - Mean) / Std; // B
 		}
 	}
 
