@@ -102,7 +102,7 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture)
 	const size_t NumTextureElements = SizeX * SizeY;
 
 	bool Processed = true;
-	if (NumTensorElements != NumTextureElements)
+	if (NumTensorElements == NumTextureElements)
 	{
 
 		EPixelFormat PixelFormat = PF_B8G8R8A8;
