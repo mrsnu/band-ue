@@ -57,7 +57,7 @@ class BAND_API UBandBlueprintLibrary : public UBlueprintFunctionLibrary
 	static EBandStatus CopyFromBuffer(UPARAM(ref) UBandTensor *Tensor, TArray<uint8> Buffer);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	static EBandStatus CopyFromTexture(UPARAM(ref) UBandTensor* Tensor, UTexture2D* Texture);
+	static EBandStatus CopyFromTexture(UPARAM(ref) UBandTensor* Tensor, UTexture2D* Texture, EPixelFormat Pf);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	static EBandStatus CopyToBuffer(UPARAM(ref) UBandTensor *Tensor, TArray<uint8> Buffer);

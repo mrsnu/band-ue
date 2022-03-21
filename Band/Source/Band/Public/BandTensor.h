@@ -24,6 +24,6 @@ public:
 
 	EBandStatus CopyFromBuffer(uint8* Buffer, int32 Bytes);
 	EBandStatus CopyFromBuffer(TArray<uint8> Buffer);
-	EBandStatus CopyFromTexture(UTexture2D* Texture);
+	EBandStatus CopyFromTexture(UTexture2D* Texture, EPixelFormat Pf);
 	EBandStatus CopyToBuffer(TArray<uint8> Buffer);
 };
