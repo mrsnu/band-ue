@@ -20,29 +20,29 @@
   } while (0);                        \
   lhs = std::move(rexpr);
 
-#define STATUS_MACROS_IMPL_CONCAT_INNER_(x, y) x##y
-#define STATUS_MACROS_IMPL_CONCAT_(x, y) STATUS_MACROS_IMPL_CONCAT_INNER_(x, y)
+#define COMMON_MACROS_IMPL_CONCAT_INNER_(x, y) x##y
+#define COMMON_MACROS_IMPL_CONCAT_(x, y) COMMON_MACROS_IMPL_CONCAT_INNER_(x, y)
 
 // Internal helpers for macro expansion.
-#define STATUS_MACROS_IMPL_EAT(...)
-#define STATUS_MACROS_IMPL_REM(...) __VA_ARGS__
-#define STATUS_MACROS_IMPL_EMPTY()
+#define COMMON_MACROS_IMPL_EAT(...)
+#define COMMON_MACROS_IMPL_REM(...) __VA_ARGS__
+#define COMMON_MACROS_IMPL_EMPTY()
 
 // Internal helpers for emptyness arguments check.
-#define STATUS_MACROS_IMPL_IS_EMPTY_INNER(...) \
-  STATUS_MACROS_IMPL_IS_EMPTY_INNER_I(__VA_ARGS__, 0, 1)
-#define STATUS_MACROS_IMPL_IS_EMPTY_INNER_I(e0, e1, is_empty, ...) is_empty
+#define COMMON_MACROS_IMPL_IS_EMPTY_INNER(...) \
+  COMMON_MACROS_IMPL_IS_EMPTY_INNER_I(__VA_ARGS__, 0, 1)
+#define COMMON_MACROS_IMPL_IS_EMPTY_INNER_I(e0, e1, is_empty, ...) is_empty
 
-#define STATUS_MACROS_IMPL_IS_EMPTY(...) \
-  STATUS_MACROS_IMPL_IS_EMPTY_I(__VA_ARGS__)
-#define STATUS_MACROS_IMPL_IS_EMPTY_I(...) \
-  STATUS_MACROS_IMPL_IS_EMPTY_INNER(_, ##__VA_ARGS__)
+#define COMMON_MACROS_IMPL_IS_EMPTY(...) \
+  COMMON_MACROS_IMPL_IS_EMPTY_I(__VA_ARGS__)
+#define COMMON_MACROS_IMPL_IS_EMPTY_I(...) \
+  COMMON_MACROS_IMPL_IS_EMPTY_INNER(_, ##__VA_ARGS__)
 
 // Internal helpers for if statement.
-#define STATUS_MACROS_IMPL_IF_1(_Then, _Else) _Then
-#define STATUS_MACROS_IMPL_IF_0(_Then, _Else) _Else
-#define STATUS_MACROS_IMPL_IF(_Cond, _Then, _Else)          \
-  STATUS_MACROS_IMPL_CONCAT_(STATUS_MACROS_IMPL_IF_, _Cond) \
+#define COMMON_MACROS_IMPL_IF_1(_Then, _Else) _Then
+#define COMMON_MACROS_IMPL_IF_0(_Then, _Else) _Else
+#define COMMON_MACROS_IMPL_IF(_Cond, _Then, _Else)          \
+  COMMON_MACROS_IMPL_CONCAT_(COMMON_MACROS_IMPL_IF_, _Cond) \
   (_Then, _Else)
 
 namespace Band
