@@ -55,7 +55,7 @@ EBandStatus UBandTensor::CopyFromBuffer(TArray<uint8> Buffer)
 	return EBandStatus(Band::TfLiteTensorCopyFromBuffer(TensorHandle, Buffer.GetData(), Buffer.GetAllocatedSize()));
 }
 
-EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, EPixelFormat PixelFormat = PF_B8G8R8A8)
+EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, int32 Mean, int32 Std)
 {
 	if (!Texture->PlatformData->Mips.Num())
 	{
@@ -109,7 +109,7 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, EPixelFormat Pixel
 	if (NumTensorElements == NumTextureElements)
 	{
 
-		// EPixelFormat PixelFormat = PF_B8G8R8A8;
+		EPixelFormat PixelFormat = PF_B8G8R8A8;
 #if !PLATFORM_LITTLE_ENDIAN
 		PixelFormat = PF_R8G8B8A8;
 #endif
@@ -119,14 +119,14 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, EPixelFormat Pixel
 		{
 		case EBandTensorType::Float32:
 			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: float32"));
-			BandTensorUtil::TextureToRGBArray<float>(SourceData, PixelFormat, reinterpret_cast<float*>(Data()), NumTensorElements, 127.5f, 127.5f);
+			BandTensorUtil::TextureToRGBArray<float>(SourceData, PixelFormat, reinterpret_cast<float*>(Data()), NumTensorElements, Mean, Std);
 			break;
 		case EBandTensorType::UInt8:
-			BandTensorUtil::TextureToRGBArray<uint8>(SourceData, PixelFormat, Data(), NumTensorElements, 0, 1);
+			BandTensorUtil::TextureToRGBArray<uint8>(SourceData, PixelFormat, Data(), NumTensorElements, Mean, Std);
 			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: UInt8"));
 			break;
 		case EBandTensorType::Int8:
-			BandTensorUtil::TextureToRGBArray<int8>(SourceData, PixelFormat, reinterpret_cast<int8_t*>(Data()), NumTensorElements, 0, 1);
+			BandTensorUtil::TextureToRGBArray<int8>(SourceData, PixelFormat, reinterpret_cast<int8_t*>(Data()), NumTensorElements, Mean, Std);
 			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: Int8"));
 			break;
 		default:

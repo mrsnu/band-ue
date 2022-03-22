@@ -27,18 +27,6 @@ namespace BandTensorUtil
 		}
 	}
 
-	// No normalization (values are between [0:255])
-	template <typename T>
-	void BGRA8ToRGBArray(const uint8_t* Src, T* Dst, size_t NumElements)
-	{
-		for (size_t i = 0, j = 0; i < NumElements; i++)
-		{
-			Dst[j++] = (static_cast<T>(Src[i * 4 + 2])); // R
-			Dst[j++] = (static_cast<T>(Src[i * 4 + 1])); // G
-			Dst[j++] = (static_cast<T>(Src[i * 4])); // B
-		}
-	}
-
 	template <typename T>
 	bool TextureToRGBArray(const void* Source, EPixelFormat PixelFormat, T* Dst, size_t NumElements, T Mean, T Std)
 	{
@@ -50,8 +38,6 @@ namespace BandTensorUtil
 		case PF_B8G8R8A8:
 			BGRA8ToRGBArray<T>(reinterpret_cast<const uint8_t*>(Source), Dst, NumElements, Mean, Std);
 			break;
-		case PF_Unknown: // Used this arbitrarily
-			BGRA8ToRGBArray<T>(reinterpret_cast<const uint8_t*>(Source), Dst, NumElements);
 		default:
 			UE_LOG(LogBand, Log, TEXT("Not support pixel format %d"), PixelFormat);
 			return false;
