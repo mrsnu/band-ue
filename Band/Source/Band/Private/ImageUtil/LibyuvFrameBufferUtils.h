@@ -13,8 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#ifndef TENSORFLOW_LITE_SUPPORT_CC_TASK_VISION_UTILS_LIBYUV_FRAME_BUFFER_UTILS_H_
-#define TENSORFLOW_LITE_SUPPORT_CC_TASK_VISION_UTILS_LIBYUV_FRAME_BUFFER_UTILS_H_
+#pragma once
 
 #include "ImageUtil/FrameBuffer.h"
 #include "ImageUtil/FrameBufferUtilsInterface.h"
@@ -67,5 +66,3 @@ class LibyuvFrameBufferUtils : public FrameBufferUtilsInterface {
 };
 
 }  // namespace Band
-
-#endif  // TENSORFLOW_LITE_SUPPORT_CC_TASK_VISION_UTILS_LIBYUV_FRAME_BUFFER_UTILS_H_

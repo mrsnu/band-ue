@@ -13,8 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#ifndef TENSORFLOW_LITE_SUPPORT_CC_TASK_VISION_CORE_FRAME_BUFFER_H_
-#define TENSORFLOW_LITE_SUPPORT_CC_TASK_VISION_CORE_FRAME_BUFFER_H_
+#pragma once
 
 #include <map>
 #include <memory>
@@ -311,5 +310,3 @@ namespace Band
   };
 
 } // namespace Band
-
-#endif // TENSORFLOW_LITE_SUPPORT_CC_TASK_VISION_CORE_FRAME_BUFFER_H_
