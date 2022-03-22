@@ -55,7 +55,7 @@ EBandStatus UBandTensor::CopyFromBuffer(TArray<uint8> Buffer)
 	return EBandStatus(Band::TfLiteTensorCopyFromBuffer(TensorHandle, Buffer.GetData(), Buffer.GetAllocatedSize()));
 }
 
-EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, EPixelFormat Pf = PF_B8G8R8A8)
+EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, EPixelFormat PixelFormat = PF_B8G8R8A8)
 {
 	if (!Texture->PlatformData->Mips.Num())
 	{
@@ -86,6 +86,8 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, EPixelFormat Pf = 
 		Texture->UpdateResource();
 	}
 
+
+
 	FTexture2DMipMap& Mip = Texture->PlatformData->Mips[0];
 	const size_t TypeBytes = BandEnum::TensorTypeBytes(Type());
 	const int32 SizeX = Mip.SizeX;
@@ -97,18 +99,17 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, EPixelFormat Pf = 
 		UE_LOG(LogBand, Log, TEXT("Texture Mip0 has nullptr"));
 		return EBandStatus::Error;
 	}
-
+	
 	const size_t NumTensorElements = ByteSize() / 3 / TypeBytes;
 	const size_t NumTextureElements = SizeX * SizeY;
 
-	UE_LOG(LogBand, Log, TEXT("HYUNSOO: NumTextureElements: %d (%d * %d)"), NumTextureElements, SizeX, SizeY);
+	UE_LOG(LogBand, Log, TEXT("CopyFromTexture: NumTextureElements: %d (%d * %d)"), NumTextureElements, SizeX, SizeY);
 
 	bool Processed = true;
 	if (NumTensorElements == NumTextureElements)
 	{
 
 		// EPixelFormat PixelFormat = PF_B8G8R8A8;
-		EPixelFormat PixelFormat = Pf;
 #if !PLATFORM_LITTLE_ENDIAN
 		PixelFormat = PF_R8G8B8A8;
 #endif
@@ -117,16 +118,16 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, EPixelFormat Pf = 
 		switch (Type())
 		{
 		case EBandTensorType::Float32:
-			UE_LOG(LogBand, Log, TEXT("HYUNSOO: float32"));
+			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: float32"));
 			BandTensorUtil::TextureToRGBArray<float>(SourceData, PixelFormat, reinterpret_cast<float*>(Data()), NumTensorElements, 127.5f, 127.5f);
 			break;
 		case EBandTensorType::UInt8:
 			BandTensorUtil::TextureToRGBArray<uint8>(SourceData, PixelFormat, Data(), NumTensorElements, 0, 1);
-			UE_LOG(LogBand, Log, TEXT("HYUNSOO: UInt8"));
+			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: UInt8"));
 			break;
 		case EBandTensorType::Int8:
 			BandTensorUtil::TextureToRGBArray<int8>(SourceData, PixelFormat, reinterpret_cast<int8_t*>(Data()), NumTensorElements, 0, 1);
-			UE_LOG(LogBand, Log, TEXT("HYUNSOO: Int8"));
+			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: Int8"));
 			break;
 		default:
 			UE_LOG(LogBand, Log, TEXT("Texture elements %d != tensor elements %d"), NumTextureElements, NumTensorElements);
