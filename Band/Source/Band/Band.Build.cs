@@ -33,7 +33,8 @@ public class Band : ModuleRules
 
 		PublicIncludePaths.AddRange(
 			new string[] {
-				Path.Combine(ModuleDirectory, "Library")
+				Path.Combine(ModuleDirectory, "Library"),
+				Path.Combine(ModuleDirectory, "ThirdParty")
 				// ... add public include paths required here ...
 			}
 			);
