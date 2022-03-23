@@ -15,14 +15,19 @@ class BAND_API UBandTensor : public UObject
 	virtual void BeginDestroy() override;
 
 	UFUNCTION(BlueprintCallable, Category = Band)
-	void FromCameraFrame(const UAndroidCameraFrame* Frame);
+	void FromCameraFrame(const UAndroidCameraFrame* Frame, bool Normalize = false);
 
+	void Initialize(TfLiteTensor* TensorHandle);
 	TfLiteTensor* TensorHandle = nullptr;
 	friend class FBandModule;
 
+	uint8* RGBBuffer = nullptr;
+
 public:
 	EBandTensorType Type();
+	int32 Dim(int32 Index);
 	int32 NumDims();
+	int32 NumElements();
 	int32 ByteSize();
 	uint8* Data();
 	FString Name();

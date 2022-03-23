@@ -120,14 +120,14 @@ int32 FBandModule::GetOutputTensorCount(UBandModel* Model)
 UBandTensor* FBandModule::AllocateInputTensor(UBandModel* Model, int32 InputIndex)
 {
 	UBandTensor* Tensor = NewObject<UBandTensor>();
-	Tensor->TensorHandle = TfLiteInterpreterAllocateInputTensor(Interpreter, Model->GetModelHandle(), InputIndex);
+	Tensor->Initialize(TfLiteInterpreterAllocateInputTensor(Interpreter, Model->GetModelHandle(), InputIndex));
 	return Tensor;
 }
 
 UBandTensor* FBandModule::AllocateOutputTensor(UBandModel* Model, int32 OutputIndex)
 {
 	UBandTensor* Tensor = NewObject<UBandTensor>();
-	Tensor->TensorHandle = TfLiteInterpreterAllocateOutputTensor(Interpreter, Model->GetModelHandle(), OutputIndex);
+	Tensor->Initialize(TfLiteInterpreterAllocateOutputTensor(Interpreter, Model->GetModelHandle(), OutputIndex));
 	return Tensor;
 }
 

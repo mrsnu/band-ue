@@ -28,6 +28,17 @@ namespace BandTensorUtil
 	}
 
 	template <typename T>
+	void RGB8ToRGBArray(const uint8_t* Src, T* Dst, size_t NumElements, T Mean, T Std)
+	{
+		for (size_t i = 0, j = 0; i < NumElements; i++)
+		{
+			Dst[j++] = (static_cast<T>(Src[i * 3]) - Mean) / Std; // R
+			Dst[j++] = (static_cast<T>(Src[i * 3 + 1]) - Mean) / Std; // G
+			Dst[j++] = (static_cast<T>(Src[i * 3 + 2]) - Mean) / Std; // B
+		}
+	}
+
+	template <typename T>
 	bool TextureToRGBArray(const void* Source, EPixelFormat PixelFormat, T* Dst, size_t NumElements, T Mean, T Std)
 	{
 		switch (PixelFormat)
