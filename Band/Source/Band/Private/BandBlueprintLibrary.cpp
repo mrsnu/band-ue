@@ -79,9 +79,9 @@ EBandStatus UBandBlueprintLibrary::CopyFromBuffer(UPARAM(ref) UBandTensor* Tenso
 	return Tensor->CopyFromBuffer(Buffer);
 }
 
-EBandStatus UBandBlueprintLibrary::CopyFromTexture(UPARAM(ref) UBandTensor* Tensor, UTexture2D* Texture)
+EBandStatus UBandBlueprintLibrary::CopyFromTexture(UPARAM(ref) UBandTensor* Tensor, UTexture2D* Texture, float Mean, float Std)
 {
-	return Tensor->CopyFromTexture(Texture);
+	return Tensor->CopyFromTexture(Texture, Mean, Std);
 }
 
 EBandStatus UBandBlueprintLibrary::CopyToBuffer(UPARAM(ref) UBandTensor* Tensor, TArray<uint8> Buffer)

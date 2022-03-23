@@ -59,7 +59,7 @@ EBandStatus UBandTensor::CopyFromBuffer(TArray<uint8> Buffer)
 	return EBandStatus(Band::TfLiteTensorCopyFromBuffer(TensorHandle, Buffer.GetData(), Buffer.GetAllocatedSize()));
 }
 
-EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture)
+EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, float Mean, float Std)
 {
 	if (!Texture->PlatformData->Mips.Num())
 	{
@@ -104,30 +104,34 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture)
 		UE_LOG(LogBand, Log, TEXT("Texture Mip0 has nullptr"));
 		return EBandStatus::Error;
 	}
-
+	
 	const size_t NumTensorElements = ByteSize() / 3 / TypeBytes;
 	const size_t NumTextureElements = SizeX * SizeY;
-
+	UE_LOG(LogBand, Log, TEXT("CopyFromTexture: NumTextureElements: %d (%d * %d)"), NumTextureElements, SizeX, SizeY);
+	
 	EPixelFormat TargetPixelFormat = Texture->PlatformData->PixelFormat;
 
 	bool Processed = true;
 	if (NumTensorElements == NumTextureElements)
 	{
 		const uint8* SourceData = static_cast<const uint8*>(Mip.BulkData.Lock(LOCK_READ_ONLY));
+		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
 		
 		switch (TensorType)
 		{
 		case EBandTensorType::Float32:
-			BandTensorUtil::TextureToRGBArray<float>(SourceData, TargetPixelFormat, reinterpret_cast<float*>(Data()), NumTensorElements, 127.5f, 127.5f);
+			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+			BandTensorUtil::TextureToRGBArray<float>(SourceData, TargetPixelFormat, reinterpret_cast<float*>(Data()), NumTensorElements, Mean, Std);
 			break;
 		case EBandTensorType::UInt8:
-			BandTensorUtil::TextureToRGBArray<uint8>(SourceData, TargetPixelFormat, Data(), NumTensorElements, 0, 1);
+			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+			BandTensorUtil::TextureToRGBArray<uint8>(SourceData, TargetPixelFormat, Data(), NumTensorElements, Mean, Std);
 			break;
 		case EBandTensorType::Int8:
-			BandTensorUtil::TextureToRGBArray<int8>(SourceData, TargetPixelFormat, reinterpret_cast<int8_t*>(Data()), NumTensorElements, 0, 1);
+			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+			BandTensorUtil::TextureToRGBArray<int8>(SourceData, TargetPixelFormat, reinterpret_cast<int8_t*>(Data()), NumTensorElements, Mean, Std);
 			break;
 		default:
-			const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
 			UE_LOG(LogBand, Log, TEXT("Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
 			Processed = false;
 			break;
