@@ -55,7 +55,7 @@ EBandStatus UBandTensor::CopyFromBuffer(TArray<uint8> Buffer)
 	return EBandStatus(Band::TfLiteTensorCopyFromBuffer(TensorHandle, Buffer.GetData(), Buffer.GetAllocatedSize()));
 }
 
-EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, int32 Mean, int32 Std)
+EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, float Mean, float Std)
 {
 	if (!Texture->PlatformData->Mips.Num())
 	{
@@ -114,23 +114,24 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, int32 Mean, int32 
 		PixelFormat = PF_R8G8B8A8;
 #endif
 		const uint8* SourceData = static_cast<const uint8*>(Mip.BulkData.Lock(LOCK_READ_ONLY));
-		
-		switch (Type())
+		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+		const EBandTensorType TensorType = Type();
+		switch (TensorType)
 		{
 		case EBandTensorType::Float32:
-			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: float32"));
+			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
 			BandTensorUtil::TextureToRGBArray<float>(SourceData, PixelFormat, reinterpret_cast<float*>(Data()), NumTensorElements, Mean, Std);
 			break;
 		case EBandTensorType::UInt8:
+			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
 			BandTensorUtil::TextureToRGBArray<uint8>(SourceData, PixelFormat, Data(), NumTensorElements, Mean, Std);
-			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: UInt8"));
 			break;
 		case EBandTensorType::Int8:
+			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
 			BandTensorUtil::TextureToRGBArray<int8>(SourceData, PixelFormat, reinterpret_cast<int8_t*>(Data()), NumTensorElements, Mean, Std);
-			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: Int8"));
 			break;
 		default:
-			UE_LOG(LogBand, Log, TEXT("Texture elements %d != tensor elements %d"), NumTextureElements, NumTensorElements);
+			UE_LOG(LogBand, Log, TEXT("Invalid EBandTensorType"));
 			Processed = false;
 			break;
 		}
