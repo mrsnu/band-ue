@@ -3,6 +3,8 @@
 #include "UObject/ObjectMacros.h"
 #include "BandLibrary.h"
 #include "BandEnum.h"
+
+#include "AndroidCameraFrame.h"
 #include "BandTensor.generated.h"
 
 UCLASS(Blueprintable)
@@ -11,6 +13,9 @@ class BAND_API UBandTensor : public UObject
 	GENERATED_BODY()
 
 	virtual void BeginDestroy() override;
+
+	UFUNCTION(BlueprintCallable, Category = Band)
+	void FromCameraFrame(const UAndroidCameraFrame* Frame);
 
 	TfLiteTensor* TensorHandle = nullptr;
 	friend class FBandModule;

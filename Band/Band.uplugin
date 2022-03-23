@@ -25,5 +25,11 @@
 			"Type": "Editor",
 			"LoadingPhase": "PostEngineInit"
 		}
+	],
+	"Plugins": [
+		{
+			"Name": "AndroidCamera",
+			"Enabled": true
+		}
 	]
 }

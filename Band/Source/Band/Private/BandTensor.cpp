@@ -12,6 +12,10 @@ void UBandTensor::BeginDestroy()
 	Super::BeginDestroy();
 }
 
+void UBandTensor::FromCameraFrame(const UAndroidCameraFrame* Frame)
+{
+}
+
 EBandTensorType UBandTensor::Type()
 {
 	return EBandTensorType(Band::TfLiteTensorType(TensorHandle));

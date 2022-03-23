@@ -27,7 +27,8 @@ public class BandEditor : ModuleRules
 			{
 				"Core",
 				"Band",
-				"Projects"
+				"Projects",
+				"AndroidCamera"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
