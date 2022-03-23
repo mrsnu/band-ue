@@ -18,7 +18,7 @@
       return false;                  \
     }                                \
   } while (0);                        \
-  lhs = std::move(rexpr);
+  lhs = rexpr;
 
 #define COMMON_MACROS_IMPL_CONCAT_INNER_(x, y) x##y
 #define COMMON_MACROS_IMPL_CONCAT_(x, y) COMMON_MACROS_IMPL_CONCAT_INNER_(x, y)
