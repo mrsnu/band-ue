@@ -25,6 +25,7 @@ void UBandTensor::BeginDestroy()
 
 void UBandTensor::FromCameraFrame(const UAndroidCameraFrame *Frame, bool normalize)
 {
+	SCOPE_CYCLE_COUNTER(STAT_BandCameraToTensor);
 	const UAndroidCameraFrame::NV12Frame &FrameData = Frame->GetData();
 	std::unique_ptr<Band::FrameBufferUtils> Utils = Band::FrameBufferUtils::Create(Band::FrameBufferUtils::ProcessEngine::kLibyuv);
 	std::unique_ptr<Band::FrameBuffer> YuvBuffer = Band::CreateFromYuvRawBuffer(
@@ -134,6 +135,7 @@ EBandStatus UBandTensor::CopyFromBuffer(TArray<uint8> Buffer)
 
 EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, float Mean, float Std)
 {
+	SCOPE_CYCLE_COUNTER(STAT_BandTextureToTensor);
 	if (!Texture->PlatformData->Mips.Num())
 	{
 		UE_LOG(LogBand, Log, TEXT("No available mips from texture"));

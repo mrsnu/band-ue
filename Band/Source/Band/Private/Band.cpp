@@ -14,6 +14,8 @@
 
 #define LOCTEXT_NAMESPACE "FBandModule"
 DEFINE_LOG_CATEGORY(LogBand);
+DEFINE_STAT(STAT_BandCameraToTensor);
+DEFINE_STAT(STAT_BandTextureToTensor);
 
 using namespace Band;
 

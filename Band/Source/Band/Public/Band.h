@@ -15,6 +15,9 @@ class UBandModel;
 class UBandTensor;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogBand, Log, All);
+DECLARE_STATS_GROUP(TEXT("Band"), STATGROUP_Band, STATCAT_Advanced);
+DECLARE_CYCLE_STAT_EXTERN(TEXT("CameraToTensor"), STAT_BandCameraToTensor, STATGROUP_Band, BAND_API);
+DECLARE_CYCLE_STAT_EXTERN(TEXT("TextureToTensor"), STAT_BandTextureToTensor, STATGROUP_Band, BAND_API);
 
 /*
 	DLL interfaces for Band / owns main interpreter
