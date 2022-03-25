@@ -17,6 +17,9 @@ class BAND_API UBandTensor : public UObject
 	UFUNCTION(BlueprintCallable, Category = Band)
 	void FromCameraFrame(const UAndroidCameraFrame* Frame, bool Normalize = false);
 
+	UFUNCTION(BlueprintCallable, Category = Band)
+	void ArgMax(int32& Index, float& Value);
+
 	void Initialize(TfLiteTensor* TensorHandle);
 	TfLiteTensor* TensorHandle = nullptr;
 	friend class FBandModule;

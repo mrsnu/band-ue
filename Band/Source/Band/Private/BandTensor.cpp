@@ -66,6 +66,55 @@ void UBandTensor::FromCameraFrame(const UAndroidCameraFrame *Frame, bool normali
 	}
 }
 
+template <typename T>
+std::pair<size_t, T> TemplatedArgMax(T* Buffer, size_t Length)
+{
+	std::pair<size_t, T> BestIndexValue = { 0, std::numeric_limits<T>::min() };
+	for (size_t i = 0; i < Length; i++)
+	{
+		if (Buffer[i] > BestIndexValue.second)
+		{
+			BestIndexValue = { i, Buffer[i] };
+		}
+	}
+	return BestIndexValue;
+}
+
+void UBandTensor::ArgMax(int32& Index, float& Value)
+{
+	switch (Type())
+	{
+	case EBandTensorType::Float32: 
+		std::tie(Index, Value) = TemplatedArgMax<float>(reinterpret_cast<float*>(Data()), NumElements());
+		break;
+	case EBandTensorType::Int32:
+		std::tie(Index, Value) = TemplatedArgMax<int32>(reinterpret_cast<int32*>(Data()), NumElements());
+		break;
+	case EBandTensorType::UInt8:
+		std::tie(Index, Value) = TemplatedArgMax<uint8>(reinterpret_cast<uint8*>(Data()), NumElements());
+		break;
+	case EBandTensorType::Int64:
+		std::tie(Index, Value) = TemplatedArgMax<int64>(reinterpret_cast<int64*>(Data()), NumElements());
+		break;
+	case EBandTensorType::Int16:
+		std::tie(Index, Value) = TemplatedArgMax<int16>(reinterpret_cast<int16*>(Data()), NumElements());
+		break;
+	case EBandTensorType::Complex64:
+		std::tie(Index, Value) = TemplatedArgMax<double>(reinterpret_cast<double*>(Data()), NumElements());
+		break;
+	case EBandTensorType::Int8:
+		std::tie(Index, Value) = TemplatedArgMax<int8>(reinterpret_cast<int8*>(Data()), NumElements());
+		break;
+	case EBandTensorType::Float64:
+		std::tie(Index, Value) = TemplatedArgMax<double>(reinterpret_cast<double*>(Data()), NumElements());
+		break;
+	default:
+		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+		UE_LOG(LogBand, Log, TEXT("Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(Type())));
+		break;
+	}
+}
+
 void UBandTensor::Initialize(TfLiteTensor *NewTensorHandle)
 {
 	TensorHandle = NewTensorHandle;
