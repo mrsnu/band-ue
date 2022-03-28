@@ -26,6 +26,36 @@ void UBandModel::RegisterModel() {
     }
 }
 
+UBandTensor* UBandModel::AllocateInputTensor(int32 InputIndex)
+{
+    return FBandModule::Get().AllocateInputTensor(this, InputIndex);
+}
+
+UBandTensor* UBandModel::AllocateOutputTensor(int32 OutputIndex)
+{
+    return FBandModule::Get().AllocateOutputTensor(this, OutputIndex);
+}
+
+int32 UBandModel::GetInputTensorCount()
+{
+    return FBandModule::Get().GetInputTensorCount(this);
+}
+
+int32 UBandModel::GetOutputTensorCount()
+{
+    return FBandModule::Get().GetOutputTensorCount(this);
+}
+
+void UBandModel::InvokeSync(UPARAM(ref) TArray<UBandTensor*> InputTensors, UPARAM(ref) TArray<UBandTensor*> OutputTensors)
+{
+    FBandModule::Get().InvokeSync(this, InputTensors, OutputTensors);
+}
+
+int32 UBandModel::InvokeAsync(UPARAM(ref) TArray<UBandTensor*> InputTensors, UPARAM(ref) TArray<UBandTensor*> OutputTensors)
+{
+    return FBandModule::Get().InvokeAsync(this, InputTensors);
+}
+
 UBandModel* UBandModel::LoadModel(UObject* InParent, FName InName, EObjectFlags Flags, const uint8*& Buffer, size_t Size)
 {
     UBandModel* Model = NewObject<UBandModel>(InParent, InName, Flags);

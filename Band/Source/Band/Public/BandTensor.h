@@ -11,32 +11,46 @@ UCLASS(Blueprintable)
 class BAND_API UBandTensor : public UObject
 {
 	GENERATED_BODY()
-
-	virtual void BeginDestroy() override;
-
+public:
 	UFUNCTION(BlueprintCallable, Category = Band)
 	void FromCameraFrame(const UAndroidCameraFrame* Frame, bool Normalize = false);
 
 	UFUNCTION(BlueprintCallable, Category = Band)
 	void ArgMax(int32& Index, float& Value);
 
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	EBandTensorType Type();
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	int32 Dim(int32 Index);
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	int32 NumDims();
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	int32 NumElements();
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	int32 ByteSize();
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	FString	Name();
+	uint8* Data();
+
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	TArray<uint8> GetRawBuffer();
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	TArray<float> GetF32Buffer();
+
+	EBandStatus CopyFromBuffer(uint8* Buffer, int32 Bytes);
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	EBandStatus CopyFromBuffer(TArray<uint8> Buffer);
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	EBandStatus CopyFromTexture(UTexture2D* Texture, float Mean, float Std = 1.f);
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	EBandStatus CopyToBuffer(TArray<uint8> Buffer);
+
+private:
 	void Initialize(TfLiteTensor* TensorHandle);
+	virtual void BeginDestroy() override;
+
 	TfLiteTensor* TensorHandle = nullptr;
 	friend class FBandModule;
 
 	uint8* RGBBuffer = nullptr;
-
-public:
-	EBandTensorType Type();
-	int32 Dim(int32 Index);
-	int32 NumDims();
-	int32 NumElements();
-	int32 ByteSize();
-	uint8* Data();
-	FString Name();
-
-	EBandStatus CopyFromBuffer(uint8* Buffer, int32 Bytes);
-	EBandStatus CopyFromBuffer(TArray<uint8> Buffer);
-	EBandStatus CopyFromTexture(UTexture2D* Texture, float Mean, float Std);
-	EBandStatus CopyToBuffer(TArray<uint8> Buffer);
 };

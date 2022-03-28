@@ -162,6 +162,16 @@ FString UBandTensor::Name()
 	return FString(Band::TfLiteTensorName(TensorHandle));
 }
 
+TArray<uint8> UBandTensor::GetRawBuffer()
+{
+	return { Data(), ByteSize() };
+}
+
+TArray<float> UBandTensor::GetF32Buffer()
+{
+	return TArray<float>((float*)(Data()), ByteSize() / sizeof(float));
+}
+
 EBandStatus UBandTensor::CopyFromBuffer(uint8 *Buffer, int32 Bytes)
 {
 	if (Bytes != ByteSize())
