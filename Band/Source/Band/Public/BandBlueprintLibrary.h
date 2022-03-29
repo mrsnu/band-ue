@@ -11,6 +11,8 @@ class BAND_API UBandBlueprintLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
+public:
+
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	static FString GetVersion();
 
