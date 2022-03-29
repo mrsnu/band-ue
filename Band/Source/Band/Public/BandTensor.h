@@ -13,7 +13,7 @@ class BAND_API UBandTensor : public UObject
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintCallable, Category = Band)
-	void FromCameraFrame(const UAndroidCameraFrame* Frame, bool Normalize = false);
+	void FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame, bool Normalize = false);
 
 	UFUNCTION(BlueprintCallable, Category = Band)
 	void ArgMax(int32& Index, float& Value);
