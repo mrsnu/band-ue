@@ -63,6 +63,8 @@ public class Band : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"RHI",
+				"UMG",
+				"TraceLog",
 				"AndroidCamera"
 				// ... add private dependencies that you statically link with here ...	
 			}
