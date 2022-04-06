@@ -30,6 +30,11 @@ void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame *Frame, 
 		UE_LOG(LogBand, Display, TEXT("FromCameraFrame - Something went wrong, Null frame"));
 		return;
 	}
+	if (!TensorHandle)
+	{
+		UE_LOG(LogBand, Display, TEXT("FromCameraFrame - Something went wrong, Null tensor"));
+		return;
+	}
 	SCOPE_CYCLE_COUNTER(STAT_BandCameraToTensor);
 	const UAndroidCameraFrame::NV12Frame &FrameData = Frame->GetData();
 	std::unique_ptr<Band::FrameBufferUtils> Utils = Band::FrameBufferUtils::Create(Band::FrameBufferUtils::ProcessEngine::kLibyuv);
