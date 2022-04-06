@@ -106,16 +106,20 @@ void ABandInferenceEngine::OnFrameAvailable(const UAndroidCameraFrame* CameraFra
 	OutputTensors[0]->ArgMax(ClassIndex, MaxValue);
 
 	{
-		UE_SCOPED_BANDTIMER(UpdateWidget);
-		// Update Widget
-		auto ImageWidget = Cast<UImage>(UIWidget->GetWidgetFromName("CameraImage"));
-		ImageWidget->SetBrushFromTexture(CameraFrame->GetTexture2D(), true);{}
-		std::lock_guard<std::mutex> Lock(CameraMutex);
-		if (ClassIndex != -1)
-		{
-			ClassTextBlock->SetText(FText::FromString(Label->GetClassName(ClassIndex)));
-		}
-		RequiresCameraReport = true;
+		// Temporal task: UI Update for camera feed
+		auto Texture2D = CameraFrame->GetTexture2D();
+		AsyncTask(ENamedThreads::GameThread, [&, Texture2D]() {
+			UE_SCOPED_BANDTIMER(UpdateWidget);
+			// Update Widget
+			auto ImageWidget = Cast<UImage>(UIWidget->GetWidgetFromName("CameraImage"));
+			ImageWidget->SetBrushFromTexture(Texture2D, true);{}
+			std::lock_guard<std::mutex> Lock(CameraMutex);
+			if (ClassIndex != -1)
+			{
+				ClassTextBlock->SetText(FText::FromString(Label->GetClassName(ClassIndex)));
+			}
+			RequiresCameraReport = true;
+		});
 	}
 }
 
