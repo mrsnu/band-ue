@@ -18,13 +18,13 @@
 UE_TRACE_CHANNEL_EXTERN(BandChannel, BAND_API)
 
 // Emits trace events denoting scope/lifetime of an activity on the cooking channel.
-#define UE_SCOPED_BANDTIMER(name)						TRACE_CPUPROFILER_EVENT_SCOPE_ON_CHANNEL(name, BandChannel)
-#define UE_SCOPED_BANDTIMER_AND_DURATION(name, durationStorage) \
-FScopedDurationTimer name##Timer(durationStorage); UE_SCOPED_COOKTIMER(name)
+#define UE_SCOPED_BANDTIMER(Name)						TRACE_CPUPROFILER_EVENT_SCOPE_ON_CHANNEL(Name, BandChannel)
+#define UE_SCOPED_BANDTIMER_AND_DURATION(Name, DurationStorage) \
+FScopedDurationTimer Name##Timer(DurationStorage); UE_SCOPED_COOKTIMER(Name)
 
 #else
 
-#define UE_SCOPED_BANDTIMER(name)
-#define UE_SCOPED_BANDTIMER_AND_DURATION(name, durationStorage)
+#define UE_SCOPED_BANDTIMER(...)
+#define UE_SCOPED_BANDTIMER_AND_DURATION(...)
 
 #endif // BAND_TRACE_ENABLED
