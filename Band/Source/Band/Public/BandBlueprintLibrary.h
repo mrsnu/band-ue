@@ -6,6 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "BandBlueprintLibrary.generated.h"
 
+class UBandBoundingBox;
 UCLASS()
 class BAND_API UBandBlueprintLibrary : public UBlueprintFunctionLibrary
 {
@@ -26,8 +27,8 @@ public:
 	*   BBoxOffset[1~4] = Offset of Left, Bottom, Right, Top (in this order)
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	static TArray<UBandBoundingBox*> GetDetectedBoxes(UPARAM(ref) UBandTensor* Tensor, TArray<float> Results, float SCORE_THRESHOLD, TArray<int32> BBoxOffsets);
+	static TArray<UBandBoundingBox*> GetDetectedBoxes(UPARAM(ref) UBandTensor* Tensor, const float Score_Threshold, TArray<int32> BBoxOffsets);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	static TArray<UBandBoundingBox*> NMS(TArray<UBandBoundingBox *> Boxes, float IOU_THRESHOLD);
+	static TArray<UBandBoundingBox*> NMS(TArray<UBandBoundingBox *> Boxes, const float IoU_Threshold);
 };
