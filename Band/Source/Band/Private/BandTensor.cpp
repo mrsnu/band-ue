@@ -27,12 +27,12 @@ void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame *Frame, 
 {
 	if (!Frame)
 	{
-		UE_LOG(LogBand, Display, TEXT("FromCameraFrame - Something went wrong, Null frame"));
+		UE_LOG(LogBand, Display, TEXT("FromCameraFrame: Something went wrong, Null frame"));
 		return;
 	}
 	if (!TensorHandle)
 	{
-		UE_LOG(LogBand, Display, TEXT("FromCameraFrame - Something went wrong, Null tensor"));
+		UE_LOG(LogBand, Display, TEXT("FromCameraFrame: Something went wrong, Null tensor"));
 		return;
 	}
 	SCOPE_CYCLE_COUNTER(STAT_BandCameraToTensor);
@@ -54,7 +54,7 @@ void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame *Frame, 
 	// Image preprocessing
 	if (!Utils->Preprocess(*YuvBuffer, OutputBuffer.get()))
 	{
-		UE_LOG(LogBand, Display, TEXT("FromCameraFrame - Failed to preprocess"));
+		UE_LOG(LogBand, Display, TEXT("FromCameraFrame: Failed to preprocess"));
 		return;
 	}
 
@@ -70,7 +70,7 @@ void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame *Frame, 
 			BandTensorUtil::RGB8ToRGBArray<float>(TargetBufferPtr, reinterpret_cast<float *>(Data()), InputWidth * InputHeight, Mean, Std);
 			break;
 		default:
-			UE_LOG(LogBand, Display, TEXT("FromCameraFrame - Failed to convert from %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(Type())));
+			UE_LOG(LogBand, Display, TEXT("FromCameraFrame: Failed to convert from %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(Type())));
 			break;
 		}
 	}
@@ -120,7 +120,7 @@ void UBandTensor::ArgMax(int32& Index, float& Value)
 		break;
 	default:
 		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
-		UE_LOG(LogBand, Log, TEXT("Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(Type())));
+		UE_LOG(LogBand, Error, TEXT("ArgMax: Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(Type())));
 		break;
 	}
 }
@@ -186,7 +186,7 @@ EBandStatus UBandTensor::CopyFromBuffer(uint8 *Buffer, int32 Bytes)
 {
 	if (Bytes != ByteSize())
 	{
-		UE_LOG(LogBand, Log, TEXT("Buffer bytes %d != target tensor bytes %d"), Bytes, ByteSize());
+		UE_LOG(LogBand, Error, TEXT("CopyFromBuffer: Buffer bytes %d != target tensor bytes %d"), Bytes, ByteSize());
 		return EBandStatus::Error;
 	}
 	return EBandStatus(Band::TfLiteTensorCopyFromBuffer(TensorHandle, Buffer, Bytes));
@@ -196,7 +196,7 @@ EBandStatus UBandTensor::CopyFromBuffer(TArray<uint8> Buffer)
 {
 	if (ByteSize() != Buffer.GetAllocatedSize())
 	{
-		UE_LOG(LogBand, Log, TEXT("Buffer bytes %d != target tensor bytes %d"), Buffer.GetAllocatedSize(), ByteSize());
+		UE_LOG(LogBand, Error, TEXT("CopyFromBuffer: Buffer bytes %d != target tensor bytes %d"), Buffer.GetAllocatedSize(), ByteSize());
 		return EBandStatus::Error;
 	}
 	return EBandStatus(Band::TfLiteTensorCopyFromBuffer(TensorHandle, Buffer.GetData(), Buffer.GetAllocatedSize()));
@@ -207,7 +207,7 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, float Mean, float 
 	SCOPE_CYCLE_COUNTER(STAT_BandTextureToTensor);
 	if (!Texture->PlatformData->Mips.Num())
 	{
-		UE_LOG(LogBand, Log, TEXT("No available mips from texture"));
+		UE_LOG(LogBand, Error, TEXT("CopyFromTexture: No available mips from texture"));
 		return EBandStatus::Error;
 	}
 
@@ -224,7 +224,6 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, float Mean, float 
 			Texture->UpdateResource();
 		}
 	};
-	UE_LOG(LogBand, Log, TEXT("Texture pixel format before conversion %d"), Texture->PlatformData->PixelFormat);
 
 	if ((PreviousSRGB != false) || (PreviousCompressionSettings != TC_VectorDisplacementmap))
 	{
@@ -238,7 +237,6 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, float Mean, float 
 	const size_t TypeBytes = BandEnum::TensorTypeBytes(TensorType);
 	const int32 SizeX = Texture->PlatformData->Mips[0].SizeX;
 	const int32 SizeY = Texture->PlatformData->Mips[0].SizeY;
-	UE_LOG(LogBand, Log, TEXT("Texture pixel format after conversion %d"), Texture->PlatformData->PixelFormat);
 
 	FTexture2DMipMap &Mip = Texture->PlatformData->Mips[0];
 	if (&Mip.BulkData == nullptr)
@@ -263,19 +261,19 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, float Mean, float 
 		switch (TensorType)
 		{
 		case EBandTensorType::Float32:
-			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+			UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
 			BandTensorUtil::TextureToRGBArray<float>(SourceData, TargetPixelFormat, reinterpret_cast<float*>(Data()), NumTensorElements, Mean, Std);
 			break;
 		case EBandTensorType::UInt8:
-			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+			UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
 			BandTensorUtil::TextureToRGBArray<uint8>(SourceData, TargetPixelFormat, Data(), NumTensorElements, Mean, Std);
 			break;
 		case EBandTensorType::Int8:
-			UE_LOG(LogBand, Log, TEXT("CopyFromTexture - EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+			UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
 			BandTensorUtil::TextureToRGBArray<int8>(SourceData, TargetPixelFormat, reinterpret_cast<int8_t*>(Data()), NumTensorElements, Mean, Std);
 			break;
 		default:
-			UE_LOG(LogBand, Log, TEXT("Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+			UE_LOG(LogBand, Error, TEXT("CopyFromTexture: Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
 			Processed = false;
 			break;
 		}
@@ -284,7 +282,7 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, float Mean, float 
 	}
 	else
 	{
-		UE_LOG(LogBand, Log, TEXT("Texture elements %d != tensor elements %d"), NumTextureElements, NumTensorElements);
+		UE_LOG(LogBand, Error, TEXT("CopyFromTexture: Texture elements %d != tensor elements %d"), NumTextureElements, NumTensorElements);
 		Processed = false;
 	}
 
