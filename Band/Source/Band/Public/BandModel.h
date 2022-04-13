@@ -4,6 +4,8 @@
 #include "Modules/ModuleManager.h"
 #include "BandModel.generated.h"
 
+class UBandTensor;
+
 namespace Band {
 	struct TfLiteModel;
 }
