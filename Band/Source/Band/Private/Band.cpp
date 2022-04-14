@@ -74,26 +74,42 @@ void FBandModule::ShutdownModule()
 
 FBandModule& FBandModule::Get()
 {
-	return *reinterpret_cast<FBandModule*>(FModuleManager::Get().GetModule("Band"));
+	return *reinterpret_cast<FBandModule*>(FModuleManager::Get().
+		GetModule("Band"));
 }
 
 bool FBandModule::InitializeInterpreter(FString ConfigPath)
 {
 	// TODO(dostos): implement BandConfig class / replace this with default object in a project
-	static const char* DEFAULT_CONFIG = "{\"allow_worksteal\":false,\"cpu_masks\":\"BIG\",\"log_path\":\"\",\"model_profile\":\"\",\"planner_cpu_masks\":\"BIG\",\"profile_num_runs\":3,\"profile_online\":true,\"profile_smoothing_factor\":0.1,\"profile_warmup_runs\":3,\"schedule_window_size\":5,\"schedulers\":[6],\"subgraph_preparation_type\":\"merge_unit_subgraph\"}";
-
-	TfLiteInterpreterOptions* InterpreterOptions = TfLiteInterpreterOptionsCreate();
-	TfLiteInterpreterOptionsSetErrorReporter(InterpreterOptions, FBandModule::ReportError, this);
+	FString LogDirectory = FPaths::ProjectLogDir() + TEXT("band_log.csv");
+	// TODO(dostos): Android log support
+#if PLATFORM_ANDROID && USE_ANDROID_FILE
+	LogDirectory = TEXT("");
+#endif
+	const FString DefaultConfig = FString::Format(
+		ANSI_TO_TCHAR(
+		"{\"allow_worksteal\":false,\"cpu_masks\":\"BIG\",\"log_path\":\"%s\",\"model_profile\":\"\",\"planner_cpu_masks\":\"BIG\",\"profile_num_runs\":3,\"profile_online\":true,\"profile_smoothing_factor\":0.1,\"profile_warmup_runs\":3,\"schedule_window_size\":5,\"schedulers\":[6],\"subgraph_preparation_type\":\"merge_unit_subgraph\"}"),
+	{*LogDirectory});
+	UE_LOG(LogBand, Display, TEXT("Log directory: %s"), *LogDirectory);
+	TfLiteInterpreterOptions* InterpreterOptions =
+		TfLiteInterpreterOptionsCreate();
+	TfLiteInterpreterOptionsSetErrorReporter(InterpreterOptions,
+	                                         FBandModule::ReportError, this);
 	TfLiteStatus ConfigStatus = TfLiteStatus::kTfLiteError;
-
-	if (FPaths::FileExists(ConfigPath)) {
-		UE_LOG(LogBand, Display, TEXT("Try to load config file from %s!"), *ConfigPath);
-		ConfigStatus = TfLiteInterpreterOptionsSetConfigPath(InterpreterOptions, TCHAR_TO_ANSI(*ConfigPath));
+	
+	if (FPaths::FileExists(ConfigPath))
+	{
+		UE_LOG(LogBand, Display, TEXT("Try to load config file from %s!"),
+		       *ConfigPath);
+		ConfigStatus = TfLiteInterpreterOptionsSetConfigPath(
+			InterpreterOptions, TCHAR_TO_ANSI(*ConfigPath));
 	}
 	else
 	{
 		UE_LOG(LogBand, Display, TEXT("Try to load default config"));
-		ConfigStatus = TfLiteInterpreterOptionsSetConfigFile(InterpreterOptions, DEFAULT_CONFIG, strlen(DEFAULT_CONFIG));
+		ConfigStatus = TfLiteInterpreterOptionsSetConfigFile(
+			InterpreterOptions, TCHAR_TO_ANSI(*DefaultConfig),
+			strlen(TCHAR_TO_ANSI(*DefaultConfig)));
 	}
 
 	if (ConfigStatus == TfLiteStatus::kTfLiteOk)
