@@ -48,7 +48,6 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	int32 ModelHandle = -1;
 
-	void ReportUnregisteredError(const TCHAR *FunctionName) const;
 	UPROPERTY(Transient)
 	bool Registered = false;
 

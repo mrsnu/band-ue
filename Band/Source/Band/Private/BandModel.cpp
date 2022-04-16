@@ -1,22 +1,13 @@
 #include "BandModel.h"
+
+#include <mutex>
+
 #include "Band.h"
 #include "BandLibraryWrapper.h"
-
-#define ENSURE_REGISTERED                                     \
-    if (!Registered)                                          \
-    {                                                         \
-        ReportUnregisteredError(ANSI_TO_TCHAR(__FUNCTION__)); \
-        return {};                                            \
-    }
 
 bool UBandModel::IsRegistered() const
 {
     return Registered;
-}
-
-void UBandModel::ReportUnregisteredError(const TCHAR *FunctionName) const
-{
-    UE_LOG(LogBand, Error, TEXT("%s: Model not registered"), FunctionName);
 }
 
 const int32 UBandModel::GetModelHandle()
@@ -33,7 +24,9 @@ const int32 UBandModel::GetModelHandle()
 
 void UBandModel::RegisterModel()
 {
-    if (ModelBinary.Num() > 0)
+    static std::mutex RegisterMutex;
+    std::unique_lock<std::mutex> RegisterLock(RegisterMutex);
+    if (ModelBinary.Num() > 0 && !Registered)
     {
         Band::TfLiteModel *TfLiteModel = Band::TfLiteModelCreate(ModelBinary.GetData(), ModelBinary.Num());
         ModelHandle = Band::TfLiteInterpreterRegisterModel(FBandModule::Get().GetInterpreter(), TfLiteModel);
@@ -44,43 +37,39 @@ void UBandModel::RegisterModel()
 
 UBandTensor *UBandModel::AllocateInputTensor(int32 InputIndex)
 {
-    ENSURE_REGISTERED
     return FBandModule::Get().AllocateInputTensor(this, InputIndex);
 }
 
 UBandTensor *UBandModel::AllocateOutputTensor(int32 OutputIndex)
 {
-    ENSURE_REGISTERED
     return FBandModule::Get().AllocateOutputTensor(this, OutputIndex);
 }
 
 int32 UBandModel::GetInputTensorCount()
 {
-    ENSURE_REGISTERED
     return FBandModule::Get().GetInputTensorCount(this);
 }
 
 int32 UBandModel::GetOutputTensorCount()
 {
-    ENSURE_REGISTERED
     return FBandModule::Get().GetOutputTensorCount(this);
 }
 
 void UBandModel::InvokeSync(UPARAM(ref) TArray<UBandTensor *> InputTensors, UPARAM(ref) TArray<UBandTensor *> OutputTensors)
 {
-    if (Registered)
+    if (!Registered)
     {
-        FBandModule::Get().InvokeSync(this, InputTensors, OutputTensors);
+        UE_LOG(LogBand, Error, TEXT("%s: Model not registered"), ANSI_TO_TCHAR(__FUNCTION__));
     }
-    else
-    {
-        ReportUnregisteredError(ANSI_TO_TCHAR(__FUNCTION__));
-    }
+    FBandModule::Get().InvokeSync(this, InputTensors, OutputTensors);
 }
 
 int32 UBandModel::InvokeAsync(UPARAM(ref) TArray<UBandTensor *> InputTensors, UPARAM(ref) TArray<UBandTensor *> OutputTensors)
 {
-    ENSURE_REGISTERED
+    if (!Registered)
+    {
+        UE_LOG(LogBand, Error, TEXT("%s: Model not registered"), ANSI_TO_TCHAR(__FUNCTION__));
+    }
     return FBandModule::Get().InvokeAsync(this, InputTensors);
 }
 
