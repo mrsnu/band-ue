@@ -91,6 +91,15 @@ void ABandInferenceEngine::OnFrameAvailable(const UAndroidCameraFrame* CameraFra
 		BeginCameraFrame = FPlatformTime::Cycles64();
 		BeginCameraFrames.push(FPlatformTime::Cycles64());
 	}
+	// Temporal task: UI Update for camera feed
+	AsyncTask(ENamedThreads::GameThread, [&]()
+	{
+		UE_SCOPED_BANDTIMER(UpdateWidget);
+		auto Texture2D = CameraFrame->GetTexture2D();
+		// Update Widget
+		auto ImageWidget = Cast<UImage>(UIWidget->GetWidgetFromName("CameraImage"));
+		ImageWidget->SetBrushFromTexture(Texture2D, true);{}
+	});
 	{
 		UE_SCOPED_BANDTIMER(InputPreprocess);
 		InputTensors[0]->FromCameraFrame(CameraFrame, false);
@@ -107,12 +116,7 @@ void ABandInferenceEngine::OnFrameAvailable(const UAndroidCameraFrame* CameraFra
 
 	{
 		// Temporal task: UI Update for camera feed
-		auto Texture2D = CameraFrame->GetTexture2D();
-		AsyncTask(ENamedThreads::GameThread, [&, Texture2D]() {
-			UE_SCOPED_BANDTIMER(UpdateWidget);
-			// Update Widget
-			auto ImageWidget = Cast<UImage>(UIWidget->GetWidgetFromName("CameraImage"));
-			ImageWidget->SetBrushFromTexture(Texture2D, true);{}
+		AsyncTask(ENamedThreads::GameThread, [&]() {
 			std::lock_guard<std::mutex> Lock(CameraMutex);
 			if (ClassIndex != -1)
 			{
