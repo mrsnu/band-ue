@@ -1,7 +1,4 @@
 #include "BandModel.h"
-
-#include <mutex>
-
 #include "Band.h"
 #include "BandLibraryWrapper.h"
 
@@ -24,7 +21,6 @@ const int32 UBandModel::GetModelHandle()
 
 void UBandModel::RegisterModel()
 {
-    static std::mutex RegisterMutex;
     std::unique_lock<std::mutex> RegisterLock(RegisterMutex);
     if (ModelBinary.Num() > 0 && !Registered)
     {

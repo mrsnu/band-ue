@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "UObject/ObjectMacros.h"
 #include "Modules/ModuleManager.h"
 #include "BandModel.generated.h"
@@ -48,6 +50,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	int32 ModelHandle = -1;
 
+	std::mutex RegisterMutex;
 	UPROPERTY(Transient)
 	bool Registered = false;
 
