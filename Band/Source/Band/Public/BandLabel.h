@@ -13,9 +13,8 @@ class BAND_API UBandLabel : public UDataAsset
 	TArray<FString> Labels;
 
 public:
-
 	UFUNCTION(BlueprintCallable, Category = Band)
-	FString GetClassName(int32 Index);
+	FString GetClassName(int32 Index) const;
 
 	static UBandLabel* LoadLabel(UObject* InParent, FName InName, EObjectFlags Flags, const FString& Filename, bool& bOutOperationCanceled);
 };

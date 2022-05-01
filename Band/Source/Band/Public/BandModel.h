@@ -27,10 +27,10 @@ public:
 	void RegisterModel();
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	UBandTensor *AllocateInputTensor(int32 InputIndex);
+	UBandTensor* AllocateInputTensor(int32 InputIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	UBandTensor *AllocateOutputTensor(int32 OutputIndex);
+	UBandTensor* AllocateOutputTensor(int32 OutputIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	int32 GetInputTensorCount();
@@ -39,12 +39,12 @@ public:
 	int32 GetOutputTensorCount();
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	void InvokeSync(UPARAM(ref) TArray<UBandTensor *> InputTensors, UPARAM(ref) TArray<UBandTensor *> OutputTensors);
+	void InvokeSync(UPARAM(ref) TArray<UBandTensor*> InputTensors, UPARAM(ref) TArray<UBandTensor*> OutputTensors);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	int32 InvokeAsync(UPARAM(ref) TArray<UBandTensor *> InputTensors, UPARAM(ref) TArray<UBandTensor *> OutputTensors);
+	int32 InvokeAsync(UPARAM(ref) TArray<UBandTensor*> InputTensors, UPARAM(ref) TArray<UBandTensor*> OutputTensors);
 
-	static UBandModel *LoadModel(UObject *InParent, FName InName, EObjectFlags Flags, const uint8 *&Buffer, size_t Size);
+	static UBandModel* LoadModel(UObject* InParent, FName InName, EObjectFlags Flags, const uint8*& Buffer, size_t Size);
 
 private:
 	UPROPERTY(VisibleAnywhere)

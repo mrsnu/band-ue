@@ -29,7 +29,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	int32 ByteSize();
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	FString	Name();
+	FString Name();
 	uint8* Data();
 
 	UFUNCTION(BlueprintCallable, Category = "Band")

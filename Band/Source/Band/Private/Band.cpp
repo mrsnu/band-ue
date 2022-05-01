@@ -44,7 +44,7 @@ void FBandModule::StartupModule()
 	{
 		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("BandLibrary", "Failed to load Band library"));
 	}
-	
+
 	// TODO(dostos): Post-initialize in BeginEvent of the main BP?
 	if (InitializeInterpreter(""))
 	{
@@ -61,7 +61,8 @@ void FBandModule::ShutdownModule()
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
 
-	if (Interpreter != nullptr) {
+	if (Interpreter != nullptr)
+	{
 		TfLiteInterpreterDelete(Interpreter);
 		Interpreter = nullptr;
 	}
@@ -74,8 +75,7 @@ void FBandModule::ShutdownModule()
 
 FBandModule& FBandModule::Get()
 {
-	return *reinterpret_cast<FBandModule*>(FModuleManager::Get().
-		GetModule("Band"));
+	return *reinterpret_cast<FBandModule*>(FModuleManager::Get().GetModule("Band"));
 }
 
 bool FBandModule::InitializeInterpreter(FString ConfigPath)
@@ -84,22 +84,22 @@ bool FBandModule::InitializeInterpreter(FString ConfigPath)
 	const FString LogDirectory = FPaths::ProjectLogDir() + TEXT("band_log.csv");
 	FString DefaultConfig = FString::Format(
 		ANSI_TO_TCHAR(
-		"{\"allow_worksteal\":false,\"cpu_masks\":\"BIG\",\"log_path\":\"%s\",\"model_profile\":\"\",\"planner_cpu_masks\":\"BIG\",\"profile_num_runs\":3,\"profile_online\":true,\"profile_smoothing_factor\":0.1,\"profile_warmup_runs\":3,\"schedule_window_size\":5,\"schedulers\":[6],\"subgraph_preparation_type\":\"merge_unit_subgraph\"}"),
-	{*LogDirectory});
+			"{\"allow_worksteal\":false,\"cpu_masks\":\"BIG\",\"log_path\":\"%s\",\"model_profile\":\"\",\"planner_cpu_masks\":\"BIG\",\"profile_num_runs\":3,\"profile_online\":true,\"profile_smoothing_factor\":0.1,\"profile_warmup_runs\":3,\"schedule_window_size\":5,\"schedulers\":[6],\"subgraph_preparation_type\":\"merge_unit_subgraph\"}"),
+		{ *LogDirectory });
 	// TODO(dostos): Android log support
 #if PLATFORM_ANDROID && USE_ANDROID_FILE
-	DefaultConfig = ANSI_TO_TCHAR("{\"allow_worksteal\":false,\"cpu_masks\":\"BIG\",\"log_path\":\"\",\"model_profile\":\"\",\"planner_cpu_masks\":\"BIG\",\"profile_num_runs\":3,\"profile_online\":true,\"profile_smoothing_factor\":0.1,\"profile_warmup_runs\":3,\"schedule_window_size\":5,\"schedulers\":[6],\"subgraph_preparation_type\":\"merge_unit_subgraph\"}");
+	DefaultConfig = ANSI_TO_TCHAR("{\"allow_worksteal\":false,\"cpu_masks\":\"BIG\",\"log_path\":\"/sdcard/UE4Game/BandExample/BandExample/Saved/Logs/BandExample.csv\",\"model_profile\":\"\",\"planner_cpu_masks\":\"BIG\",\"profile_num_runs\":3,\"profile_online\":true,\"profile_smoothing_factor\":0.1,\"profile_warmup_runs\":3,\"schedule_window_size\":5,\"schedulers\":[6],\"subgraph_preparation_type\":\"merge_unit_subgraph\"}");
 #endif
 	TfLiteInterpreterOptions* InterpreterOptions =
 		TfLiteInterpreterOptionsCreate();
 	TfLiteInterpreterOptionsSetErrorReporter(InterpreterOptions,
 	                                         FBandModule::ReportError, this);
 	TfLiteStatus ConfigStatus = TfLiteStatus::kTfLiteError;
-	
+
 	if (FPaths::FileExists(ConfigPath))
 	{
 		UE_LOG(LogBand, Display, TEXT("Try to load config file from %s!"),
-		       *ConfigPath);
+			*ConfigPath);
 		ConfigStatus = TfLiteInterpreterOptionsSetConfigPath(
 			InterpreterOptions, TCHAR_TO_ANSI(*ConfigPath));
 	}
@@ -152,7 +152,8 @@ TArray<TfLiteTensor*> FBandModule::TensorsFromTArray(TArray<UBandTensor*> Tensor
 {
 	TArray<TfLiteTensor*> OutTensors;
 
-	for (int i = 0; i < Tensors.Num(); i++) {
+	for (int i = 0; i < Tensors.Num(); i++)
+	{
 		OutTensors.Push(Tensors[i]->TensorHandle);
 	}
 
@@ -179,18 +180,20 @@ Band::TfLiteInterpreter* FBandModule::GetInterpreter()
 	return Interpreter;
 }
 
-
-#define LoadFunction(DllHandle, Function) \
-    Function = reinterpret_cast<p##Function>(FPlatformProcess::GetDllExport(DllHandle, ANSI_TO_TCHAR(#Function))); \
-    if (!Function) { \
-		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("BandLibrary", "Failed to load "#Function)); \
-		return false; \
+#define LoadFunction(DllHandle, Function)                                                                          \
+	Function = reinterpret_cast<p##Function>(FPlatformProcess::GetDllExport(DllHandle, ANSI_TO_TCHAR(#Function))); \
+	if (!Function)                                                                                                 \
+	{                                                                                                              \
+		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("BandLibrary", "Failed to load " #Function));                \
+		return false;                                                                                              \
 	}
 
-bool FBandModule::LoadDllFunction(FString LibraryPath) {
+bool FBandModule::LoadDllFunction(FString LibraryPath)
+{
 	LibraryHandle = !LibraryPath.IsEmpty() ? FPlatformProcess::GetDllHandle(*LibraryPath) : nullptr;
 
-	if (!LibraryHandle) {
+	if (!LibraryHandle)
+	{
 		return false;
 	}
 
@@ -235,17 +238,19 @@ void FBandModule::ReportError(void* UserData, const char* Format, va_list Args)
 	ANSICHAR LogMessage[256];
 	FCStringAnsi::GetVarArgs(LogMessage, UE_ARRAY_COUNT(LogMessage), Format, Args);
 
-	if (FModuleManager::Get().IsModuleLoaded("Band")) 
+	if (FModuleManager::Get().IsModuleLoaded("Band"))
 	{
+#if WITH_EDITOR
 		// Open dialog (pre editor load)
 		FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(LogMessage));
+#endif
 	}
 	else
 	{
-		UE_LOG(LogBand, Log, TEXT("%s"), *LogMessage);
+		UE_LOG(LogBand, Display, TEXT("%s"), *LogMessage);
 	}
 }
 
 #undef LOCTEXT_NAMESPACE
-	
+
 IMPLEMENT_MODULE(FBandModule, Band)

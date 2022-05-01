@@ -23,7 +23,7 @@ void UBandTensor::BeginDestroy()
 	Super::BeginDestroy();
 }
 
-void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame *Frame, bool normalize)
+void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame, bool normalize)
 {
 	if (!Frame)
 	{
@@ -36,11 +36,11 @@ void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame *Frame, 
 		return;
 	}
 	SCOPE_CYCLE_COUNTER(STAT_BandCameraToTensor);
-	const UAndroidCameraFrame::NV12Frame &FrameData = Frame->GetData();
+	const UAndroidCameraFrame::NV12Frame& FrameData = Frame->GetData();
 	std::unique_ptr<Band::FrameBufferUtils> Utils = Band::FrameBufferUtils::Create(Band::FrameBufferUtils::ProcessEngine::kLibyuv);
 	std::unique_ptr<Band::FrameBuffer> YuvBuffer = Band::CreateFromYuvRawBuffer(
 		FrameData.Y, FrameData.U, FrameData.V, Band::FrameBuffer::Format::kNV12,
-		{Frame->GetWidth(), Frame->GetHeight()},
+		{ Frame->GetWidth(), Frame->GetHeight() },
 		FrameData.YRowStride, FrameData.UVRowStride, FrameData.UVPixelStride);
 
 	// BWHC format
@@ -48,8 +48,8 @@ void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame *Frame, 
 	const int InputHeight = Dim(2);
 
 	// Directly update uint8 buffer
-	uint8 *TargetBufferPtr = Type() == EBandTensorType::UInt8 ? Data() : RGBBuffer;
-	std::unique_ptr<Band::FrameBuffer> OutputBuffer = Band::CreateFromRgbRawBuffer(TargetBufferPtr, {InputWidth, InputHeight});
+	uint8* TargetBufferPtr = Type() == EBandTensorType::UInt8 ? Data() : RGBBuffer;
+	std::unique_ptr<Band::FrameBuffer> OutputBuffer = Band::CreateFromRgbRawBuffer(TargetBufferPtr, { InputWidth, InputHeight });
 
 	// Image preprocessing
 	if (!Utils->Preprocess(*YuvBuffer, OutputBuffer.get()))
@@ -63,15 +63,15 @@ void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame *Frame, 
 	{
 		float Mean = normalize ? 127.5f : 0.f;
 		float Std = normalize ? 127.5f : 1.f;
-		const UEnum *EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
 		switch (Type())
 		{
-		case EBandTensorType::Float32:
-			BandTensorUtil::RGB8ToRGBArray<float>(TargetBufferPtr, reinterpret_cast<float *>(Data()), InputWidth * InputHeight, Mean, Std);
-			break;
-		default:
-			UE_LOG(LogBand, Display, TEXT("FromCameraFrame: Failed to convert from %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(Type())));
-			break;
+			case EBandTensorType::Float32:
+				BandTensorUtil::RGB8ToRGBArray<float>(TargetBufferPtr, reinterpret_cast<float*>(Data()), InputWidth * InputHeight, Mean, Std);
+				break;
+			default:
+				UE_LOG(LogBand, Display, TEXT("FromCameraFrame: Failed to convert from %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(Type())));
+				break;
 		}
 	}
 }
@@ -94,38 +94,38 @@ void UBandTensor::ArgMax(int32& Index, float& Value)
 {
 	switch (Type())
 	{
-	case EBandTensorType::Float32: 
-		std::tie(Index, Value) = TemplatedArgMax<float>(reinterpret_cast<float*>(Data()), NumElements());
-		break;
-	case EBandTensorType::Int32:
-		std::tie(Index, Value) = TemplatedArgMax<int32>(reinterpret_cast<int32*>(Data()), NumElements());
-		break;
-	case EBandTensorType::UInt8:
-		std::tie(Index, Value) = TemplatedArgMax<uint8>(reinterpret_cast<uint8*>(Data()), NumElements());
-		break;
-	case EBandTensorType::Int64:
-		std::tie(Index, Value) = TemplatedArgMax<int64>(reinterpret_cast<int64*>(Data()), NumElements());
-		break;
-	case EBandTensorType::Int16:
-		std::tie(Index, Value) = TemplatedArgMax<int16>(reinterpret_cast<int16*>(Data()), NumElements());
-		break;
-	case EBandTensorType::Complex64:
-		std::tie(Index, Value) = TemplatedArgMax<double>(reinterpret_cast<double*>(Data()), NumElements());
-		break;
-	case EBandTensorType::Int8:
-		std::tie(Index, Value) = TemplatedArgMax<int8>(reinterpret_cast<int8*>(Data()), NumElements());
-		break;
-	case EBandTensorType::Float64:
-		std::tie(Index, Value) = TemplatedArgMax<double>(reinterpret_cast<double*>(Data()), NumElements());
-		break;
-	default:
-		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
-		UE_LOG(LogBand, Error, TEXT("ArgMax: Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(Type())));
-		break;
+		case EBandTensorType::Float32:
+			std::tie(Index, Value) = TemplatedArgMax<float>(reinterpret_cast<float*>(Data()), NumElements());
+			break;
+		case EBandTensorType::Int32:
+			std::tie(Index, Value) = TemplatedArgMax<int32>(reinterpret_cast<int32*>(Data()), NumElements());
+			break;
+		case EBandTensorType::UInt8:
+			std::tie(Index, Value) = TemplatedArgMax<uint8>(reinterpret_cast<uint8*>(Data()), NumElements());
+			break;
+		case EBandTensorType::Int64:
+			std::tie(Index, Value) = TemplatedArgMax<int64>(reinterpret_cast<int64*>(Data()), NumElements());
+			break;
+		case EBandTensorType::Int16:
+			std::tie(Index, Value) = TemplatedArgMax<int16>(reinterpret_cast<int16*>(Data()), NumElements());
+			break;
+		case EBandTensorType::Complex64:
+			std::tie(Index, Value) = TemplatedArgMax<double>(reinterpret_cast<double*>(Data()), NumElements());
+			break;
+		case EBandTensorType::Int8:
+			std::tie(Index, Value) = TemplatedArgMax<int8>(reinterpret_cast<int8*>(Data()), NumElements());
+			break;
+		case EBandTensorType::Float64:
+			std::tie(Index, Value) = TemplatedArgMax<double>(reinterpret_cast<double*>(Data()), NumElements());
+			break;
+		default:
+			const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+			UE_LOG(LogBand, Error, TEXT("ArgMax: Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(Type())));
+			break;
 	}
 }
 
-void UBandTensor::Initialize(TfLiteTensor *NewTensorHandle)
+void UBandTensor::Initialize(TfLiteTensor* NewTensorHandle)
 {
 	TensorHandle = NewTensorHandle;
 
@@ -162,9 +162,9 @@ int32 UBandTensor::ByteSize()
 	return (int32)Band::TfLiteTensorByteSize(TensorHandle);
 }
 
-uint8 *UBandTensor::Data()
+uint8* UBandTensor::Data()
 {
-	return (uint8 *)Band::TfLiteTensorData(TensorHandle);
+	return (uint8*)Band::TfLiteTensorData(TensorHandle);
 }
 
 FString UBandTensor::Name()
@@ -182,7 +182,7 @@ TArray<float> UBandTensor::GetF32Buffer()
 	return TArray<float>((float*)(Data()), ByteSize() / sizeof(float));
 }
 
-EBandStatus UBandTensor::CopyFromBuffer(uint8 *Buffer, int32 Bytes)
+EBandStatus UBandTensor::CopyFromBuffer(uint8* Buffer, int32 Bytes)
 {
 	if (Bytes != ByteSize())
 	{
@@ -215,8 +215,7 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, float Mean, float 
 	bool PreviousSRGB = Texture->SRGB;
 	TextureCompressionSettings PreviousCompressionSettings = Texture->CompressionSettings;
 
-	auto CleanUp = [&]()
-	{
+	auto CleanUp = [&]() {
 		if (ChangedTexture2D)
 		{
 			Texture->SRGB = PreviousSRGB;
@@ -238,18 +237,18 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, float Mean, float 
 	const int32 SizeX = Texture->PlatformData->Mips[0].SizeX;
 	const int32 SizeY = Texture->PlatformData->Mips[0].SizeY;
 
-	FTexture2DMipMap &Mip = Texture->PlatformData->Mips[0];
+	FTexture2DMipMap& Mip = Texture->PlatformData->Mips[0];
 	if (&Mip.BulkData == nullptr)
 	{
 		CleanUp();
 		UE_LOG(LogBand, Log, TEXT("Texture Mip0 has nullptr"));
 		return EBandStatus::Error;
 	}
-	
+
 	const size_t NumTensorElements = ByteSize() / 3 / TypeBytes;
 	const size_t NumTextureElements = SizeX * SizeY;
 	UE_LOG(LogBand, Log, TEXT("CopyFromTexture: NumTextureElements: %d (%d * %d)"), NumTextureElements, SizeX, SizeY);
-	
+
 	EPixelFormat TargetPixelFormat = Texture->PlatformData->PixelFormat;
 
 	bool Processed = true;
@@ -257,25 +256,25 @@ EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, float Mean, float 
 	{
 		const uint8* SourceData = static_cast<const uint8*>(Mip.BulkData.Lock(LOCK_READ_ONLY));
 		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
-		
+
 		switch (TensorType)
 		{
-		case EBandTensorType::Float32:
-			UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
-			BandTensorUtil::TextureToRGBArray<float>(SourceData, TargetPixelFormat, reinterpret_cast<float*>(Data()), NumTensorElements, Mean, Std);
-			break;
-		case EBandTensorType::UInt8:
-			UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
-			BandTensorUtil::TextureToRGBArray<uint8>(SourceData, TargetPixelFormat, Data(), NumTensorElements, Mean, Std);
-			break;
-		case EBandTensorType::Int8:
-			UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
-			BandTensorUtil::TextureToRGBArray<int8>(SourceData, TargetPixelFormat, reinterpret_cast<int8_t*>(Data()), NumTensorElements, Mean, Std);
-			break;
-		default:
-			UE_LOG(LogBand, Error, TEXT("CopyFromTexture: Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
-			Processed = false;
-			break;
+			case EBandTensorType::Float32:
+				UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+				BandTensorUtil::TextureToRGBArray<float>(SourceData, TargetPixelFormat, reinterpret_cast<float*>(Data()), NumTensorElements, Mean, Std);
+				break;
+			case EBandTensorType::UInt8:
+				UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+				BandTensorUtil::TextureToRGBArray<uint8>(SourceData, TargetPixelFormat, Data(), NumTensorElements, Mean, Std);
+				break;
+			case EBandTensorType::Int8:
+				UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+				BandTensorUtil::TextureToRGBArray<int8>(SourceData, TargetPixelFormat, reinterpret_cast<int8_t*>(Data()), NumTensorElements, Mean, Std);
+				break;
+			default:
+				UE_LOG(LogBand, Error, TEXT("CopyFromTexture: Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+				Processed = false;
+				break;
 		}
 
 		Mip.BulkData.Unlock();

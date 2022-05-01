@@ -1,4 +1,7 @@
 #include "BandBlueprintLibrary.h"
+
+#include <functional>
+
 #include "Band.h"
 #include "BandModel.h"
 #include "BandLibraryWrapper.h"
@@ -68,41 +71,48 @@ TArray<UBandBoundingBox*> UBandBlueprintLibrary::GetDetectedBoxes(UPARAM(ref) UB
 	return Boxes;
 }
 
-float BoxIntersection(FRect A, FRect B) {
-	if (A.Right <= B.Left || B.Right <= A.Left) return 0.0f;
-	if (A.Top <= B.Bottom || B.Top <= A.Bottom) return 0.0f;
+float BoxIntersection(FRect A, FRect B)
+{
+	if (A.Right <= B.Left || B.Right <= A.Left)
+		return 0.0f;
+	if (A.Top <= B.Bottom || B.Top <= A.Bottom)
+		return 0.0f;
 	return (FGenericPlatformMath::Min(A.Right, B.Right) - FGenericPlatformMath::Max(A.Left, B.Left))
 		* (FGenericPlatformMath::Min(A.Top, B.Top) - FGenericPlatformMath::Max(A.Bottom, B.Bottom));
 }
 
-float BoxUnion(FRect A, FRect B) {
+float BoxUnion(FRect A, FRect B)
+{
 	return (A.Right - A.Left) * (A.Top - A.Bottom)
 		+ (B.Right - B.Left) * (B.Top - B.Bottom)
 		- BoxIntersection(A, B);
 }
 
-float BoxIou(FRect A, FRect B) {
+float BoxIou(FRect A, FRect B)
+{
 	return BoxIntersection(A, B) / BoxUnion(A, B);
 }
 
-
-TArray<UBandBoundingBox *> UBandBlueprintLibrary::NMS(TArray<UBandBoundingBox *> Boxes, const float IoU_Threshold) 
+TArray<UBandBoundingBox*> UBandBlueprintLibrary::NMS(TArray<UBandBoundingBox*> Boxes, const float IoU_Threshold)
 {
 	TArray<UBandBoundingBox*> NMSBoxes;
 	TArray<UBandBoundingBox*> PrevBoxes = TArray<UBandBoundingBox*>(Boxes);
 
-	while (PrevBoxes.Num() > 0) {
+	while (PrevBoxes.Num() > 0)
+	{
 		PrevBoxes.Sort([](const UBandBoundingBox& Box1, const UBandBoundingBox& Box2) {
 			return Box1.Confidence < Box2.Confidence;
-			});
+		});
 		TArray<UBandBoundingBox*> CurrBoxes = TArray<UBandBoundingBox*>(PrevBoxes);
 		UBandBoundingBox* Max = CurrBoxes[0];
 		NMSBoxes.Push(Max);
 		PrevBoxes.Empty();
 
-		for (int Index = 1; Index < CurrBoxes.Num(); Index++) {
+		for (int Index = 1; Index < CurrBoxes.Num(); Index++)
+		{
 			UBandBoundingBox* Detection = CurrBoxes[Index];
-			if (BoxIou(Max->Position, Detection->Position) < IoU_Threshold) {
+			if (BoxIou(Max->Position, Detection->Position) < IoU_Threshold)
+			{
 				PrevBoxes.Push(Detection);
 			}
 		}

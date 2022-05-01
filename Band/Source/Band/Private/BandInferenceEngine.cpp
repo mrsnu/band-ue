@@ -1,5 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "BandInferenceEngine.h"
 #include "Band.h"
@@ -56,14 +55,14 @@ void ABandInferenceEngine::BeginPlay()
 		const int Height = InputTensors[0]->Dim(2);
 
 		UE_LOG(LogBand, Log, TEXT("Start camera desired size %d x %d"), Width, Height);
-		
+
 		CameraComponent->StartCamera(Width, Height);
 	}
 	else
 	{
 		UE_LOG(LogBand, Error, TEXT("Failed to start inference engine"));
 	}
-	
+
 	Super::BeginPlay();
 }
 
@@ -78,7 +77,7 @@ void ABandInferenceEngine::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	FCoreDelegates::OnEndFrame.Remove(OnEndFrameHandle);
 	FCoreDelegates::OnBeginFrameRT.Remove(OnBeginFrameRTHandle);
 	FCoreDelegates::OnEndFrameRT.Remove(OnEndFrameRTHandle);
-	
+
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -92,13 +91,14 @@ void ABandInferenceEngine::OnFrameAvailable(const UAndroidCameraFrame* CameraFra
 		BeginCameraFrames.push(FPlatformTime::Cycles64());
 	}
 	// Temporal task: UI Update for camera feed
-	AsyncTask(ENamedThreads::GameThread, [&]()
-	{
+	AsyncTask(ENamedThreads::GameThread, [CameraFrame, this]() {
 		UE_SCOPED_BANDTIMER(UpdateWidget);
 		auto Texture2D = CameraFrame->GetTexture2D();
 		// Update Widget
 		auto ImageWidget = Cast<UImage>(UIWidget->GetWidgetFromName("CameraImage"));
-		ImageWidget->SetBrushFromTexture(Texture2D, true);{}
+		ImageWidget->SetBrushFromTexture(Texture2D, true);
+		{
+		}
 	});
 	{
 		UE_SCOPED_BANDTIMER(InputPreprocess);
@@ -140,7 +140,7 @@ void ABandInferenceEngine::OnEndFrame()
 		AsyncTask(ENamedThreads::GameThread, [&, FrameTime]() {
 			MainTextBlock->SetText(FText::FromString(FString::Printf(TEXT("Main thread %f ms"), FrameTime)));
 		});
-		
+
 		std::lock_guard<std::mutex> Lock(CameraMutex);
 		if (RequiresCameraReport && BeginCameraFrames.size())
 		{

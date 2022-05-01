@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "BandBoundingBox.h"
 #include "GenericPlatform/GenericPlatformMath.h"
 
-void UBandBoundingBox::InitBandBoundingBox(float Cf, float Left, float Bottom, float Right, float Top) {
+void UBandBoundingBox::InitBandBoundingBox(float Cf, float Left, float Bottom, float Right, float Top)
+{
 	Confidence = Cf;
 	Position.Left = Left;
 	Position.Bottom = Bottom;
@@ -12,12 +12,14 @@ void UBandBoundingBox::InitBandBoundingBox(float Cf, float Left, float Bottom, f
 	Position.Top = Top;
 }
 
-void UBandBoundingBox::PrintBox() {
+void UBandBoundingBox::PrintBox()
+{
 	UE_LOG(LogBand, Log, TEXT("UBandBoundingBox: %f - (%f, %f, %f, %f)"), Confidence,
 		Position.Left, Position.Right, Position.Top, Position.Bottom);
 }
 
-void UBandBoundingBox::ParseRectF(const int ImageHeight, const int ImageWidth, float &PosX, float &PosY, float &SizeX, float &SizeY) {
+void UBandBoundingBox::ParseRectF(const int ImageHeight, const int ImageWidth, float& PosX, float& PosY, float& SizeX, float& SizeY)
+{
 	float Left = Position.Left;
 	float Right = Position.Right;
 	float Top = Position.Top;
@@ -29,10 +31,12 @@ void UBandBoundingBox::ParseRectF(const int ImageHeight, const int ImageWidth, f
 	PosX = Left * ImageWidth;
 	PosY = Top * ImageHeight;
 
-	if (SizeX < 0) { // Shift PosX to the left by SizeX
+	if (SizeX < 0)
+	{ // Shift PosX to the left by SizeX
 		PosX += SizeX;
 	}
-	if (SizeY < 0) { // Shift PoxY upwards by SizeY
+	if (SizeY < 0)
+	{ // Shift PoxY upwards by SizeY
 		PosY += SizeY;
 	}
 
