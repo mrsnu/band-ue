@@ -6,11 +6,8 @@
 #include "Modules/ModuleManager.h"
 #include "BandLibrary.h"
 #include "BandEnum.h"
+#include "BandInterpreter.h"
 
-namespace Band
-{
-	struct TfLiteInterpreter;
-}
 struct TfLiteTensor;
 class UBandModel;
 class UBandTensor;
@@ -32,7 +29,7 @@ public:
 	/* Returns singleton object (Note: avoid calling this in shutdown phase) */
 	static FBandModule& Get();
 
-	bool InitializeInterpreter(FString ConfigPath);
+	UBandInterpreter* GetInterpreter();
 
 	/* Inpterpreter interfaces */
 	FString GetVersion();
@@ -45,17 +42,20 @@ public:
 	int32 InvokeAsync(UBandModel* Model, TArray<UBandTensor*> InputTensors);
 	EBandStatus Wait(int32 JobHandle, TArray<UBandTensor*> OutputTensors);
 
-	/* Helper functions for UBandModel */
-	Band::TfLiteInterpreter* GetInterpreter();
+	// Registers model using given asset
+	// Returns model handle (-1 : invalid)
+	int32 RegisterModel(UBandModel* Model) const;
 
 private:
-	TArray<TfLiteTensor*> TensorsFromTArray(TArray<UBandTensor*> Tensors);
+	bool InitializeInterpreter(FString ConfigPath);
 	bool LoadDllFunction(FString LibraryPath);
 	// Callback function for TfLiteErrorReporter
 	static void ReportError(void* UserData, const char* Format, va_list Args);
-	static void ReportError(void *user_data, const char *format, va_list args);
+	void OnEndInvokeInternal(int JobId, TfLiteStatus Status) const;
+	
+	TArray<TfLiteTensor*> TensorsFromTArray(TArray<UBandTensor*> Tensors);
 
-	Band::TfLiteInterpreter* Interpreter = nullptr;
+	UBandInterpreter* Interpreter = nullptr;
 	void* LibraryHandle = nullptr;
 	bool IsDllLoaded = false;
 };

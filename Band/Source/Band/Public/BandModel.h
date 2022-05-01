@@ -20,7 +20,9 @@ class BAND_API UBandModel : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	const int32 GetModelHandle();
+	const int32 GetHandle();
+	const TArray<uint8>& GetBinary() const;
+	
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	bool IsRegistered() const;
 	UFUNCTION(BlueprintCallable, Category = "Band")
@@ -51,6 +53,7 @@ private:
 	int32 ModelHandle = -1;
 
 	std::mutex RegisterMutex;
+	// TODO(dostos): replace this with (Handle != -1)
 	UPROPERTY(Transient)
 	bool Registered = false;
 

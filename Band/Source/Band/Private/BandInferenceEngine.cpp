@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "BandInferenceEngine.h"
 #include "Band.h"
@@ -83,6 +83,11 @@ void ABandInferenceEngine::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void ABandInferenceEngine::OnFrameAvailable(const UAndroidCameraFrame* CameraFrame)
 {
+	if (!CameraFrame)
+	{
+		UE_LOG(LogBand, Display, TEXT("OnFrameAvailable on null CameraFrame"));
+		return;
+	}
 	UE_SCOPED_BANDTIMER(OnFrameAvailable);
 	// Assumption: FIFO
 	{

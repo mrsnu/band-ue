@@ -48,6 +48,3 @@ namespace BandEnum
 	size_t TensorTypeBytes(const EBandTensorType& Type);
 	EBandStatus ToBandStatus(TfLiteStatus Status);
 } // namespace BandEnum
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnInvokeEndDynamic, int, JobId, EBandStatus, InvokeStatus);
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnInvokeEnd, int, EBandStatus);

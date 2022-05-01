@@ -48,4 +48,9 @@ namespace BandEnum
 		}
 		return Size;
 	}
-}} // namespace BandEnum
+
+	EBandStatus ToBandStatus(TfLiteStatus Status)
+	{
+		return static_cast<EBandStatus>(Status);
+	}
+} // namespace BandEnum

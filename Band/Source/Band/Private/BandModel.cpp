@@ -7,7 +7,7 @@ bool UBandModel::IsRegistered() const
 	return Registered;
 }
 
-const int32 UBandModel::GetModelHandle()
+const int32 UBandModel::GetHandle()
 {
 	// Delay-register model
 	// TODO(dostos): figure out how to register
@@ -19,14 +19,17 @@ const int32 UBandModel::GetModelHandle()
 	return ModelHandle;
 }
 
+const TArray<uint8>& UBandModel::GetBinary() const
+{
+	return ModelBinary;
+}
+
 void UBandModel::RegisterModel()
 {
 	std::unique_lock<std::mutex> RegisterLock(RegisterMutex);
-	if (ModelBinary.Num() > 0 && !Registered)
+	ModelHandle = FBandModule::Get().RegisterModel(this);
+	if (ModelHandle != -1)
 	{
-		Band::TfLiteModel* TfLiteModel = Band::TfLiteModelCreate(ModelBinary.GetData(), ModelBinary.Num());
-		ModelHandle = Band::TfLiteInterpreterRegisterModel(FBandModule::Get().GetInterpreter(), TfLiteModel);
-		Band::TfLiteModelDelete(TfLiteModel);
 		Registered = true;
 	}
 }

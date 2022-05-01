@@ -128,6 +128,20 @@ void UBandTensor::ArgMax(int32& Index, float& Value)
 void UBandTensor::Initialize(TfLiteTensor* NewTensorHandle)
 {
 	TensorHandle = NewTensorHandle;
+	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+	FString DimensionString;
+	for (int32 i = 0; i < NumDims(); i++)
+	{
+		DimensionString += FString::FromInt(Dim(i));
+		if (i < NumDims() - 1)
+		{
+			DimensionString += "x";
+		}
+	}
+	UE_LOG(LogBand, Log, TEXT("Allocate new Tensor dimension(%s) name(%s) type(%s)"),
+		*DimensionString,
+		*Name(),
+		*EnumPtr->GetNameStringByValue(static_cast<int64>(Type())));
 
 	RGBBuffer = new uint8[NumElements()];
 }

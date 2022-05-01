@@ -63,7 +63,7 @@ void FBandModule::ShutdownModule()
 
 	if (Interpreter != nullptr)
 	{
-		TfLiteInterpreterDelete(Interpreter);
+		TfLiteInterpreterDelete(*Interpreter);
 		Interpreter = nullptr;
 	}
 
@@ -76,6 +76,11 @@ void FBandModule::ShutdownModule()
 FBandModule& FBandModule::Get()
 {
 	return *reinterpret_cast<FBandModule*>(FModuleManager::Get().GetModule("Band"));
+}
+
+UBandInterpreter* FBandModule::GetInterpreter()
+{
+	return Interpreter;
 }
 
 bool FBandModule::InitializeInterpreter(FString ConfigPath)
@@ -93,7 +98,14 @@ bool FBandModule::InitializeInterpreter(FString ConfigPath)
 	TfLiteInterpreterOptions* InterpreterOptions =
 		TfLiteInterpreterOptionsCreate();
 	TfLiteInterpreterOptionsSetErrorReporter(InterpreterOptions,
-	                                         FBandModule::ReportError, this);
+		FBandModule::ReportError, this);
+	TfLiteInterpreterOptionsSetOnInvokeEnd(
+		InterpreterOptions, [](void* UserData, int JobId, TfLiteStatus Status) {
+			FBandModule* BandModule = static_cast<FBandModule*>(UserData);
+			BandModule->OnEndInvokeInternal(JobId, Status);
+		},
+		this);
+
 	TfLiteStatus ConfigStatus = TfLiteStatus::kTfLiteError;
 
 	if (FPaths::FileExists(ConfigPath))
@@ -113,7 +125,16 @@ bool FBandModule::InitializeInterpreter(FString ConfigPath)
 
 	if (ConfigStatus == TfLiteStatus::kTfLiteOk)
 	{
-		Interpreter = TfLiteInterpreterCreate(InterpreterOptions);
+		Band::TfLiteInterpreter* Handle = TfLiteInterpreterCreate(InterpreterOptions);
+		if (Handle)
+		{
+			Interpreter = NewObject<UBandInterpreter>();
+			Interpreter->Initialize(Handle);
+		}
+		else
+		{
+			UE_LOG(LogBand, Error, TEXT("Failed to create interpreter"));
+		}
 	}
 
 	return Interpreter != nullptr;
@@ -126,25 +147,25 @@ FString FBandModule::GetVersion()
 
 int32 FBandModule::GetInputTensorCount(UBandModel* Model)
 {
-	return TfLiteInterpreterGetInputTensorCount(Interpreter, Model->GetModelHandle());
+	return TfLiteInterpreterGetInputTensorCount(*Interpreter, Model->GetHandle());
 }
 
 int32 FBandModule::GetOutputTensorCount(UBandModel* Model)
 {
-	return TfLiteInterpreterGetOutputTensorCount(Interpreter, Model->GetModelHandle());
+	return TfLiteInterpreterGetOutputTensorCount(*Interpreter, Model->GetHandle());
 }
 
 UBandTensor* FBandModule::AllocateInputTensor(UBandModel* Model, int32 InputIndex)
 {
 	UBandTensor* Tensor = NewObject<UBandTensor>();
-	Tensor->Initialize(TfLiteInterpreterAllocateInputTensor(Interpreter, Model->GetModelHandle(), InputIndex));
+	Tensor->Initialize(TfLiteInterpreterAllocateInputTensor(*Interpreter, Model->GetHandle(), InputIndex));
 	return Tensor;
 }
 
 UBandTensor* FBandModule::AllocateOutputTensor(UBandModel* Model, int32 OutputIndex)
 {
 	UBandTensor* Tensor = NewObject<UBandTensor>();
-	Tensor->Initialize(TfLiteInterpreterAllocateOutputTensor(Interpreter, Model->GetModelHandle(), OutputIndex));
+	Tensor->Initialize(TfLiteInterpreterAllocateOutputTensor(*Interpreter, Model->GetHandle(), OutputIndex));
 	return Tensor;
 }
 
@@ -162,22 +183,29 @@ TArray<TfLiteTensor*> FBandModule::TensorsFromTArray(TArray<UBandTensor*> Tensor
 
 void FBandModule::InvokeSync(UBandModel* Model, TArray<UBandTensor*> InputTensors, TArray<UBandTensor*> OutputTensors)
 {
-	TfLiteInterpreterInvokeSync(Interpreter, Model->GetModelHandle(), TensorsFromTArray(InputTensors).GetData(), TensorsFromTArray(OutputTensors).GetData());
+	TfLiteInterpreterInvokeSync(*Interpreter, Model->GetHandle(), TensorsFromTArray(InputTensors).GetData(), TensorsFromTArray(OutputTensors).GetData());
 }
 
 int32 FBandModule::InvokeAsync(UBandModel* Model, TArray<UBandTensor*> InputTensors)
 {
-	return TfLiteInterpreterInvokeAsync(Interpreter, Model->GetModelHandle(), TensorsFromTArray(InputTensors).GetData());
+	return TfLiteInterpreterInvokeAsync(*Interpreter, Model->GetHandle(), TensorsFromTArray(InputTensors).GetData());
 }
 
 EBandStatus FBandModule::Wait(int32 JobHandle, TArray<UBandTensor*> OutputTensors)
 {
-	return EBandStatus(TfLiteInterpreterWait(Interpreter, JobHandle, TensorsFromTArray(OutputTensors).GetData()));
+	return EBandStatus(TfLiteInterpreterWait(*Interpreter, JobHandle, TensorsFromTArray(OutputTensors).GetData()));
 }
 
-Band::TfLiteInterpreter* FBandModule::GetInterpreter()
+int32 FBandModule::RegisterModel(UBandModel* Model) const
 {
-	return Interpreter;
+	int32 Handle = -1;
+	if (Model->GetBinary().Num() && !Model->IsRegistered())
+	{
+		Band::TfLiteModel* TfLiteModel = Band::TfLiteModelCreate(Model->GetBinary().GetData(), Model->GetBinary().Num());
+		Handle = Band::TfLiteInterpreterRegisterModel(*Interpreter, TfLiteModel);
+		Band::TfLiteModelDelete(TfLiteModel);
+	}
+	return Handle;
 }
 
 #define LoadFunction(DllHandle, Function)                                                                          \
@@ -204,6 +232,7 @@ bool FBandModule::LoadDllFunction(FString LibraryPath)
 	LoadFunction(LibraryHandle, TfLiteModelDelete);
 	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsCreate);
 	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsDelete);
+	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsSetOnInvokeEnd);
 	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsSetConfigPath);
 	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsSetConfigFile);
 	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsSetErrorReporter);
@@ -249,6 +278,17 @@ void FBandModule::ReportError(void* UserData, const char* Format, va_list Args)
 	{
 		UE_LOG(LogBand, Display, TEXT("%s"), *LogMessage);
 	}
+}
+
+void FBandModule::OnEndInvokeInternal(int JobId, TfLiteStatus Status) const
+{
+	if (Interpreter)
+	{
+		AsyncTask(ENamedThreads::GameThread, [&]() {
+			Interpreter->OnEndInvokeDynamic.Broadcast(JobId, BandEnum::ToBandStatus(Status));
+		});
+		Interpreter->OnEndInvoke.Broadcast(JobId, BandEnum::ToBandStatus(Status));
+	}								
 }
 
 #undef LOCTEXT_NAMESPACE

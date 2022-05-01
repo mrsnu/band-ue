@@ -127,6 +127,12 @@ TFL_CAPI_EXPORT extern void TfLiteInterpreterOptionsSetErrorReporter(
     void (*reporter)(void* user_data, const char* format, va_list args),
     void* user_data);
 
+// Sets an on end invoke callback for interpreter execution.
+TFL_CAPI_EXPORT extern void TfLiteInterpreterOptionsSetOnInvokeEnd(
+    TfLiteInterpreterOptions* options,
+    void (*on_end_invoke)(void* user_data, int job_id, TfLiteStatus status),
+    void* user_data);
+
 // Set config options from file path.
 TFL_CAPI_EXPORT extern TfLiteStatus TfLiteInterpreterOptionsSetConfigPath(
     TfLiteInterpreterOptions* options,
@@ -141,12 +147,8 @@ TFL_CAPI_EXPORT extern TfLiteStatus TfLiteInterpreterOptionsSetConfigFile(
 // TfLiteInterpreter provides inference from a provided model.
 typedef struct TfLiteInterpreter TfLiteInterpreter;
 
-// Returns a new interpreter using the provided model and options, or null on
-// failure.
-//
-// * `model` must be a valid model instance. The caller retains ownership of the
-//   object, and can destroy it immediately after creating the interpreter; the
-//   interpreter will maintain its own reference to the underlying model data.
+// Returns a new interpreter using the options, or null on failure.
+// 
 // * `optional_options` may be null. The caller retains ownership of the object,
 //   and can safely destroy it immediately after creating the interpreter.
 //
@@ -166,7 +168,7 @@ TFL_CAPI_EXPORT extern void TfLiteInterpreterInvokeSync(
 TFL_CAPI_EXPORT extern int TfLiteInterpreterInvokeAsync(
     TfLiteInterpreter* interpreter, int32_t model_id, TfLiteTensor** inputs);
 
-TFL_CAPI_EXPORT extern TfLiteStatus TFLiteInterpreterWait(TfLiteInterpreter* interpreter, int job_id, TfLiteTensor** outputs);
+TFL_CAPI_EXPORT extern TfLiteStatus TfLiteInterpreterWait(TfLiteInterpreter* interpreter, int job_id, TfLiteTensor** outputs);
 
 // Returns the number of input tensors associated with the model.
 TFL_CAPI_EXPORT extern int32_t TfLiteInterpreterGetInputTensorCount(
