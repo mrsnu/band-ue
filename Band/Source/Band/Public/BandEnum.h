@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common.h"
 #include "Modules/ModuleManager.h"
 #include "BandEnum.generated.h"
 
@@ -23,11 +24,6 @@ enum class EBandTensorType : uint8
 	Float64 UMETA(DisplayName = "Float64"),
 };
 
-namespace BandEnum
-{
-	size_t TensorTypeBytes(const EBandTensorType& Type);
-}
-
 /*
 	UEnum for TfLiteStatus in common.h
 */
@@ -38,3 +34,20 @@ enum class EBandStatus : uint8
 	Error UMETA(DisplayName = "Error"),
 	DelegateError UMETA(DisplayName = "DelegateError"),
 };
+
+UENUM(BlueprintType)
+enum class EBandDetector : uint8
+{
+	RetinaFace UMETA(DisplayName = "RetinaFace"),
+	SSD UMETA(DisplayName = "SSD"),
+	Unknown UMETA(DisplayName = "Unknown")
+};
+
+namespace BandEnum
+{
+	size_t TensorTypeBytes(const EBandTensorType& Type);
+	EBandStatus ToBandStatus(TfLiteStatus Status);
+} // namespace BandEnum
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnInvokeEndDynamic, int, JobId, EBandStatus, InvokeStatus);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnInvokeEnd, int, EBandStatus);

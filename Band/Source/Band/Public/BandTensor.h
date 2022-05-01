@@ -32,8 +32,14 @@ public:
 	FString Name();
 	uint8* Data();
 
+	template <typename T>
+	TArray<T> GetBuffer()
+	{
+		return TArray<T>(reinterpret_cast<T*>(Data()), ByteSize() / sizeof(T));
+	}
+	
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	TArray<uint8> GetRawBuffer();
+	TArray<uint8> GetUInt8Buffer();
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	TArray<float> GetF32Buffer();
 

@@ -172,7 +172,7 @@ FString UBandTensor::Name()
 	return FString(Band::TfLiteTensorName(TensorHandle));
 }
 
-TArray<uint8> UBandTensor::GetRawBuffer()
+TArray<uint8> UBandTensor::GetUInt8Buffer()
 {
 	return { Data(), ByteSize() };
 }
