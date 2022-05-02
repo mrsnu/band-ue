@@ -18,12 +18,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	static FString GetVersion();
 	
-	UFUNCTION(BlueprintCallable, Category = "Band")
-	static UBandInterpreter* GetInterpreter();
-
-	UFUNCTION(BlueprintCallable, Category = "Band")
-	static EBandStatus Wait(int32 JobHandle, UPARAM(ref) TArray<UBandTensor *> OutputTensors);
-	
 	UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
 	static TArray<UBandBoundingBox*> GetDetectedBoxes(UPARAM(ref) TArray<UBandTensor *> OutputTensors, EBandDetector DetectorType, UBandLabel* Label = nullptr);
 

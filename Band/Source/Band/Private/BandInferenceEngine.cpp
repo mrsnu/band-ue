@@ -23,6 +23,7 @@ ABandInferenceEngine::ABandInferenceEngine()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+	Interpreter = NewObject<ABandInterpreter>();
 	CameraComponent = CreateDefaultSubobject<UAndroidCameraComponent>(TEXT("CameraComponent"));
 }
 
@@ -48,8 +49,8 @@ void ABandInferenceEngine::BeginPlay()
 		OnEndFrameRTHandle = FCoreDelegates::OnEndFrameRT.AddUObject(this, &ABandInferenceEngine::OnEndFrameRT);
 
 		// Allocate tensors
-		InputTensors.Add(Model->AllocateInputTensor(0));
-		OutputTensors.Add(Model->AllocateOutputTensor(0));
+		InputTensors.Add(Interpreter->AllocateInputTensor(Model, 0));
+		OutputTensors.Add(Interpreter->AllocateOutputTensor(Model, 0));
 
 		const int Width = InputTensors[0]->Dim(1);
 		const int Height = InputTensors[0]->Dim(2);
@@ -112,7 +113,7 @@ void ABandInferenceEngine::OnFrameAvailable(const UAndroidCameraFrame* CameraFra
 
 	{
 		UE_SCOPED_BANDTIMER(Inference);
-		Model->InvokeSync(InputTensors, OutputTensors);
+		Interpreter->InvokeSync(Model, InputTensors, OutputTensors);
 	}
 
 	int ClassIndex = -1;

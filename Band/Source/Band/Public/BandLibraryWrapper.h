@@ -109,37 +109,4 @@ namespace Band
 		TfLiteModel* model, const char* name,
 		const TfLiteRegistration* registration, int32_t min_version,
 		int32_t max_version);
-	/*
-		global handles
-	*/
-	pTfLiteVersion TfLiteVersion = nullptr;
-	pTfLiteModelCreate TfLiteModelCreate = nullptr;
-	pTfLiteModelCreateFromFile TfLiteModelCreateFromFile = nullptr;
-	pTfLiteModelDelete TfLiteModelDelete = nullptr;
-	pTfLiteInterpreterOptionsCreate TfLiteInterpreterOptionsCreate = nullptr;
-	pTfLiteInterpreterOptionsDelete TfLiteInterpreterOptionsDelete = nullptr;
-	pTfLiteInterpreterOptionsSetOnInvokeEnd TfLiteInterpreterOptionsSetOnInvokeEnd = nullptr;
-	pTfLiteInterpreterOptionsSetConfigPath TfLiteInterpreterOptionsSetConfigPath = nullptr;
-	pTfLiteInterpreterOptionsSetConfigFile TfLiteInterpreterOptionsSetConfigFile = nullptr;
-	pTfLiteInterpreterOptionsSetErrorReporter TfLiteInterpreterOptionsSetErrorReporter = nullptr;
-	pTfLiteInterpreterCreate TfLiteInterpreterCreate = nullptr;
-	pTfLiteInterpreterDelete TfLiteInterpreterDelete = nullptr;
-	pTfLiteInterpreterRegisterModel TfLiteInterpreterRegisterModel = nullptr;
-	pTfLiteInterpreterInvokeSync TfLiteInterpreterInvokeSync = nullptr;
-	pTfLiteInterpreterInvokeAsync TfLiteInterpreterInvokeAsync = nullptr;
-	pTfLiteInterpreterWait TfLiteInterpreterWait = nullptr;
-	pTfLiteInterpreterGetInputTensorCount TfLiteInterpreterGetInputTensorCount = nullptr;
-	pTfLiteInterpreterGetOutputTensorCount TfLiteInterpreterGetOutputTensorCount = nullptr;
-	pTfLiteInterpreterAllocateInputTensor TfLiteInterpreterAllocateInputTensor = nullptr;
-	pTfLiteInterpreterAllocateOutputTensor TfLiteInterpreterAllocateOutputTensor = nullptr;
-	pTfLiteTensorDeallocate TfLiteTensorDeallocate = nullptr;
-	pTfLiteTensorType TfLiteTensorType = nullptr;
-	pTfLiteTensorNumDims TfLiteTensorNumDims = nullptr;
-	pTfLiteTensorDim TfLiteTensorDim = nullptr;
-	pTfLiteTensorByteSize TfLiteTensorByteSize = nullptr;
-	pTfLiteTensorData TfLiteTensorData = nullptr;
-	pTfLiteTensorName TfLiteTensorName = nullptr;
-	pTfLiteTensorQuantizationParams TfLiteTensorQuantizationParams = nullptr;
-	pTfLiteTensorCopyFromBuffer TfLiteTensorCopyFromBuffer = nullptr;
-	pTfLiteTensorCopyToBuffer TfLiteTensorCopyToBuffer = nullptr;
 } // namespace Band

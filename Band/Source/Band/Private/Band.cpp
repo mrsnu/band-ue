@@ -61,10 +61,10 @@ void FBandModule::ShutdownModule()
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
 
-	if (Interpreter != nullptr)
+	if (InterpreterHandle != nullptr)
 	{
-		TfLiteInterpreterDelete(*Interpreter);
-		Interpreter = nullptr;
+		TfLiteInterpreterDelete(InterpreterHandle);
+		InterpreterHandle = nullptr;
 	}
 
 	// Free the dll handle
@@ -76,11 +76,6 @@ void FBandModule::ShutdownModule()
 FBandModule& FBandModule::Get()
 {
 	return *reinterpret_cast<FBandModule*>(FModuleManager::Get().GetModule("Band"));
-}
-
-UBandInterpreter* FBandModule::GetInterpreter()
-{
-	return Interpreter;
 }
 
 bool FBandModule::InitializeInterpreter(FString ConfigPath)
@@ -100,7 +95,7 @@ bool FBandModule::InitializeInterpreter(FString ConfigPath)
 	TfLiteInterpreterOptionsSetErrorReporter(InterpreterOptions,
 		FBandModule::ReportError, this);
 	TfLiteInterpreterOptionsSetOnInvokeEnd(
-		InterpreterOptions, [](void* UserData, int JobId, TfLiteStatus Status) {
+		InterpreterOptions, [](void* UserData, int32 JobId, TfLiteStatus Status) {
 			FBandModule* BandModule = static_cast<FBandModule*>(UserData);
 			BandModule->OnEndInvokeInternal(JobId, Status);
 		},
@@ -125,19 +120,10 @@ bool FBandModule::InitializeInterpreter(FString ConfigPath)
 
 	if (ConfigStatus == TfLiteStatus::kTfLiteOk)
 	{
-		Band::TfLiteInterpreter* Handle = TfLiteInterpreterCreate(InterpreterOptions);
-		if (Handle)
-		{
-			Interpreter = NewObject<UBandInterpreter>();
-			Interpreter->Initialize(Handle);
-		}
-		else
-		{
-			UE_LOG(LogBand, Error, TEXT("Failed to create interpreter"));
-		}
+		InterpreterHandle = TfLiteInterpreterCreate(InterpreterOptions);
 	}
 
-	return Interpreter != nullptr;
+	return InterpreterHandle != nullptr;
 }
 
 FString FBandModule::GetVersion()
@@ -145,67 +131,9 @@ FString FBandModule::GetVersion()
 	return TfLiteVersion();
 }
 
-int32 FBandModule::GetInputTensorCount(UBandModel* Model)
+Band::TfLiteInterpreter* FBandModule::GetInterpreterHandle() const
 {
-	return TfLiteInterpreterGetInputTensorCount(*Interpreter, Model->GetHandle());
-}
-
-int32 FBandModule::GetOutputTensorCount(UBandModel* Model)
-{
-	return TfLiteInterpreterGetOutputTensorCount(*Interpreter, Model->GetHandle());
-}
-
-UBandTensor* FBandModule::AllocateInputTensor(UBandModel* Model, int32 InputIndex)
-{
-	UBandTensor* Tensor = NewObject<UBandTensor>();
-	Tensor->Initialize(TfLiteInterpreterAllocateInputTensor(*Interpreter, Model->GetHandle(), InputIndex));
-	return Tensor;
-}
-
-UBandTensor* FBandModule::AllocateOutputTensor(UBandModel* Model, int32 OutputIndex)
-{
-	UBandTensor* Tensor = NewObject<UBandTensor>();
-	Tensor->Initialize(TfLiteInterpreterAllocateOutputTensor(*Interpreter, Model->GetHandle(), OutputIndex));
-	return Tensor;
-}
-
-TArray<TfLiteTensor*> FBandModule::TensorsFromTArray(TArray<UBandTensor*> Tensors)
-{
-	TArray<TfLiteTensor*> OutTensors;
-
-	for (int i = 0; i < Tensors.Num(); i++)
-	{
-		OutTensors.Push(Tensors[i]->TensorHandle);
-	}
-
-	return OutTensors;
-}
-
-void FBandModule::InvokeSync(UBandModel* Model, TArray<UBandTensor*> InputTensors, TArray<UBandTensor*> OutputTensors)
-{
-	TfLiteInterpreterInvokeSync(*Interpreter, Model->GetHandle(), TensorsFromTArray(InputTensors).GetData(), TensorsFromTArray(OutputTensors).GetData());
-}
-
-int32 FBandModule::InvokeAsync(UBandModel* Model, TArray<UBandTensor*> InputTensors)
-{
-	return TfLiteInterpreterInvokeAsync(*Interpreter, Model->GetHandle(), TensorsFromTArray(InputTensors).GetData());
-}
-
-EBandStatus FBandModule::Wait(int32 JobHandle, TArray<UBandTensor*> OutputTensors)
-{
-	return EBandStatus(TfLiteInterpreterWait(*Interpreter, JobHandle, TensorsFromTArray(OutputTensors).GetData()));
-}
-
-int32 FBandModule::RegisterModel(UBandModel* Model) const
-{
-	int32 Handle = -1;
-	if (Model->GetBinary().Num() && !Model->IsRegistered())
-	{
-		Band::TfLiteModel* TfLiteModel = Band::TfLiteModelCreate(Model->GetBinary().GetData(), Model->GetBinary().Num());
-		Handle = Band::TfLiteInterpreterRegisterModel(*Interpreter, TfLiteModel);
-		Band::TfLiteModelDelete(TfLiteModel);
-	}
-	return Handle;
+	return InterpreterHandle;
 }
 
 #define LoadFunction(DllHandle, Function)                                                                          \
@@ -262,17 +190,15 @@ bool FBandModule::LoadDllFunction(FString LibraryPath)
 
 void FBandModule::ReportError(void* UserData, const char* Format, va_list Args)
 {
-	FBandModule* BandModule = static_cast<FBandModule*>(UserData);
-
 	ANSICHAR LogMessage[256];
 	FCStringAnsi::GetVarArgs(LogMessage, UE_ARRAY_COUNT(LogMessage), Format, Args);
 
 	if (FModuleManager::Get().IsModuleLoaded("Band"))
 	{
-#if WITH_EDITOR
+		#if WITH_EDITOR
 		// Open dialog (pre editor load)
 		FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(LogMessage));
-#endif
+		#endif
 	}
 	else
 	{
@@ -280,15 +206,25 @@ void FBandModule::ReportError(void* UserData, const char* Format, va_list Args)
 	}
 }
 
-void FBandModule::OnEndInvokeInternal(int JobId, TfLiteStatus Status) const
+void FBandModule::OnEndInvokeInternal(int32 JobId, TfLiteStatus Status) const
 {
-	if (Interpreter)
+	// Propagate callback to actor for delegation
+	if (InterpreterActor.Get())
 	{
-		AsyncTask(ENamedThreads::GameThread, [&]() {
-			Interpreter->OnEndInvokeDynamic.Broadcast(JobId, BandEnum::ToBandStatus(Status));
-		});
-		Interpreter->OnEndInvoke.Broadcast(JobId, BandEnum::ToBandStatus(Status));
-	}								
+		InterpreterActor->OnEndInvokeInternal(JobId, Status);
+	}
+}
+
+void FBandModule::RegisterInterpreterActor(ABandInterpreter* Interpreter)
+{
+	check(InterpreterActor == nullptr);
+	InterpreterActor = MakeWeakObjectPtr(Interpreter);
+}
+
+void FBandModule::UnregisterInterpreterActor(ABandInterpreter* Interpreter)
+{
+	check(InterpreterActor == Interpreter);
+	InterpreterActor = nullptr;
 }
 
 #undef LOCTEXT_NAMESPACE

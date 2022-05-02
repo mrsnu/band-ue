@@ -9,8 +9,6 @@
 #include "BandInterpreter.h"
 
 struct TfLiteTensor;
-class UBandModel;
-class UBandTensor;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogBand, Log, All);
 DECLARE_STATS_GROUP(TEXT("Band"), STATGROUP_Band, STATCAT_Advanced);
@@ -28,34 +26,59 @@ public:
 
 	/* Returns singleton object (Note: avoid calling this in shutdown phase) */
 	static FBandModule& Get();
-
-	UBandInterpreter* GetInterpreter();
-
-	/* Inpterpreter interfaces */
 	FString GetVersion();
-	int32 GetInputTensorCount(UBandModel* Model);
-	int32 GetOutputTensorCount(UBandModel* Model);
-	UBandTensor* AllocateInputTensor(UBandModel* Model, int32 InputIndex);
-	UBandTensor* AllocateOutputTensor(UBandModel* Model, int32 OutputIndex);
-
-	void InvokeSync(UBandModel* Model, TArray<UBandTensor*> InputTensors, TArray<UBandTensor*> OutputTensors);
-	int32 InvokeAsync(UBandModel* Model, TArray<UBandTensor*> InputTensors);
-	EBandStatus Wait(int32 JobHandle, TArray<UBandTensor*> OutputTensors);
-
-	// Registers model using given asset
-	// Returns model handle (-1 : invalid)
-	int32 RegisterModel(UBandModel* Model) const;
-
+	Band::TfLiteInterpreter* GetInterpreterHandle() const;
+	
 private:
 	bool InitializeInterpreter(FString ConfigPath);
 	bool LoadDllFunction(FString LibraryPath);
-	// Callback function for TfLiteErrorReporter
-	static void ReportError(void* UserData, const char* Format, va_list Args);
-	void OnEndInvokeInternal(int JobId, TfLiteStatus Status) const;
-	
-	TArray<TfLiteTensor*> TensorsFromTArray(TArray<UBandTensor*> Tensors);
 
-	UBandInterpreter* Interpreter = nullptr;
+	static void ReportError(void* UserData, const char* Format, va_list Args);
+	void OnEndInvokeInternal(int32 JobId, TfLiteStatus Status) const;
+
+	/* Reference to interpreter actor. Mainly for callback propagation */
+	void RegisterInterpreterActor(ABandInterpreter* Interpreter);
+	void UnregisterInterpreterActor(ABandInterpreter* Interpreter);
+	TWeakObjectPtr<ABandInterpreter> InterpreterActor = nullptr;
+	
+	Band::TfLiteInterpreter* InterpreterHandle = nullptr;
 	void* LibraryHandle = nullptr;
 	bool IsDllLoaded = false;
+
+	friend class UBandTensor;
+	friend class UBandModel;
+	friend class ABandInterpreter;
+	/*
+		DLL handles from Band Library
+	*/
+	Band::pTfLiteVersion TfLiteVersion = nullptr;
+	Band::pTfLiteModelCreate TfLiteModelCreate = nullptr;
+	Band::pTfLiteModelCreateFromFile TfLiteModelCreateFromFile = nullptr;
+	Band::pTfLiteModelDelete TfLiteModelDelete = nullptr;
+	Band::pTfLiteInterpreterOptionsCreate TfLiteInterpreterOptionsCreate = nullptr;
+	Band::pTfLiteInterpreterOptionsDelete TfLiteInterpreterOptionsDelete = nullptr;
+	Band::pTfLiteInterpreterOptionsSetOnInvokeEnd TfLiteInterpreterOptionsSetOnInvokeEnd = nullptr;
+	Band::pTfLiteInterpreterOptionsSetConfigPath TfLiteInterpreterOptionsSetConfigPath = nullptr;
+	Band::pTfLiteInterpreterOptionsSetConfigFile TfLiteInterpreterOptionsSetConfigFile = nullptr;
+	Band::pTfLiteInterpreterOptionsSetErrorReporter TfLiteInterpreterOptionsSetErrorReporter = nullptr;
+	Band::pTfLiteInterpreterCreate TfLiteInterpreterCreate = nullptr;
+	Band::pTfLiteInterpreterDelete TfLiteInterpreterDelete = nullptr;
+	Band::pTfLiteInterpreterRegisterModel TfLiteInterpreterRegisterModel = nullptr;
+	Band::pTfLiteInterpreterInvokeSync TfLiteInterpreterInvokeSync = nullptr;
+	Band::pTfLiteInterpreterInvokeAsync TfLiteInterpreterInvokeAsync = nullptr;
+	Band::pTfLiteInterpreterWait TfLiteInterpreterWait = nullptr;
+	Band::pTfLiteInterpreterGetInputTensorCount TfLiteInterpreterGetInputTensorCount = nullptr;
+	Band::pTfLiteInterpreterGetOutputTensorCount TfLiteInterpreterGetOutputTensorCount = nullptr;
+	Band::pTfLiteInterpreterAllocateInputTensor TfLiteInterpreterAllocateInputTensor = nullptr;
+	Band::pTfLiteInterpreterAllocateOutputTensor TfLiteInterpreterAllocateOutputTensor = nullptr;
+	Band::pTfLiteTensorDeallocate TfLiteTensorDeallocate = nullptr;
+	Band::pTfLiteTensorType TfLiteTensorType = nullptr;
+	Band::pTfLiteTensorNumDims TfLiteTensorNumDims = nullptr;
+	Band::pTfLiteTensorDim TfLiteTensorDim = nullptr;
+	Band::pTfLiteTensorByteSize TfLiteTensorByteSize = nullptr;
+	Band::pTfLiteTensorData TfLiteTensorData = nullptr;
+	Band::pTfLiteTensorName TfLiteTensorName = nullptr;
+	Band::pTfLiteTensorQuantizationParams TfLiteTensorQuantizationParams = nullptr;
+	Band::pTfLiteTensorCopyFromBuffer TfLiteTensorCopyFromBuffer = nullptr;
+	Band::pTfLiteTensorCopyToBuffer TfLiteTensorCopyToBuffer = nullptr;
 };

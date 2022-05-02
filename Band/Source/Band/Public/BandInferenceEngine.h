@@ -6,6 +6,7 @@
 #include <queue>
 
 #include "CoreMinimal.h"
+#include "BandInterpreter.h"
 #include "GameFramework/Actor.h"
 #include "BandInferenceEngine.generated.h"
 
@@ -41,11 +42,12 @@ public:
 	UBandModel* Model = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Band")
 	UBandLabel* Label = nullptr;
-	UAndroidCameraComponent* CameraComponent = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
 	TSubclassOf<class UUserWidget> UIWidgetReference;
 	
 	UUserWidget* UIWidget;
+	UAndroidCameraComponent* CameraComponent = nullptr;
+	ABandInterpreter* Interpreter = nullptr;
 
 	uint64 BeginFrame = 0;
 	uint64 BeginFrameRT = 0;

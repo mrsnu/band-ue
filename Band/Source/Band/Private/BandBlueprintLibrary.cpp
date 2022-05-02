@@ -14,16 +14,6 @@ FString UBandBlueprintLibrary::GetVersion()
 	return FBandModule::Get().GetVersion();
 }
 
-UBandInterpreter* UBandBlueprintLibrary::GetInterpreter()
-{
-	return FBandModule::Get().GetInterpreter();
-}
-
-EBandStatus UBandBlueprintLibrary::Wait(int32 JobHandle, UPARAM(ref) TArray<UBandTensor*> OutputTensors)
-{
-	return FBandModule::Get().Wait(JobHandle, OutputTensors);
-}
-
 /* BBox offsets: Offset of Left, Bottom, Right, Top (in this order) */
 template <typename T>
 TArray<UBandBoundingBox*> GetDetectedBoxesInternal(
@@ -43,13 +33,15 @@ TArray<UBandBoundingBox*> GetDetectedBoxesInternal(
 	const size_t BatchOffset = Tensors[DetectionTensorIndex]->Dim(0) == 1 ? 1 : 0;
 	const int32 NumBoxes = Tensors[DetectionTensorIndex]->Dim(BatchOffset);
 	const int32 LenBoxVector = Tensors[DetectionTensorIndex]->Dim(1 + BatchOffset);
+
+	const int32 NumTrueDims = Tensors[ConfidenceTensorIndex]->NumDims() - BatchOffset;
 	// Assumption: (1) x [NumBoxes] x [LenConfidenceVector] or (1) x [NumBoxes]
 	const TArray<T>& ConfidenceResults = Tensors[ConfidenceTensorIndex]->GetBuffer<T>();
-	const int32 LenConfidenceVector = Tensors[ConfidenceTensorIndex]->NumDims() > 2 ?
+	const int32 LenConfidenceVector = NumTrueDims >= 2 ?
 		Tensors[ConfidenceTensorIndex]->Dim(1 + BatchOffset) : 1;
 	// Assumption: (1) x [NumBoxes] x [LenConfidenceVector] or (1) x [NumBoxes]
 	const TArray<T>& ClassResults = Tensors[ClassTensorIndex]->GetBuffer<T>();
-	const int32 LenClassVector = Tensors[ClassTensorIndex]->NumDims() > 2 ?
+	const int32 LenClassVector = NumTrueDims >= 2 ?
 		Tensors[ClassTensorIndex]->Dim(1 + BatchOffset) : 1;
 
 	for (int32 BBoxOffset : BBoxOffsets)
@@ -113,7 +105,7 @@ TArray<UBandBoundingBox*> UBandBlueprintLibrary::GetDetectedBoxes(UPARAM(ref) TA
 	TArray<int32> BBoxOffsets = {0, 1, 2, 3};
 	size_t ConfidenceTensorIndex = 0;
 	size_t ConfidenceOffset = 15;
-	size_t ClassTensorIndex = -1;
+	size_t ClassTensorIndex = 0;
 	size_t ClassOffset = 0;
 	float ScoreThreshold = 0.2f;
 	

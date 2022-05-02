@@ -1,10 +1,12 @@
 #pragma once
 
 #include "Engine/Texture.h"
+#include "BandTensor.h"
 #include <cstdint>
 
 namespace BandTensorUtil
 {
+	TArray<TfLiteTensor*> TensorsFromTArray(TArray<UBandTensor*> Tensors);
 	template <typename T>
 	void BGRA8ToRGBArray(const uint8_t* Src, T* Dst, size_t NumElements, T Mean, T Std)
 	{
