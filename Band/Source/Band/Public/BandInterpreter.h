@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <unordered_map>
+
 #include "CoreMinimal.h"
 #include "BandEnum.h"
 #include "BandLibraryWrapper.h"
@@ -42,7 +44,7 @@ public:
 	int32 InvokeAsync(UPARAM(ref) UBandModel* Model, UPARAM(ref) TArray<UBandTensor*> InputTensors);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	EBandStatus Wait(int32 JobHandle, UPARAM(ref) TArray<UBandTensor*> OutputTensors);
+	EBandStatus Wait(int32 JobId, UPARAM(ref) TArray<UBandTensor*> OutputTensors);
 
 	UPROPERTY(BlueprintAssignable, Category = Band)
 	FOnEndInvokeDynamic OnEndInvokeDynamic;
@@ -55,5 +57,9 @@ private:
 	void OnEndInvokeInternal(int JobId, TfLiteStatus Status) const;
 	
 	Band::TfLiteInterpreter* GetHandle() const;
+
+	// <Job Id, Model Handle>
+	// Temporal solution for output tensor length validation
+	mutable std::unordered_map<int32, int32> JobToModel;
 	friend class FBandModule;
 };
