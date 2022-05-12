@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "BandEnum.h"
 #include "BandLibraryWrapper.h"
-#include "BandInterpreter.generated.h"
+#include "BandInterpreterComponent.generated.h"
 
 class UBandModel;
 class UBandTensor;
@@ -20,8 +20,8 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnEndInvoke, int32, EBandStatus);
  * Internally utilizes global interpreter handle that
  * FBandModule manages.
  */
-UCLASS(NotBlueprintable)
-class BAND_API ABandInterpreter : public AActor
+UCLASS(ClassGroup = (Band), NotBlueprintable, meta = (BlueprintSpawnableComponent))
+class BAND_API UBandInterpreterComponent : public UActorComponent
 {
 public:
 	GENERATED_BODY()

@@ -6,7 +6,7 @@
 #include <queue>
 
 #include "CoreMinimal.h"
-#include "BandInterpreter.h"
+#include "BandInterpreterComponent.h"
 #include "GameFramework/Actor.h"
 #include "BandInferenceEngine.generated.h"
 
@@ -47,7 +47,7 @@ public:
 	
 	UUserWidget* UIWidget;
 	UAndroidCameraComponent* CameraComponent = nullptr;
-	ABandInterpreter* Interpreter = nullptr;
+	UBandInterpreterComponent* Interpreter = nullptr;
 
 	uint64 BeginFrame = 0;
 	uint64 BeginFrameRT = 0;

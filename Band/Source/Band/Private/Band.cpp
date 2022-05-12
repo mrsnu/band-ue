@@ -209,22 +209,22 @@ void FBandModule::ReportError(void* UserData, const char* Format, va_list Args)
 void FBandModule::OnEndInvokeInternal(int32 JobId, TfLiteStatus Status) const
 {
 	// Propagate callback to actor for delegation
-	if (InterpreterActor.Get())
+	if (Interpreter.Get())
 	{
-		InterpreterActor->OnEndInvokeInternal(JobId, Status);
+		Interpreter->OnEndInvokeInternal(JobId, Status);
 	}
 }
 
-void FBandModule::RegisterInterpreterActor(ABandInterpreter* Interpreter)
+void FBandModule::RegisterInterpreter(UBandInterpreterComponent* InterpreterComponent)
 {
-	check(InterpreterActor == nullptr);
-	InterpreterActor = MakeWeakObjectPtr(Interpreter);
+	check(Interpreter == nullptr);
+	Interpreter = MakeWeakObjectPtr(InterpreterComponent);
 }
 
-void FBandModule::UnregisterInterpreterActor(ABandInterpreter* Interpreter)
+void FBandModule::UnregisterInterpreter(UBandInterpreterComponent* InterpreterComponent)
 {
-	check(InterpreterActor == Interpreter);
-	InterpreterActor = nullptr;
+	check(Interpreter == InterpreterComponent);
+	Interpreter = nullptr;
 }
 
 #undef LOCTEXT_NAMESPACE

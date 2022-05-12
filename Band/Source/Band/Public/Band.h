@@ -6,7 +6,7 @@
 #include "Modules/ModuleManager.h"
 #include "BandLibrary.h"
 #include "BandEnum.h"
-#include "BandInterpreter.h"
+#include "BandInterpreterComponent.h"
 
 struct TfLiteTensor;
 
@@ -36,10 +36,10 @@ private:
 	static void ReportError(void* UserData, const char* Format, va_list Args);
 	void OnEndInvokeInternal(int32 JobId, TfLiteStatus Status) const;
 
-	/* Reference to interpreter actor. Mainly for callback propagation */
-	void RegisterInterpreterActor(ABandInterpreter* Interpreter);
-	void UnregisterInterpreterActor(ABandInterpreter* Interpreter);
-	TWeakObjectPtr<ABandInterpreter> InterpreterActor = nullptr;
+	/* Reference to interpreter. Mainly for callback propagation */
+	void RegisterInterpreter(UBandInterpreterComponent* Interpreter);
+	void UnregisterInterpreter(UBandInterpreterComponent* Interpreter);
+	TWeakObjectPtr<UBandInterpreterComponent> Interpreter = nullptr;
 	
 	Band::TfLiteInterpreter* InterpreterHandle = nullptr;
 	void* LibraryHandle = nullptr;
@@ -47,7 +47,7 @@ private:
 
 	friend class UBandTensor;
 	friend class UBandModel;
-	friend class ABandInterpreter;
+	friend class UBandInterpreterComponent;
 	/*
 		DLL handles from Band Library
 	*/

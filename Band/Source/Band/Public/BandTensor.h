@@ -54,7 +54,7 @@ public:
 	TfLiteTensor* Handle() const;
 
 private:
-	friend class ABandInterpreter;
+	friend class UBandInterpreterComponent;
 
 	void Initialize(TfLiteTensor* TensorHandle);
 	virtual void BeginDestroy() override;
