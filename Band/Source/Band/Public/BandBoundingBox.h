@@ -6,8 +6,8 @@
 #include "Rect.h"
 #include "BandBoundingBox.generated.h"
 
-UCLASS(Blueprintable)
-class BAND_API UBandBoundingBox : public UObject
+USTRUCT(BlueprintType)
+struct BAND_API FBandBoundingBox
 {
 	GENERATED_BODY()
 
@@ -22,10 +22,4 @@ public:
 	FRect Position;
 
 	void InitBandBoundingBox(float Cf, float Left, float Bottom, float Right, float Top);
-
-	UFUNCTION(BlueprintCallable)
-	void PrintBox();
-
-	UFUNCTION(BlueprintCallable)
-	void ParseRectF(const int ImageHeight, const int ImageWidth, float& PosX, float& PosY, float& SizeX, float& SizeY);
 };

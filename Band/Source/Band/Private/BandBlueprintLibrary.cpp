@@ -4,10 +4,8 @@
 
 #include "Band.h"
 #include "BandModel.h"
-#include "BandLibraryWrapper.h"
 #include "BandLibrary.h"
 #include "Rect.h"
-#include "BandBoundingBox.h"
 
 FString UBandBlueprintLibrary::GetVersion()
 {
@@ -16,7 +14,7 @@ FString UBandBlueprintLibrary::GetVersion()
 
 /* BBox offsets: Offset of Left, Bottom, Right, Top (in this order) */
 template <typename T>
-TArray<UBandBoundingBox*> GetDetectedBoxesInternal(
+TArray<FBandBoundingBox> GetDetectedBoxesInternal(
 	TArray<UBandTensor*> Tensors,
 	const size_t DetectionTensorIndex,
 	TArray<int32> BBoxOffsets,
@@ -27,7 +25,7 @@ TArray<UBandBoundingBox*> GetDetectedBoxesInternal(
 	const UBandLabel* Label,
 	const float ScoreThreshold)
 {
-	TArray<UBandBoundingBox*> Boxes;
+	TArray<FBandBoundingBox> Boxes;
 	// Assumption: (1) x [NumBoxes] x [LenBoxVector]
 	const TArray<T>& DetectionResults = Tensors[DetectionTensorIndex]->GetBuffer<T>();
 	const size_t BatchOffset = Tensors[DetectionTensorIndex]->Dim(0) == 1 ? 1 : 0;
@@ -81,14 +79,14 @@ TArray<UBandBoundingBox*> GetDetectedBoxesInternal(
 		const float Confidence = ConfidenceResults[BoxIndex * LenConfidenceVector + ConfidenceOffset];
 		if (Confidence > ScoreThreshold)
 		{
-			UBandBoundingBox* TempBox = NewObject<UBandBoundingBox>();
-			TempBox->InitBandBoundingBox(Confidence, DetectionResults[BoxOffset + BBoxOffsets[0]],
+			FBandBoundingBox TempBox = FBandBoundingBox();
+			TempBox.InitBandBoundingBox(Confidence, DetectionResults[BoxOffset + BBoxOffsets[0]],
 				DetectionResults[BoxOffset + BBoxOffsets[1]],
 				DetectionResults[BoxOffset + BBoxOffsets[2]],
 				DetectionResults[BoxOffset + BBoxOffsets[3]]);
 			if (Label)
 			{
-				TempBox->Label = Label->GetClassName(static_cast<int32>(ClassResults[BoxIndex * LenClassVector + ClassOffset]));
+				TempBox.Label = Label->GetClassName(static_cast<int32>(ClassResults[BoxIndex * LenClassVector + ClassOffset]));
 			}
 			Boxes.Push(TempBox);
 		}
@@ -97,9 +95,9 @@ TArray<UBandBoundingBox*> GetDetectedBoxesInternal(
 	return Boxes;
 }
 
-TArray<UBandBoundingBox*> UBandBlueprintLibrary::GetDetectedBoxes(UPARAM(ref) TArray<UBandTensor*> Tensors, EBandDetector DetectorType, UBandLabel* Label)
+TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(UPARAM(ref) TArray<UBandTensor*> Tensors, EBandDetector DetectorType, UBandLabel* Label)
 {
-	TArray<UBandBoundingBox*> Boxes;
+	TArray<FBandBoundingBox> Boxes;
 	// Default parameters from RetinaFace
 	size_t DetectionTensorIndex = 0;
 	TArray<int32> BBoxOffsets = {0, 1, 2, 3};
@@ -163,25 +161,25 @@ float BoxIou(FRect A, FRect B)
 	return BoxIntersection(A, B) / BoxUnion(A, B);
 }
 
-TArray<UBandBoundingBox*> UBandBlueprintLibrary::NMS(TArray<UBandBoundingBox*> Boxes, const float IoU_Threshold)
+TArray<FBandBoundingBox> UBandBlueprintLibrary::NMS(TArray<FBandBoundingBox> Boxes, const float IoU_Threshold)
 {
-	TArray<UBandBoundingBox*> NMSBoxes;
-	TArray<UBandBoundingBox*> PrevBoxes = TArray<UBandBoundingBox*>(Boxes);
+	TArray<FBandBoundingBox> NMSBoxes;
+	TArray<FBandBoundingBox> PrevBoxes = TArray<FBandBoundingBox>(Boxes);
 
 	while (PrevBoxes.Num() > 0)
 	{
-		PrevBoxes.Sort([](const UBandBoundingBox& Box1, const UBandBoundingBox& Box2) {
+		PrevBoxes.Sort([](const FBandBoundingBox& Box1, const FBandBoundingBox& Box2) {
 			return Box1.Confidence < Box2.Confidence;
 		});
-		TArray<UBandBoundingBox*> CurrBoxes = TArray<UBandBoundingBox*>(PrevBoxes);
-		UBandBoundingBox* Max = CurrBoxes[0];
+		TArray<FBandBoundingBox> CurrBoxes = TArray<FBandBoundingBox>(PrevBoxes);
+		FBandBoundingBox Max = CurrBoxes[0];
 		NMSBoxes.Push(Max);
 		PrevBoxes.Empty();
 
 		for (int Index = 1; Index < CurrBoxes.Num(); Index++)
 		{
-			UBandBoundingBox* Detection = CurrBoxes[Index];
-			if (BoxIou(Max->Position, Detection->Position) < IoU_Threshold)
+			FBandBoundingBox Detection = CurrBoxes[Index];
+			if (BoxIou(Max.Position, Detection.Position) < IoU_Threshold)
 			{
 				PrevBoxes.Push(Detection);
 			}
@@ -189,4 +187,39 @@ TArray<UBandBoundingBox*> UBandBlueprintLibrary::NMS(TArray<UBandBoundingBox*> B
 	}
 	UE_LOG(LogBand, Log, TEXT("UBandRetinaFace: NMS: NMSBoxes' length %d"), NMSBoxes.Num());
 	return NMSBoxes;
+}
+
+void UBandBlueprintLibrary::PrintBox(FBandBoundingBox BoundingBox)
+{
+	UE_LOG(LogBand, Log, TEXT("FBandBoundingBox: %f - (%f, %f, %f, %f)"), BoundingBox.Confidence,
+		BoundingBox.Position.Left, BoundingBox.Position.Right, BoundingBox.Position.Top, BoundingBox.Position.Bottom);
+}
+
+void UBandBlueprintLibrary::ParseRectF(FBandBoundingBox BoundingBox, const int ImageHeight, const int ImageWidth, float& PosX, float& PosY, float& SizeX, float& SizeY)
+{
+	
+	float Left = BoundingBox.Position.Left;
+	float Right = BoundingBox.Position.Right;
+	float Top = BoundingBox.Position.Top;
+	float Bottom = BoundingBox.Position.Bottom;
+
+	SizeX = (Right - Left) * ImageWidth;
+	SizeY = (Bottom - Top) * ImageHeight;
+
+	PosX = Left * ImageWidth;
+	PosY = Top * ImageHeight;
+
+	if (SizeX < 0)
+	{ // Shift PosX to the left by SizeX
+		PosX += SizeX;
+	}
+	if (SizeY < 0)
+	{ // Shift PoxY upwards by SizeY
+		PosY += SizeY;
+	}
+
+	SizeX = FGenericPlatformMath::Abs(SizeX);
+	SizeY = FGenericPlatformMath::Abs(SizeY);
+
+	UE_LOG(LogBand, Log, TEXT("FBandBoundingBox: ParseRectF (%f, %f, %f, %f)"), PosX, PosY, SizeX, SizeY);
 }

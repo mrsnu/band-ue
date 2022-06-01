@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Band.h"
+#include "BandBoundingBox.h"
 #include "BandTensor.h"
 #include "BandEnum.h"
 #include "BandLabel.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "BandBlueprintLibrary.generated.h"
 
-class UBandBoundingBox;
 UCLASS()
 class BAND_API UBandBlueprintLibrary : public UBlueprintFunctionLibrary
 {
@@ -19,8 +19,14 @@ public:
 	static FString GetVersion();
 	
 	UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
-	static TArray<UBandBoundingBox*> GetDetectedBoxes(UPARAM(ref) TArray<UBandTensor *> OutputTensors, EBandDetector DetectorType, UBandLabel* Label = nullptr);
+	static TArray<FBandBoundingBox> GetDetectedBoxes(UPARAM(ref) TArray<UBandTensor *> OutputTensors, EBandDetector DetectorType, UBandLabel* Label = nullptr);
 
 	UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
-	static TArray<UBandBoundingBox*> NMS(TArray<UBandBoundingBox *> Boxes, const float IoU_Threshold);
+	static TArray<FBandBoundingBox> NMS(TArray<FBandBoundingBox> Boxes, const float IoU_Threshold);
+
+	UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
+	static void PrintBox(FBandBoundingBox BoundingBox);
+	
+	UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
+	static void ParseRectF(FBandBoundingBox BoundingBox, const int ImageHeight, const int ImageWidth, float& PosX, float& PosY, float& SizeX, float& SizeY);
 };
