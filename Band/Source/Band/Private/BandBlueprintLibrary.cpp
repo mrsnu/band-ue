@@ -91,7 +91,6 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
 			Boxes.Push(TempBox);
 		}
 	}
-	UE_LOG(LogBand, Log, TEXT("UBandRetinaFace: GetDetectedBoxes: Boxes' length %d"), Boxes.Num());
 	return Boxes;
 }
 
@@ -134,8 +133,6 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(UPARAM(ref) TAr
 			const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
 		UE_LOG(LogBand, Error, TEXT("Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
 	}
-
-	UE_LOG(LogBand, Log, TEXT("GetDetectedBoxes: Boxes' length %d"), Boxes.Num());
 	return Boxes;
 }
 
@@ -185,7 +182,6 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::NMS(TArray<FBandBoundingBox> Box
 			}
 		}
 	}
-	UE_LOG(LogBand, Log, TEXT("UBandRetinaFace: NMS: NMSBoxes' length %d"), NMSBoxes.Num());
 	return NMSBoxes;
 }
 
@@ -220,6 +216,4 @@ void UBandBlueprintLibrary::ParseRectF(FBandBoundingBox BoundingBox, const int I
 
 	SizeX = FGenericPlatformMath::Abs(SizeX);
 	SizeY = FGenericPlatformMath::Abs(SizeY);
-
-	UE_LOG(LogBand, Log, TEXT("FBandBoundingBox: ParseRectF (%f, %f, %f, %f)"), PosX, PosY, SizeX, SizeY);
 }
