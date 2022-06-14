@@ -110,7 +110,7 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(UPARAM(ref) TAr
 	{
 		ConfidenceTensorIndex = 2;
 		ConfidenceOffset = 0;
-		ScoreThreshold = 9.99999993922529e-9;
+		ScoreThreshold = 0.5f;
 		ClassTensorIndex = 1;
 	}
 	else if (DetectorType == EBandDetector::Unknown)
@@ -118,7 +118,6 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(UPARAM(ref) TAr
 		UE_LOG(LogBand, Error, TEXT("Unknown detector type"));
 		return Boxes;
 	}
-
 	
 	const EBandTensorType TensorType = Tensors[DetectionTensorIndex]->Type();
 	switch (TensorType)
@@ -133,6 +132,7 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(UPARAM(ref) TAr
 			const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
 		UE_LOG(LogBand, Error, TEXT("Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
 	}
+	
 	return Boxes;
 }
 
@@ -182,7 +182,19 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::NMS(TArray<FBandBoundingBox> Box
 			}
 		}
 	}
+	
 	return NMSBoxes;
+}
+
+TArray<FBandBoundingBox> UBandBlueprintLibrary::FilterBoxesByConfidence(TArray<FBandBoundingBox> Boxes, const int MaxNumBoxes)
+{
+	// Sort by descending order
+	Boxes.Sort();
+	if (Boxes.Num() > MaxNumBoxes)
+	{
+		Boxes.SetNum(MaxNumBoxes);
+	}
+	return Boxes;
 }
 
 void UBandBlueprintLibrary::PrintBox(FBandBoundingBox BoundingBox)

@@ -23,6 +23,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
 	static TArray<FBandBoundingBox> NMS(TArray<FBandBoundingBox> Boxes, const float IoU_Threshold);
+	
+	UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
+	static TArray<FBandBoundingBox> FilterBoxesByConfidence(TArray<FBandBoundingBox> Boxes, const int MaxNumBoxes);
 
 	UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
 	static void PrintBox(FBandBoundingBox BoundingBox);

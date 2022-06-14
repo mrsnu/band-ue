@@ -23,3 +23,8 @@ public:
 
 	void InitBandBoundingBox(float Cf, float Left, float Bottom, float Right, float Top);
 };
+
+inline bool operator<(const FBandBoundingBox& Lhs, const FBandBoundingBox& Rhs)
+{
+	return Lhs.Confidence > Rhs.Confidence;
+}
