@@ -24,7 +24,7 @@ void UBandTensor::BeginDestroy()
 	Super::BeginDestroy();
 }
 
-void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame, bool normalize)
+void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame, bool Normalize)
 {
 	if (!Frame)
 	{
@@ -62,8 +62,8 @@ void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame, 
 	// Type conversion (RGB8 to tensor type)
 	if (Type() != EBandTensorType::UInt8)
 	{
-		float Mean = normalize ? 127.5f : 0.f;
-		float Std = normalize ? 127.5f : 1.f;
+		float Mean = Normalize ? 127.5f : 0.f;
+		float Std = Normalize ? 127.5f : 1.f;
 		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
 		switch (Type())
 		{
