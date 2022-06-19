@@ -217,7 +217,7 @@ EBandStatus UBandTensor::CopyFromBuffer(TArray<uint8> Buffer)
 	return EBandStatus(FBandModule::Get().TfLiteTensorCopyFromBuffer(TensorHandle, Buffer.GetData(), Buffer.GetAllocatedSize()));
 }
 
-EBandStatus UBandTensor::CopyFromTexture(UTexture2D* Texture, float Mean, float Std)
+EBandStatus UBandTensor::CopyFromTexture(UPARAM(ref) UTexture2D* Texture, float Mean, float Std)
 {
 	SCOPE_CYCLE_COUNTER(STAT_BandTextureToTensor);
 	if (!Texture->PlatformData->Mips.Num())

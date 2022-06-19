@@ -3,11 +3,6 @@
 #include "BandBoundingBox.h"
 #include "GenericPlatform/GenericPlatformMath.h"
 
-void FBandBoundingBox::InitBandBoundingBox(float Cf, float Left, float Bottom, float Right, float Top)
-{
-	Confidence = Cf;
-	Position.Left = Left;
-	Position.Bottom = Bottom;
-	Position.Right = Right;
-	Position.Top = Top;
-}
+FBandBoundingBox::FBandBoundingBox(float Confidence, FRect Position, FString Label, TArray<FVector> Landmark)
+	:Confidence(Confidence), Position(Position), Label(Label), Landmark(Landmark)
+{}

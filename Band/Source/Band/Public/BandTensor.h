@@ -47,7 +47,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	EBandStatus CopyFromBuffer(TArray<uint8> Buffer);
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	EBandStatus CopyFromTexture(UTexture2D* Texture, float Mean, float Std = 1.f);
+	EBandStatus CopyFromTexture(UPARAM(ref) UTexture2D* Texture, float Mean, float Std = 1.f);
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	EBandStatus CopyToBuffer(TArray<uint8> Buffer);
 

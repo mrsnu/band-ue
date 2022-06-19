@@ -79,15 +79,18 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
 		const float Confidence = ConfidenceResults[BoxIndex * LenConfidenceVector + ConfidenceOffset];
 		if (Confidence > ScoreThreshold)
 		{
-			FBandBoundingBox TempBox = FBandBoundingBox();
-			TempBox.InitBandBoundingBox(Confidence, DetectionResults[BoxOffset + BBoxOffsets[0]],
-				DetectionResults[BoxOffset + BBoxOffsets[1]],
+			FBandBoundingBox TempBox = FBandBoundingBox(Confidence,FRect({
+				DetectionResults[BoxOffset + BBoxOffsets[0]],
 				DetectionResults[BoxOffset + BBoxOffsets[2]],
-				DetectionResults[BoxOffset + BBoxOffsets[3]]);
+				DetectionResults[BoxOffset + BBoxOffsets[3]],
+				DetectionResults[BoxOffset + BBoxOffsets[1]]
+			}));
+			
 			if (Label)
 			{
 				TempBox.Label = Label->GetClassName(static_cast<int32>(ClassResults[BoxIndex * LenClassVector + ClassOffset]));
 			}
+			
 			Boxes.Push(TempBox);
 		}
 	}

@@ -11,17 +11,20 @@ struct BAND_API FBandBoundingBox
 {
 	GENERATED_BODY()
 
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FString Label;
-	
+	FBandBoundingBox() = default;
+	FBandBoundingBox(float Confidence, FRect Position, FString Label = TEXT(""), TArray<FVector> Landmark = {});
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float Confidence;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FRect Position;
 
-	void InitBandBoundingBox(float Cf, float Left, float Bottom, float Right, float Top);
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FString Label;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<FVector> Landmark;
 };
 
 inline bool operator<(const FBandBoundingBox& Lhs, const FBandBoundingBox& Rhs)
