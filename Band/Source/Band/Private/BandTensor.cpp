@@ -270,33 +270,40 @@ EBandStatus UBandTensor::CopyFromTexture(UPARAM(ref) UTexture2D* Texture, float 
 	if (NumTensorElements == NumTextureElements)
 	{
 		const uint8* SourceData = static_cast<const uint8*>(Mip.BulkData.Lock(LOCK_READ_ONLY));
-		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
-
-		switch (TensorType)
+		if (SourceData)
 		{
-			case EBandTensorType::Float32:
-				UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+			const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+
+			switch (TensorType)
+			{
+				case EBandTensorType::Float32:
+					UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
 				BandTensorUtil::TextureToRGBArray<float>(SourceData, TargetPixelFormat, reinterpret_cast<float*>(Data()), NumTensorElements, Mean, Std);
 				break;
-			case EBandTensorType::UInt8:
-				UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+				case EBandTensorType::UInt8:
+					UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
 				BandTensorUtil::TextureToRGBArray<uint8>(SourceData, TargetPixelFormat, Data(), NumTensorElements, Mean, Std);
 				break;
-			case EBandTensorType::Int8:
-				UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+				case EBandTensorType::Int8:
+					UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
 				BandTensorUtil::TextureToRGBArray<int8>(SourceData, TargetPixelFormat, reinterpret_cast<int8_t*>(Data()), NumTensorElements, Mean, Std);
 				break;
-			default:
-				UE_LOG(LogBand, Error, TEXT("CopyFromTexture: Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+				default:
+					UE_LOG(LogBand, Error, TEXT("CopyFromTexture: Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
 				Processed = false;
 				break;
+			}
+		}
+		else
+		{
+			UE_LOG(LogBand, Error, TEXT("CopyFromTexture: Tried to access null source data"));
 		}
 
 		Mip.BulkData.Unlock();
 	}
 	else
 	{
-		UE_LOG(LogBand, Error, TEXT("CopyFromTexture: Texture elements %d != tensor elements %d"), NumTextureElements, NumTensorElements);
+		UE_LOG(LogBand, Error, TEXT("CopyFromTexture: Texture elements %llu != tensor elements %llu"), NumTextureElements, NumTensorElements);
 		Processed = false;
 	}
 
