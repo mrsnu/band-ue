@@ -39,7 +39,7 @@ UENUM(BlueprintType)
 enum class EBandDetector : uint8
 {
 	RetinaFace UMETA(DisplayName = "RetinaFace"),
-	BlazeFace UMETA(DisplayName = "BlazeFace"),
+	PalmDetection UMETA(DisplayName = "PalmDetection"),
 	SSD UMETA(DisplayName = "SSD"),
 	Unknown UMETA(DisplayName = "Unknown")
 };
