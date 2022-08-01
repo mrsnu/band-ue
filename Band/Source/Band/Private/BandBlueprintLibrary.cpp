@@ -27,14 +27,14 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
 	const float ScoreThreshold)
 {
 	TArray<FBandBoundingBox> Boxes;
-	if (Tensors.Num() >= DetectionTensorIndex)
+	if (Tensors.Num() <= DetectionTensorIndex)
 	{
 		UE_LOG(LogBand, Error, TEXT("UBandBlueprintLibrary: GetDetectedBoxes: Given tensor index offset %d out of bound %d"),
 			DetectionTensorIndex, Tensors.Num());
 		return Boxes;
 	}
 	
-	if (Tensors.Num() >= ConfidenceTensorIndex)
+	if (Tensors.Num() <= ConfidenceTensorIndex)
 	{
 		UE_LOG(LogBand, Error, TEXT("UBandBlueprintLibrary: GetDetectedBoxes: Given confidence index offset %d out of bound %d"),
 			ConfidenceTensorIndex, Tensors.Num());
