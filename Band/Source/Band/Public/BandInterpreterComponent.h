@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "BandEnum.h"
-#include "BandLibraryWrapper.h"
+#include "BandLibrary.h"
 #include "BandInterpreterComponent.generated.h"
 
 class UBandModel;
@@ -54,12 +54,12 @@ public:
 	FOnEndInvoke OnEndInvoke;
 	
 private:
-	void OnEndInvokeInternal(int JobId, TfLiteStatus Status) const;
+	void OnEndInvokeInternal(int JobId, BandStatus Status) const;
 	
-	Band::TfLiteInterpreter* GetHandle() const;
+	BandEngine* GetHandle() const;
 
 	// <Job Id, Model Handle>
 	// Temporal solution for output tensor length validation
-	mutable std::unordered_map<int32, int32> JobToModel;
+	mutable std::unordered_map<int32, BandModel*> JobToModel;
 	friend class FBandModule;
 };

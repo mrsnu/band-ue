@@ -25,7 +25,7 @@ enum class EBandTensorType : uint8
 };
 
 /*
-	UEnum for TfLiteStatus in common.h
+	UEnum for BandStatus in common.h
 */
 UENUM(BlueprintType)
 enum class EBandStatus : uint8
@@ -47,5 +47,5 @@ enum class EBandDetector : uint8
 namespace BandEnum
 {
 	size_t TensorTypeBytes(const EBandTensorType& Type);
-	EBandStatus ToBandStatus(TfLiteStatus Status);
+	EBandStatus ToBandStatus(BandStatus Status);
 } // namespace BandEnum

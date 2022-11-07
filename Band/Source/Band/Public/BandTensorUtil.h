@@ -6,7 +6,7 @@
 
 namespace BandTensorUtil
 {
-	TArray<TfLiteTensor*> TensorsFromTArray(TArray<UBandTensor*> Tensors);
+	TArray<BandTensor*> TensorsFromTArray(TArray<UBandTensor*> Tensors);
 	template <typename T>
 	void BGRA8ToRGBArray(const uint8_t* Src, T* Dst, size_t NumElements, T Mean, T Std)
 	{

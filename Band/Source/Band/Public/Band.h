@@ -8,10 +8,12 @@
 #include "BandEnum.h"
 #include "BandInterpreterComponent.h"
 
-struct TfLiteTensor;
+struct BandTensor;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogBand, Log, All);
+
 DECLARE_STATS_GROUP(TEXT("Band"), STATGROUP_Band, STATCAT_Advanced);
+
 DECLARE_CYCLE_STAT_EXTERN(TEXT("CameraToTensor"), STAT_BandCameraToTensor, STATGROUP_Band, BAND_API);
 DECLARE_CYCLE_STAT_EXTERN(TEXT("TextureToTensor"), STAT_BandTextureToTensor, STATGROUP_Band, BAND_API);
 
@@ -27,21 +29,21 @@ public:
 	/* Returns singleton object (Note: avoid calling this in shutdown phase) */
 	static FBandModule& Get();
 	FString GetVersion();
-	Band::TfLiteInterpreter* GetInterpreterHandle() const;
-	
+	BandEngine* GetEngineHandle() const;
+
 private:
 	bool InitializeInterpreter(FString ConfigPath);
 	bool LoadDllFunction(FString LibraryPath);
 
 	static void ReportError(void* UserData, const char* Format, va_list Args);
-	void OnEndInvokeInternal(int32 JobId, TfLiteStatus Status) const;
+	void OnEndInvokeInternal(int32 JobId, BandStatus Status) const;
 
 	/* Reference to interpreter. Mainly for callback propagation */
 	void RegisterInterpreter(UBandInterpreterComponent* Interpreter);
 	void UnregisterInterpreter(UBandInterpreterComponent* Interpreter);
 	TWeakObjectPtr<UBandInterpreterComponent> Interpreter = nullptr;
-	
-	Band::TfLiteInterpreter* InterpreterHandle = nullptr;
+
+	BandEngine* EngineHandle = nullptr;
 	void* LibraryHandle = nullptr;
 	bool IsDllLoaded = false;
 
@@ -51,34 +53,36 @@ private:
 	/*
 		DLL handles from Band Library
 	*/
-	Band::pTfLiteVersion TfLiteVersion = nullptr;
-	Band::pTfLiteModelCreate TfLiteModelCreate = nullptr;
-	Band::pTfLiteModelCreateFromFile TfLiteModelCreateFromFile = nullptr;
-	Band::pTfLiteModelDelete TfLiteModelDelete = nullptr;
-	Band::pTfLiteInterpreterOptionsCreate TfLiteInterpreterOptionsCreate = nullptr;
-	Band::pTfLiteInterpreterOptionsDelete TfLiteInterpreterOptionsDelete = nullptr;
-	Band::pTfLiteInterpreterOptionsSetOnInvokeEnd TfLiteInterpreterOptionsSetOnInvokeEnd = nullptr;
-	Band::pTfLiteInterpreterOptionsSetConfigPath TfLiteInterpreterOptionsSetConfigPath = nullptr;
-	Band::pTfLiteInterpreterOptionsSetConfigFile TfLiteInterpreterOptionsSetConfigFile = nullptr;
-	Band::pTfLiteInterpreterOptionsSetErrorReporter TfLiteInterpreterOptionsSetErrorReporter = nullptr;
-	Band::pTfLiteInterpreterCreate TfLiteInterpreterCreate = nullptr;
-	Band::pTfLiteInterpreterDelete TfLiteInterpreterDelete = nullptr;
-	Band::pTfLiteInterpreterRegisterModel TfLiteInterpreterRegisterModel = nullptr;
-	Band::pTfLiteInterpreterInvokeSync TfLiteInterpreterInvokeSync = nullptr;
-	Band::pTfLiteInterpreterInvokeAsync TfLiteInterpreterInvokeAsync = nullptr;
-	Band::pTfLiteInterpreterWait TfLiteInterpreterWait = nullptr;
-	Band::pTfLiteInterpreterGetInputTensorCount TfLiteInterpreterGetInputTensorCount = nullptr;
-	Band::pTfLiteInterpreterGetOutputTensorCount TfLiteInterpreterGetOutputTensorCount = nullptr;
-	Band::pTfLiteInterpreterAllocateInputTensor TfLiteInterpreterAllocateInputTensor = nullptr;
-	Band::pTfLiteInterpreterAllocateOutputTensor TfLiteInterpreterAllocateOutputTensor = nullptr;
-	Band::pTfLiteTensorDeallocate TfLiteTensorDeallocate = nullptr;
-	Band::pTfLiteTensorType TfLiteTensorType = nullptr;
-	Band::pTfLiteTensorNumDims TfLiteTensorNumDims = nullptr;
-	Band::pTfLiteTensorDim TfLiteTensorDim = nullptr;
-	Band::pTfLiteTensorByteSize TfLiteTensorByteSize = nullptr;
-	Band::pTfLiteTensorData TfLiteTensorData = nullptr;
-	Band::pTfLiteTensorName TfLiteTensorName = nullptr;
-	Band::pTfLiteTensorQuantizationParams TfLiteTensorQuantizationParams = nullptr;
-	Band::pTfLiteTensorCopyFromBuffer TfLiteTensorCopyFromBuffer = nullptr;
-	Band::pTfLiteTensorCopyToBuffer TfLiteTensorCopyToBuffer = nullptr;
+	PFN_BandAddConfig BandAddConfig = nullptr;
+	PFN_BandConfigBuilderCreate BandConfigBuilderCreate = nullptr;
+	PFN_BandConfigBuilderDelete BandConfigBuilderDelete = nullptr;
+	PFN_BandConfigCreate BandConfigCreate = nullptr;
+	PFN_BandConfigDelete BandConfigDelete = nullptr;
+	PFN_BandEngineCreate BandEngineCreate = nullptr;
+	PFN_BandEngineCreateInputTensor BandEngineCreateInputTensor = nullptr;
+	PFN_BandEngineCreateOutputTensor BandEngineCreateOutputTensor = nullptr;
+	PFN_BandEngineDelete BandEngineDelete = nullptr;
+	PFN_BandEngineGetNumInputTensors BandEngineGetNumInputTensors = nullptr;
+	PFN_BandEngineGetNumOutputTensors BandEngineGetNumOutputTensors = nullptr;
+	PFN_BandEngineGetNumWorkers BandEngineGetNumWorkers = nullptr;
+	PFN_BandEngineGetWorkerDevice BandEngineGetWorkerDevice = nullptr;
+	PFN_BandEngineRegisterModel BandEngineRegisterModel = nullptr;
+	PFN_BandEngineRequestAsync BandEngineRequestAsync = nullptr;
+	PFN_BandEngineRequestSync BandEngineRequestSync = nullptr;
+	PFN_BandEngineRequestAsyncOnWorker BandEngineRequestAsyncOnWorker = nullptr;
+	PFN_BandEngineRequestSyncOnWorker BandEngineRequestSyncOnWorker = nullptr;
+	PFN_BandEngineWait BandEngineWait = nullptr;
+	PFN_BandEngineSetOnEndRequest BandEngineSetOnEndRequest = nullptr;
+	PFN_BandModelAddFromBuffer BandModelAddFromBuffer = nullptr;
+	PFN_BandModelAddFromFile BandModelAddFromFile = nullptr;
+	PFN_BandModelCreate BandModelCreate = nullptr;
+	PFN_BandModelDelete BandModelDelete = nullptr;
+	PFN_BandTensorDelete BandTensorDelete = nullptr;
+	PFN_BandTensorGetBytes BandTensorGetBytes = nullptr;
+	PFN_BandTensorGetData BandTensorGetData = nullptr;
+	PFN_BandTensorGetNumDims BandTensorGetNumDims = nullptr;
+	PFN_BandTensorGetDims BandTensorGetDims = nullptr;
+	PFN_BandTensorGetName BandTensorGetName = nullptr;
+	PFN_BandTensorGetQuantization BandTensorGetQuantization = nullptr;
+	PFN_BandTensorGetType BandTensorGetType = nullptr;
 };

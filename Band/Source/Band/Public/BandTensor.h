@@ -51,15 +51,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	EBandStatus CopyToBuffer(TArray<uint8> Buffer);
 
-	TfLiteTensor* Handle() const;
+	BandTensor* Handle() const;
 
 private:
 	friend class UBandInterpreterComponent;
 
-	void Initialize(TfLiteTensor* TensorHandle);
+	void Initialize(BandTensor* TensorHandle);
 	virtual void BeginDestroy() override;
 
-	TfLiteTensor* TensorHandle = nullptr;
+	BandTensor* TensorHandle = nullptr;
 
 	uint8* RGBBuffer = nullptr;
 };

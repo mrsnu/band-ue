@@ -1,7 +1,7 @@
 #include "BandTensor.h"
 #include "Band.h"
 #include "BandTensorUtil.h"
-#include "BandLibraryWrapper.h"
+#include "BandLibrary.h"
 #include "Rendering/Texture2DResource.h"
 
 #include "ImageUtil/FrameBuffer.h"
@@ -12,7 +12,7 @@ void UBandTensor::BeginDestroy()
 {
 	if (TensorHandle)
 	{
-		FBandModule::Get().TfLiteTensorDeallocate(TensorHandle);
+		FBandModule::Get().BandTensorDelete(TensorHandle);
 		TensorHandle = nullptr;
 	}
 
@@ -126,7 +126,7 @@ void UBandTensor::ArgMax(int32& Index, float& Value)
 	}
 }
 
-void UBandTensor::Initialize(TfLiteTensor* NewTensorHandle)
+void UBandTensor::Initialize(BandTensor* NewTensorHandle)
 {
 	TensorHandle = NewTensorHandle;
 	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
@@ -149,17 +149,24 @@ void UBandTensor::Initialize(TfLiteTensor* NewTensorHandle)
 
 EBandTensorType UBandTensor::Type()
 {
-	return EBandTensorType(FBandModule::Get().TfLiteTensorType(TensorHandle));
+	return EBandTensorType(FBandModule::Get().BandTensorGetType(TensorHandle));
 }
 
 int32 UBandTensor::Dim(int32 Index)
 {
-	return FBandModule::Get().TfLiteTensorDim(TensorHandle, Index);
+	if (Index < NumDims() && Index >= 0)
+	{
+		return FBandModule::Get().BandTensorGetDims(TensorHandle)[Index];
+	} else
+	{
+		UE_LOG(LogBand, Error, TEXT("Dim: out of index %d"), Index);
+		return -1;
+	}
 }
 
 int32 UBandTensor::NumDims()
 {
-	return FBandModule::Get().TfLiteTensorNumDims(TensorHandle);
+	return FBandModule::Get().BandTensorGetNumDims(TensorHandle);
 }
 
 int32 UBandTensor::NumElements()
@@ -174,17 +181,17 @@ int32 UBandTensor::NumElements()
 
 int32 UBandTensor::ByteSize()
 {
-	return (int32)FBandModule::Get().TfLiteTensorByteSize(TensorHandle);
+	return (int32)FBandModule::Get().BandTensorGetBytes(TensorHandle);
 }
 
 uint8* UBandTensor::Data()
 {
-	return (uint8*)FBandModule::Get().TfLiteTensorData(TensorHandle);
+	return (uint8*)FBandModule::Get().BandTensorGetData(TensorHandle);
 }
 
 FString UBandTensor::Name()
 {
-	return FString(FBandModule::Get().TfLiteTensorName(TensorHandle));
+	return FString(FBandModule::Get().BandTensorGetName(TensorHandle));
 }
 
 TArray<uint8> UBandTensor::GetUInt8Buffer()
@@ -204,17 +211,19 @@ EBandStatus UBandTensor::CopyFromBuffer(uint8* Buffer, int32 Bytes)
 		UE_LOG(LogBand, Error, TEXT("CopyFromBuffer: Buffer bytes %d != target tensor bytes %d"), Bytes, ByteSize());
 		return EBandStatus::Error;
 	}
-	return EBandStatus(FBandModule::Get().TfLiteTensorCopyFromBuffer(TensorHandle, Buffer, Bytes));
+	memcpy(Data(), Buffer, Bytes);
+	return EBandStatus::Ok;
 }
 
 EBandStatus UBandTensor::CopyFromBuffer(TArray<uint8> Buffer)
 {
 	if (ByteSize() != Buffer.GetAllocatedSize())
 	{
-		UE_LOG(LogBand, Error, TEXT("CopyFromBuffer: Buffer bytes %d != target tensor bytes %d"), Buffer.GetAllocatedSize(), ByteSize());
+		UE_LOG(LogBand, Error, TEXT("CopyFromBuffer: Buffer bytes %llu != target tensor bytes %d"), Buffer.GetAllocatedSize(), ByteSize());
 		return EBandStatus::Error;
 	}
-	return EBandStatus(FBandModule::Get().TfLiteTensorCopyFromBuffer(TensorHandle, Buffer.GetData(), Buffer.GetAllocatedSize()));
+	memcpy(Data(), Buffer.GetData(), Buffer.GetAllocatedSize());
+	return EBandStatus::Ok;
 }
 
 EBandStatus UBandTensor::CopyFromTexture(UPARAM(ref) UTexture2D* Texture, float Mean, float Std)
@@ -278,20 +287,20 @@ EBandStatus UBandTensor::CopyFromTexture(UPARAM(ref) UTexture2D* Texture, float 
 			{
 				case EBandTensorType::Float32:
 					UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
-				BandTensorUtil::TextureToRGBArray<float>(SourceData, TargetPixelFormat, reinterpret_cast<float*>(Data()), NumTensorElements, Mean, Std);
-				break;
+					BandTensorUtil::TextureToRGBArray<float>(SourceData, TargetPixelFormat, reinterpret_cast<float*>(Data()), NumTensorElements, Mean, Std);
+					break;
 				case EBandTensorType::UInt8:
 					UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
-				BandTensorUtil::TextureToRGBArray<uint8>(SourceData, TargetPixelFormat, Data(), NumTensorElements, Mean, Std);
-				break;
+					BandTensorUtil::TextureToRGBArray<uint8>(SourceData, TargetPixelFormat, Data(), NumTensorElements, Mean, Std);
+					break;
 				case EBandTensorType::Int8:
 					UE_LOG(LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
-				BandTensorUtil::TextureToRGBArray<int8>(SourceData, TargetPixelFormat, reinterpret_cast<int8_t*>(Data()), NumTensorElements, Mean, Std);
-				break;
+					BandTensorUtil::TextureToRGBArray<int8>(SourceData, TargetPixelFormat, reinterpret_cast<int8_t*>(Data()), NumTensorElements, Mean, Std);
+					break;
 				default:
 					UE_LOG(LogBand, Error, TEXT("CopyFromTexture: Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
-				Processed = false;
-				break;
+					Processed = false;
+					break;
 			}
 		}
 		else
@@ -313,10 +322,16 @@ EBandStatus UBandTensor::CopyFromTexture(UPARAM(ref) UTexture2D* Texture, float 
 
 EBandStatus UBandTensor::CopyToBuffer(TArray<uint8> Buffer)
 {
-	return EBandStatus(FBandModule::Get().TfLiteTensorCopyToBuffer(TensorHandle, Buffer.GetData(), Buffer.GetAllocatedSize()));
+	if (ByteSize() != Buffer.GetAllocatedSize())
+	{
+		UE_LOG(LogBand, Error, TEXT("CopyToBuffer: Buffer bytes %llu != target tensor bytes %d"), Buffer.GetAllocatedSize(), ByteSize());
+		return EBandStatus::Error;
+	}
+	memcpy(Buffer.GetData(), Data(), Buffer.GetAllocatedSize());
+	return EBandStatus::Ok;
 }
 
-TfLiteTensor* UBandTensor::Handle() const
+BandTensor* UBandTensor::Handle() const
 {
 	return TensorHandle;
 }

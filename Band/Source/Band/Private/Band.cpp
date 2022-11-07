@@ -3,7 +3,6 @@
 #include "Band.h"
 #include "BandModel.h"
 #include "BandTensor.h"
-#include "BandLibraryWrapper.h"
 #include "BandLibrary.h"
 
 #include "Core.h"
@@ -17,8 +16,6 @@ DEFINE_LOG_CATEGORY(LogBand);
 DEFINE_STAT(STAT_BandCameraToTensor);
 DEFINE_STAT(STAT_BandTextureToTensor);
 
-using namespace Band;
-
 void FBandModule::StartupModule()
 {
 	// Get the base directory of this plugin
@@ -26,13 +23,13 @@ void FBandModule::StartupModule()
 
 	// Add on the relative location of the third party dll and load it
 	FString LibraryPath;
-#if PLATFORM_WINDOWS
-	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/Band/Data/Release/tensorflowlite_c.dll"));
-#elif PLATFORM_MAC
+	#if PLATFORM_WINDOWS
+	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/Band/Data/Debug/band_c.dll"));
+	#elif PLATFORM_MAC
 	LibraryPath = FString("libtensorflowlite_c.dylib");
-#elif PLATFORM_ANDROID
+	#elif PLATFORM_ANDROID
 	LibraryPath = FString("libtensorflowlite_c.so");
-#endif // PLATFORM_WINDOWS
+	#endif // PLATFORM_WINDOWS
 
 	UE_LOG(LogBand, Display, TEXT("Selected library path %s"), *LibraryPath);
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
@@ -61,10 +58,10 @@ void FBandModule::ShutdownModule()
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
 
-	if (InterpreterHandle != nullptr)
+	if (EngineHandle != nullptr)
 	{
-		TfLiteInterpreterDelete(InterpreterHandle);
-		InterpreterHandle = nullptr;
+		BandEngineDelete(EngineHandle);
+		EngineHandle = nullptr;
 	}
 
 	// Free the dll handle
@@ -80,68 +77,70 @@ FBandModule& FBandModule::Get()
 
 bool FBandModule::InitializeInterpreter(FString ConfigPath)
 {
-	// TODO(dostos): implement BandConfig class / replace this with default object in a project
-	const FString LogDirectory = FPaths::ProjectLogDir() + TEXT("band_log.csv");
-	FString DefaultConfig = FString::Format(
-		ANSI_TO_TCHAR(
-			"{\"allow_worksteal\":false,\"cpu_masks\":\"BIG\",\"log_path\":\"%s\",\"model_profile\":\"\",\"planner_cpu_masks\":\"BIG\",\"profile_num_runs\":3,\"profile_online\":true,\"profile_smoothing_factor\":0.1,\"profile_warmup_runs\":3,\"schedule_window_size\":5,\"schedulers\":[6],\"subgraph_preparation_type\":\"merge_unit_subgraph\"}"),
-		{ *LogDirectory });
-	// TODO(dostos): Android log support
-#if PLATFORM_ANDROID && USE_ANDROID_FILE
-	DefaultConfig = ANSI_TO_TCHAR("{\"allow_worksteal\":false,\"cpu_masks\":\"BIG\",\"log_path\":\"/sdcard/UE4Game/BandExample/BandExample/Saved/Logs/BandExample.csv\",\"model_profile\":\"\",\"planner_cpu_masks\":\"BIG\",\"profile_num_runs\":3,\"profile_online\":true,\"profile_smoothing_factor\":0.1,\"profile_warmup_runs\":3,\"schedule_window_size\":5,\"schedulers\":[6],\"subgraph_preparation_type\":\"merge_unit_subgraph\"}");
-#endif
-	TfLiteInterpreterOptions* InterpreterOptions =
-		TfLiteInterpreterOptionsCreate();
-	TfLiteInterpreterOptionsSetErrorReporter(InterpreterOptions,
-		FBandModule::ReportError, this);
-	TfLiteInterpreterOptionsSetOnInvokeEnd(
-		InterpreterOptions, [](void* UserData, int32 JobId, TfLiteStatus Status) {
+	FString LogDirectory = FPaths::ProjectLogDir();
+	FString ProfileDirectory = FPaths::ProjectLogDir();
+	#if PLATFORM_ANDROID && USE_ANDROID_FILE
+	LogDirectory = TEXT("/sdcard/UE4Game/BandExample/BandExample/Saved/Logs/");
+	ProfileDirectory = TEXT("/sdcard/UE4Game/BandExample/BandExample/Saved/Logs/");
+	#endif
+	LogDirectory += TEXT("band_log.csv");
+	ProfileDirectory += TEXT("band_profile.json");
+
+	BandConfigBuilder* ConfigBuilder = BandConfigBuilderCreate();
+	BandAddConfig(ConfigBuilder, BAND_PLANNER_LOG_PATH, 1, ToCStr(LogDirectory));
+	BandAddConfig(ConfigBuilder, BAND_PLANNER_SCHEDULERS, 1, kBandFixedDevice);
+	BandAddConfig(ConfigBuilder, BAND_CPU_MASK, /*count=*/1, kBandAll);
+	BandAddConfig(ConfigBuilder, BAND_PLANNER_CPU_MASK, /*count=*/1, kBandPrimary);
+	BandAddConfig(ConfigBuilder, BAND_WORKER_WORKERS, /*count=*/3, kBandCPU, kBandNPU, kBandDSP);
+	BandAddConfig(ConfigBuilder, BAND_WORKER_CPU_MASKS, /*count=*/3, kBandBig, kBandBig, kBandBig);
+	BandAddConfig(ConfigBuilder, BAND_WORKER_NUM_THREADS, /*count=*/3, 1, 1, 1);
+	BandAddConfig(ConfigBuilder, BAND_PROFILE_SMOOTHING_FACTOR, /*count=*/1, 0.1f);
+	BandAddConfig(ConfigBuilder, BAND_PROFILE_DATA_PATH, /*count=*/1,
+		ToCStr(ProfileDirectory));
+	BandAddConfig(ConfigBuilder, BAND_PROFILE_ONLINE, /*count=*/1, true);
+	BandAddConfig(ConfigBuilder, BAND_PROFILE_NUM_WARMUPS, /*count=*/1, 1);
+	BandAddConfig(ConfigBuilder, BAND_PROFILE_NUM_RUNS, /*count=*/1, 1);
+	BandAddConfig(ConfigBuilder, BAND_WORKER_AVAILABILITY_CHECK_INTERVAL_MS, /*count=*/1,
+		30000);
+
+	BandConfig* Config = BandConfigCreate(ConfigBuilder);
+
+	if (Config)
+	{
+		EngineHandle = BandEngineCreate(Config);
+		BandConfigDelete(Config);
+	}
+
+	if (EngineHandle)
+	{
+		BandEngineSetOnEndRequest(EngineHandle, [](void* UserData, int32 JobId, BandStatus Status) {
 			FBandModule* BandModule = static_cast<FBandModule*>(UserData);
 			BandModule->OnEndInvokeInternal(JobId, Status);
-		},
-		this);
-
-	TfLiteStatus ConfigStatus = TfLiteStatus::kTfLiteError;
-
-	if (FPaths::FileExists(ConfigPath))
-	{
-		UE_LOG(LogBand, Display, TEXT("Try to load config file from %s!"),
-			*ConfigPath);
-		ConfigStatus = TfLiteInterpreterOptionsSetConfigPath(
-			InterpreterOptions, TCHAR_TO_ANSI(*ConfigPath));
-	}
-	else
-	{
-		UE_LOG(LogBand, Display, TEXT("Try to load default config"));
-		ConfigStatus = TfLiteInterpreterOptionsSetConfigFile(
-			InterpreterOptions, TCHAR_TO_ANSI(*DefaultConfig),
-			strlen(TCHAR_TO_ANSI(*DefaultConfig)));
+		}, this);
 	}
 
-	if (ConfigStatus == TfLiteStatus::kTfLiteOk)
-	{
-		InterpreterHandle = TfLiteInterpreterCreate(InterpreterOptions);
-	}
+	BandConfigBuilderDelete(ConfigBuilder);
 
-	return InterpreterHandle != nullptr;
+	return EngineHandle != nullptr;
 }
 
 FString FBandModule::GetVersion()
 {
-	return TfLiteVersion();
+	// TODO(dostos): Add Band version
+	return FString("0.0.0");
 }
 
-Band::TfLiteInterpreter* FBandModule::GetInterpreterHandle() const
+BandEngine* FBandModule::GetEngineHandle() const
 {
-	return InterpreterHandle;
+	return EngineHandle;
 }
 
-#define LoadFunction(DllHandle, Function)                                                                          \
-	Function = reinterpret_cast<p##Function>(FPlatformProcess::GetDllExport(DllHandle, ANSI_TO_TCHAR(#Function))); \
-	if (!Function)                                                                                                 \
-	{                                                                                                              \
-		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("BandLibrary", "Failed to load " #Function));                \
-		return false;                                                                                              \
+#define LoadFunction(DllHandle, Function)                                                                             \
+	Function = reinterpret_cast<PFN_##Function>(FPlatformProcess::GetDllExport(DllHandle, ANSI_TO_TCHAR(#Function))); \
+	if (!Function)                                                                                                    \
+	{                                                                                                                 \
+		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("BandLibrary", "Failed to load " #Function));                   \
+		return false;                                                                                                 \
 	}
 
 bool FBandModule::LoadDllFunction(FString LibraryPath)
@@ -154,36 +153,38 @@ bool FBandModule::LoadDllFunction(FString LibraryPath)
 	}
 
 	// TODO(dostos): Unload below function ptrs?
-	LoadFunction(LibraryHandle, TfLiteVersion);
-	LoadFunction(LibraryHandle, TfLiteModelCreate);
-	LoadFunction(LibraryHandle, TfLiteModelCreateFromFile);
-	LoadFunction(LibraryHandle, TfLiteModelDelete);
-	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsCreate);
-	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsDelete);
-	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsSetOnInvokeEnd);
-	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsSetConfigPath);
-	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsSetConfigFile);
-	LoadFunction(LibraryHandle, TfLiteInterpreterOptionsSetErrorReporter);
-	LoadFunction(LibraryHandle, TfLiteInterpreterCreate);
-	LoadFunction(LibraryHandle, TfLiteInterpreterDelete);
-	LoadFunction(LibraryHandle, TfLiteInterpreterRegisterModel);
-	LoadFunction(LibraryHandle, TfLiteInterpreterInvokeSync);
-	LoadFunction(LibraryHandle, TfLiteInterpreterInvokeAsync);
-	LoadFunction(LibraryHandle, TfLiteInterpreterWait);
-	LoadFunction(LibraryHandle, TfLiteInterpreterGetInputTensorCount);
-	LoadFunction(LibraryHandle, TfLiteInterpreterGetOutputTensorCount);
-	LoadFunction(LibraryHandle, TfLiteInterpreterAllocateInputTensor);
-	LoadFunction(LibraryHandle, TfLiteInterpreterAllocateOutputTensor);
-	LoadFunction(LibraryHandle, TfLiteTensorDeallocate);
-	LoadFunction(LibraryHandle, TfLiteTensorType);
-	LoadFunction(LibraryHandle, TfLiteTensorNumDims);
-	LoadFunction(LibraryHandle, TfLiteTensorDim);
-	LoadFunction(LibraryHandle, TfLiteTensorByteSize);
-	LoadFunction(LibraryHandle, TfLiteTensorData);
-	LoadFunction(LibraryHandle, TfLiteTensorName);
-	LoadFunction(LibraryHandle, TfLiteTensorQuantizationParams);
-	LoadFunction(LibraryHandle, TfLiteTensorCopyFromBuffer);
-	LoadFunction(LibraryHandle, TfLiteTensorCopyToBuffer);
+	LoadFunction(LibraryHandle, BandAddConfig);
+	LoadFunction(LibraryHandle, BandConfigBuilderCreate);
+	LoadFunction(LibraryHandle, BandConfigBuilderDelete);
+	LoadFunction(LibraryHandle, BandConfigCreate);
+	LoadFunction(LibraryHandle, BandConfigDelete);
+	LoadFunction(LibraryHandle, BandEngineCreate);
+	LoadFunction(LibraryHandle, BandEngineCreateInputTensor);
+	LoadFunction(LibraryHandle, BandEngineCreateOutputTensor);
+	LoadFunction(LibraryHandle, BandEngineDelete);
+	LoadFunction(LibraryHandle, BandEngineGetNumInputTensors);
+	LoadFunction(LibraryHandle, BandEngineGetNumOutputTensors);
+	LoadFunction(LibraryHandle, BandEngineGetNumWorkers);
+	LoadFunction(LibraryHandle, BandEngineGetWorkerDevice);
+	LoadFunction(LibraryHandle, BandEngineRegisterModel);
+	LoadFunction(LibraryHandle, BandEngineRequestAsync);
+	LoadFunction(LibraryHandle, BandEngineRequestSync);
+	LoadFunction(LibraryHandle, BandEngineRequestAsyncOnWorker);
+	LoadFunction(LibraryHandle, BandEngineRequestSyncOnWorker);
+	LoadFunction(LibraryHandle, BandEngineWait);
+	LoadFunction(LibraryHandle, BandEngineSetOnEndRequest);
+	LoadFunction(LibraryHandle, BandModelAddFromBuffer);
+	LoadFunction(LibraryHandle, BandModelAddFromFile);
+	LoadFunction(LibraryHandle, BandModelCreate);
+	LoadFunction(LibraryHandle, BandModelDelete);
+	LoadFunction(LibraryHandle, BandTensorDelete);
+	LoadFunction(LibraryHandle, BandTensorGetBytes);
+	LoadFunction(LibraryHandle, BandTensorGetData);
+	LoadFunction(LibraryHandle, BandTensorGetNumDims);
+	LoadFunction(LibraryHandle, BandTensorGetDims);
+	LoadFunction(LibraryHandle, BandTensorGetName);
+	LoadFunction(LibraryHandle, BandTensorGetQuantization);
+	LoadFunction(LibraryHandle, BandTensorGetType);
 	IsDllLoaded = true;
 	return true;
 }
@@ -202,11 +203,11 @@ void FBandModule::ReportError(void* UserData, const char* Format, va_list Args)
 	}
 	else
 	{
-		UE_LOG(LogBand, Display, TEXT("%s"), *LogMessage);
+		UE_LOG(LogBand, Display, TEXT("%hc"), *LogMessage);
 	}
 }
 
-void FBandModule::OnEndInvokeInternal(int32 JobId, TfLiteStatus Status) const
+void FBandModule::OnEndInvokeInternal(int32 JobId, BandStatus Status) const
 {
 	// Propagate callback to actor for delegation
 	if (Interpreter.Get())

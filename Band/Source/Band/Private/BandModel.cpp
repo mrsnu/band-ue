@@ -1,13 +1,22 @@
 #include "BandModel.h"
 #include "Band.h"
-#include "BandLibraryWrapper.h"
+#include "BandLibrary.h"
 
 bool UBandModel::IsRegistered() const
 {
 	return Registered;
 }
 
-const int32 UBandModel::GetHandle()
+void UBandModel::BeginDestroy()
+{
+	if (ModelHandle)
+	{
+		FBandModule::Get().BandModelDelete(ModelHandle);
+	}
+	Super::BeginDestroy();
+}
+
+BandModel* UBandModel::GetHandle()
 {
 	// Delay-register model
 	// TODO(dostos): figure out how to register
@@ -29,12 +38,15 @@ void UBandModel::RegisterModel()
 	std::unique_lock<std::mutex> RegisterLock(RegisterMutex);
 	if (ModelBinary.Num() && !IsRegistered())
 	{
-		Band::TfLiteModel* TfLiteModel = FBandModule::Get().TfLiteModelCreate(ModelBinary.GetData(), ModelBinary.Num());
-		ModelHandle = FBandModule::Get().TfLiteInterpreterRegisterModel(FBandModule::Get().GetInterpreterHandle() , TfLiteModel);
-		FBandModule::Get().TfLiteModelDelete(TfLiteModel);
-		if (ModelHandle != -1)
+		ModelHandle = FBandModule::Get().BandModelCreate();
+		if (FBandModule::Get().BandModelAddFromBuffer(ModelHandle, kBandTfLite, ModelBinary.GetData(), ModelBinary.Num()) == kBandOk
+			&& FBandModule::Get().BandEngineRegisterModel(FBandModule::Get().GetEngineHandle(), ModelHandle) == kBandOk)
 		{
 			Registered = true;
+		}
+		else
+		{
+			FBandModule::Get().BandModelDelete(ModelHandle);
 		}
 	}
 }

@@ -1,8 +1,8 @@
 ﻿#include "BandTensorUtil.h"
 
-TArray<TfLiteTensor*> BandTensorUtil::TensorsFromTArray(TArray<UBandTensor*> Tensors)
+TArray<BandTensor*> BandTensorUtil::TensorsFromTArray(TArray<UBandTensor*> Tensors)
 {
-	TArray<TfLiteTensor*> OutTensors;
+	TArray<BandTensor*> OutTensors;
 	
 	for (int i = 0; i < Tensors.Num(); i++)
 	{
