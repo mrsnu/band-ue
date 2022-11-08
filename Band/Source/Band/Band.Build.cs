@@ -12,8 +12,8 @@ public class Band : ModuleRules
 		// TODO(dostos): change `Data` dir to better name/structure
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{
-			RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Data/Release/tensorflowlite_c.dll"));
-			PublicDelayLoadDLLs.Add("tensorflowlite_c.dll");
+			RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Data/Release/band_c.dll"));
+			PublicDelayLoadDLLs.Add("band_c.dll");
 		}
 		// TODO(dostos): not tested on iOS yet
 		else if (Target.Platform == UnrealTargetPlatform.Mac)
