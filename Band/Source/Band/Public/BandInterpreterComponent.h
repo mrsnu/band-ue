@@ -38,6 +38,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	UBandTensor* AllocateOutputTensor(UPARAM(ref) UBandModel* Model, int32 OutputIndex);
 
+	
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	void InvokeSyncSingleIO(UPARAM(ref) UBandModel* Model, UBandTensor* InputTensor, UBandTensor* OutputTensor);
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	int32 InvokeAsyncSingleInput(UPARAM(ref) UBandModel* Model, UBandTensor* InputTensor);
+
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	void InvokeSync(UPARAM(ref) UBandModel* Model, UPARAM(ref) TArray<UBandTensor*> InputTensors, UPARAM(ref) TArray<UBandTensor*> OutputTensors);
 	UFUNCTION(BlueprintCallable, Category = "Band")

@@ -50,6 +50,16 @@ UBandTensor* UBandInterpreterComponent::AllocateOutputTensor(UPARAM(ref) UBandMo
 	return Tensor;
 }
 
+void UBandInterpreterComponent::InvokeSyncSingleIO(UBandModel* Model, UBandTensor* InputTensor, UBandTensor* OutputTensor)
+{
+	InvokeSync(Model, {InputTensor}, {OutputTensor});
+}
+
+int32 UBandInterpreterComponent::InvokeAsyncSingleInput(UBandModel* Model, UBandTensor* InputTensor)
+{
+	return InvokeAsync(Model, {InputTensor});
+}
+
 void UBandInterpreterComponent::InvokeSync(UPARAM(ref) UBandModel* Model, UPARAM(ref) TArray<UBandTensor*> InputTensors, UPARAM(ref) TArray<UBandTensor*> OutputTensors)
 {
 	if (Model->IsRegistered() && GetInputTensorCount(Model) == InputTensors.Num() && GetOutputTensorCount(Model) == OutputTensors.Num())
