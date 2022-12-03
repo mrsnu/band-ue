@@ -1,14 +1,14 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BandInterpreterComponent.h"
+#include "BandInterfaceComponent.h"
 #include "BandModel.h"
 #include "BandTensor.h"
 #include "Band.h"
 #include "BandTensorUtil.h"
 
 
-void UBandInterpreterComponent::BeginPlay()
+void UBandInterfaceComponent::BeginPlay()
 {
 	// Reserve enough amount to avoid run-time realloc
 	JobToModel.reserve(1000);
@@ -16,25 +16,25 @@ void UBandInterpreterComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UBandInterpreterComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void UBandInterfaceComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	FBandModule::Get().UnregisterInterpreter(this);
 	Super::EndPlay(EndPlayReason);
 }
 
-int32 UBandInterpreterComponent::GetInputTensorCount(UPARAM(ref) UBandModel* Model)
+int32 UBandInterfaceComponent::GetInputTensorCount(UPARAM(ref) UBandModel* Model)
 {
 	// Skip model registration check (lazily register in get handle)
 	return FBandModule::Get().BandEngineGetNumInputTensors(GetHandle(), Model->GetHandle());
 }
 
-int32 UBandInterpreterComponent::GetOutputTensorCount(UPARAM(ref) UBandModel* Model)
+int32 UBandInterfaceComponent::GetOutputTensorCount(UPARAM(ref) UBandModel* Model)
 {
 	// Skip model registration check (lazily register in get handle)
 	return FBandModule::Get().BandEngineGetNumOutputTensors(GetHandle(), Model->GetHandle());
 }
 
-UBandTensor* UBandInterpreterComponent::AllocateInputTensor(UPARAM(ref) UBandModel* Model, int32 InputIndex)
+UBandTensor* UBandInterfaceComponent::AllocateInputTensor(UPARAM(ref) UBandModel* Model, int32 InputIndex)
 {
 	// Skip model registration check (lazily register in get handle)
 	UBandTensor* Tensor = NewObject<UBandTensor>();
@@ -42,7 +42,7 @@ UBandTensor* UBandInterpreterComponent::AllocateInputTensor(UPARAM(ref) UBandMod
 	return Tensor;
 }
 
-UBandTensor* UBandInterpreterComponent::AllocateOutputTensor(UPARAM(ref) UBandModel* Model, int32 OutputIndex)
+UBandTensor* UBandInterfaceComponent::AllocateOutputTensor(UPARAM(ref) UBandModel* Model, int32 OutputIndex)
 {
 	// Skip model registration check (lazily register in get handle)
 	UBandTensor* Tensor = NewObject<UBandTensor>();
@@ -50,17 +50,17 @@ UBandTensor* UBandInterpreterComponent::AllocateOutputTensor(UPARAM(ref) UBandMo
 	return Tensor;
 }
 
-void UBandInterpreterComponent::InvokeSyncSingleIO(UBandModel* Model, UBandTensor* InputTensor, UBandTensor* OutputTensor)
+void UBandInterfaceComponent::InvokeSyncSingleIO(UBandModel* Model, UBandTensor* InputTensor, UBandTensor* OutputTensor)
 {
 	InvokeSync(Model, {InputTensor}, {OutputTensor});
 }
 
-int32 UBandInterpreterComponent::InvokeAsyncSingleInput(UBandModel* Model, UBandTensor* InputTensor)
+int32 UBandInterfaceComponent::InvokeAsyncSingleInput(UBandModel* Model, UBandTensor* InputTensor)
 {
 	return InvokeAsync(Model, {InputTensor});
 }
 
-void UBandInterpreterComponent::InvokeSync(UPARAM(ref) UBandModel* Model, UPARAM(ref) TArray<UBandTensor*> InputTensors, UPARAM(ref) TArray<UBandTensor*> OutputTensors)
+void UBandInterfaceComponent::InvokeSync(UPARAM(ref) UBandModel* Model, UPARAM(ref) TArray<UBandTensor*> InputTensors, UPARAM(ref) TArray<UBandTensor*> OutputTensors)
 {
 	if (Model->IsRegistered() && GetInputTensorCount(Model) == InputTensors.Num() && GetOutputTensorCount(Model) == OutputTensors.Num())
 	{
@@ -74,7 +74,7 @@ void UBandInterpreterComponent::InvokeSync(UPARAM(ref) UBandModel* Model, UPARAM
 
 }
 
-int32 UBandInterpreterComponent::InvokeAsync(UPARAM(ref) UBandModel* Model, UPARAM(ref) TArray<UBandTensor*> InputTensors)
+int32 UBandInterfaceComponent::InvokeAsync(UPARAM(ref) UBandModel* Model, UPARAM(ref) TArray<UBandTensor*> InputTensors)
 {
 	if (Model->IsRegistered() && GetInputTensorCount(Model) == InputTensors.Num()) {
 		const int32 JobId = FBandModule::Get().BandEngineRequestAsyncOnWorker(GetHandle(), Model->GetHandle(), 0, BandTensorUtil::TensorsFromTArray(InputTensors).GetData());
@@ -89,7 +89,7 @@ int32 UBandInterpreterComponent::InvokeAsync(UPARAM(ref) UBandModel* Model, UPAR
 	}
 }
 
-EBandStatus UBandInterpreterComponent::Wait(int32 JobId, UPARAM(ref) TArray<UBandTensor*> OutputTensors)
+EBandStatus UBandInterfaceComponent::Wait(int32 JobId, UPARAM(ref) TArray<UBandTensor*> OutputTensors)
 {
 	// TODO(dostos): Add `GetJob(int32 jobId)` to C API?
 	const int32 OutputTensorCount = FBandModule::Get().BandEngineGetNumOutputTensors(GetHandle(), JobToModel[JobId]);
@@ -105,7 +105,7 @@ EBandStatus UBandInterpreterComponent::Wait(int32 JobId, UPARAM(ref) TArray<UBan
 	}
 }
 
-void UBandInterpreterComponent::OnEndInvokeInternal(int32 JobId, BandStatus Status) const
+void UBandInterfaceComponent::OnEndInvokeInternal(int32 JobId, BandStatus Status) const
 {
 	AsyncTask(ENamedThreads::GameThread, [&, JobId, Status]() {
 		UE_LOG(LogBand, Display, TEXT("Finished Job id %d."), JobId);
@@ -115,7 +115,7 @@ void UBandInterpreterComponent::OnEndInvokeInternal(int32 JobId, BandStatus Stat
 	OnEndInvoke.Broadcast(JobId, BandEnum::ToBandStatus(Status));
 }
 
-BandEngine* UBandInterpreterComponent::GetHandle() const
+BandEngine* UBandInterfaceComponent::GetHandle() const
 {
 	return FBandModule::Get().GetEngineHandle();
 }

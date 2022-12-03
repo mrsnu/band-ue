@@ -216,13 +216,13 @@ void FBandModule::OnEndInvokeInternal(int32 JobId, BandStatus Status) const
 	}
 }
 
-void FBandModule::RegisterInterpreter(UBandInterpreterComponent* InterpreterComponent)
+void FBandModule::RegisterInterpreter(UBandInterfaceComponent* InterpreterComponent)
 {
 	check(Interpreter == nullptr);
 	Interpreter = MakeWeakObjectPtr(InterpreterComponent);
 }
 
-void FBandModule::UnregisterInterpreter(UBandInterpreterComponent* InterpreterComponent)
+void FBandModule::UnregisterInterpreter(UBandInterfaceComponent* InterpreterComponent)
 {
 	check(Interpreter == InterpreterComponent);
 	Interpreter = nullptr;

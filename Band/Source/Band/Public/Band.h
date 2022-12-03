@@ -6,7 +6,7 @@
 #include "Modules/ModuleManager.h"
 #include "BandLibrary.h"
 #include "BandEnum.h"
-#include "BandInterpreterComponent.h"
+#include "BandInterfaceComponent.h"
 
 struct BandTensor;
 
@@ -39,9 +39,9 @@ private:
 	void OnEndInvokeInternal(int32 JobId, BandStatus Status) const;
 
 	/* Reference to interpreter. Mainly for callback propagation */
-	void RegisterInterpreter(UBandInterpreterComponent* Interpreter);
-	void UnregisterInterpreter(UBandInterpreterComponent* Interpreter);
-	TWeakObjectPtr<UBandInterpreterComponent> Interpreter = nullptr;
+	void RegisterInterpreter(UBandInterfaceComponent* Interpreter);
+	void UnregisterInterpreter(UBandInterfaceComponent* Interpreter);
+	TWeakObjectPtr<UBandInterfaceComponent> Interpreter = nullptr;
 
 	BandEngine* EngineHandle = nullptr;
 	void* LibraryHandle = nullptr;
@@ -49,7 +49,7 @@ private:
 
 	friend class UBandTensor;
 	friend class UBandModel;
-	friend class UBandInterpreterComponent;
+	friend class UBandInterfaceComponent;
 	/*
 		DLL handles from Band Library
 	*/

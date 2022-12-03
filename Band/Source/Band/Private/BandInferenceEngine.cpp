@@ -23,7 +23,7 @@ ABandInferenceEngine::ABandInferenceEngine()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-	Interpreter = CreateDefaultSubobject<UBandInterpreterComponent>(TEXT("InterpreterComponent"));
+	Interpreter = CreateDefaultSubobject<UBandInterfaceComponent>(TEXT("InterpreterComponent"));
 	CameraComponent = CreateDefaultSubobject<UAndroidCameraComponent>(TEXT("CameraComponent"));
 }
 

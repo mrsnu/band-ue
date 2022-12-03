@@ -54,7 +54,7 @@ public:
 	BandTensor* Handle() const;
 
 private:
-	friend class UBandInterpreterComponent;
+	friend class UBandInterfaceComponent;
 
 	void Initialize(BandTensor* TensorHandle);
 	virtual void BeginDestroy() override;
