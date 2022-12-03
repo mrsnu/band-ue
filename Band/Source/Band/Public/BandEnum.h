@@ -41,6 +41,14 @@ enum class EBandDetector : uint8
 	RetinaFace UMETA(DisplayName = "RetinaFace"),
 	PalmDetection UMETA(DisplayName = "PalmDetection"),
 	SSD UMETA(DisplayName = "SSD"),
+	SSDMNetV2 UMETA(DisplayName = "SSDMobileNetV2"),
+	Unknown UMETA(DisplayName = "Unknown")
+};
+
+UENUM(BlueprintType)
+enum class EBandLandmark : uint8
+{
+	MoveNetSingleThunder UMETA(DisplayName = "SinglePoseMovenetThunder"),
 	Unknown UMETA(DisplayName = "Unknown")
 };
 

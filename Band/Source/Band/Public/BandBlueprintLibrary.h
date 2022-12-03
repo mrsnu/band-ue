@@ -22,6 +22,9 @@ public:
 	static TArray<FBandBoundingBox> GetDetectedBoxes(UPARAM(ref) TArray<UBandTensor *> OutputTensors, EBandDetector DetectorType, UBandLabel* Label = nullptr);
 
 	UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
+	static TArray<FVector2D> Get2DLandmarks(UPARAM(ref) TArray<UBandTensor *> OutputTensors, EBandLandmark ModelType);
+
+	UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
 	static TArray<FBandBoundingBox> NMS(TArray<FBandBoundingBox> Boxes, const float IoU_Threshold);
 	
 	UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")

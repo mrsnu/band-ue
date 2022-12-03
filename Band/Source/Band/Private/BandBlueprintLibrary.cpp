@@ -24,7 +24,10 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
 	const size_t ClassTensorIndex,
 	const size_t ClassOffset,
 	const UBandLabel* Label,
-	const float ScoreThreshold)
+	const float ScoreThreshold,
+	int32 LenBoxVector = -1,
+	int32 LenConfidenceVector = -1,
+	int32 LenClassVector = -1)
 {
 	TArray<FBandBoundingBox> Boxes;
 	if (Tensors.Num() <= DetectionTensorIndex)
@@ -45,17 +48,17 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
 	const TArray<T>& DetectionResults = Tensors[DetectionTensorIndex]->GetBuffer<T>();
 	const size_t BatchOffset = Tensors[DetectionTensorIndex]->Dim(0) == 1 ? 1 : 0;
 	const int32 NumBoxes = Tensors[DetectionTensorIndex]->Dim(BatchOffset);
-	const int32 LenBoxVector = Tensors[DetectionTensorIndex]->Dim(1 + BatchOffset);
+	LenBoxVector = LenBoxVector < 0 ? Tensors[DetectionTensorIndex]->Dim(1 + BatchOffset) : LenBoxVector;
 
 	const int32 NumTrueDims = Tensors[ConfidenceTensorIndex]->NumDims() - BatchOffset;
 	// Assumption: (1) x [NumBoxes] x [LenConfidenceVector] or (1) x [NumBoxes]
 	const TArray<T>& ConfidenceResults = Tensors[ConfidenceTensorIndex]->GetBuffer<T>();
-	const int32 LenConfidenceVector = NumTrueDims >= 2 ?
-		Tensors[ConfidenceTensorIndex]->Dim(1 + BatchOffset) : 1;
+	LenConfidenceVector = LenConfidenceVector < 0 ? (NumTrueDims >= 2 ?
+		Tensors[ConfidenceTensorIndex]->Dim(1 + BatchOffset) : 1) : LenConfidenceVector;
 	// Assumption: (1) x [NumBoxes] x [LenConfidenceVector] or (1) x [NumBoxes]
 	const TArray<T>& ClassResults = Tensors[ClassTensorIndex]->GetBuffer<T>();
-	const int32 LenClassVector = NumTrueDims >= 2 ?
-		Tensors[ClassTensorIndex]->Dim(1 + BatchOffset) : 1;
+	LenClassVector = LenClassVector < 0 ? (NumTrueDims >= 2 ?
+		Tensors[ClassTensorIndex]->Dim(1 + BatchOffset) : 1) : LenClassVector;
 
 	for (int32 BBoxOffset : BBoxOffsets)
 	{
@@ -122,6 +125,9 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(UPARAM(ref) TAr
 	size_t ConfidenceOffset = 15;
 	size_t ClassTensorIndex = 0;
 	size_t ClassOffset = 0;
+	int32 LenBoxVector = -1;
+	int32 LenConfidenceVector = -1;
+	int32 LenClassVector = -1;
 	float ScoreThreshold = 0.2f;
 
 	if (DetectorType == EBandDetector::SSD)
@@ -130,6 +136,14 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(UPARAM(ref) TAr
 		ConfidenceOffset = 0;
 		ScoreThreshold = 0.5f;
 		ClassTensorIndex = 1;
+	}
+	else if(DetectorType == EBandDetector::SSDMNetV2)
+	{
+		ConfidenceTensorIndex = 2;
+		ConfidenceOffset = 0;
+		ScoreThreshold = 0.5f;
+		ClassTensorIndex = 1;
+		BBoxOffsets = {1, 0, 3, 2}; // ymin, xmin, ymax, xmax
 	}
 	else if (DetectorType == EBandDetector::PalmDetection)
 	{
@@ -141,12 +155,22 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(UPARAM(ref) TAr
 		UE_LOG(LogBand, Error, TEXT("Unknown detector type"));
 		return Boxes;
 	}
+	else if (DetectorType == EBandDetector::RetinaFace)
+	{
+		DetectionTensorIndex = 0;
+		ConfidenceTensorIndex = 0;
+		ClassTensorIndex = 0;
+		ScoreThreshold = 0.7f;
+		ConfidenceOffset = 15;
+		LenBoxVector = LenConfidenceVector = LenClassVector = 16;
+		BBoxOffsets = {0, 3, 2, 1}; // xmin, ymin, xmax, ymax
+	}
 
 	const EBandTensorType TensorType = Tensors[DetectionTensorIndex]->Type();
 	switch (TensorType)
 	{
 		case EBandTensorType::Float32:
-			Boxes = GetDetectedBoxesInternal<float>(Tensors, DetectionTensorIndex, BBoxOffsets, ConfidenceTensorIndex, ConfidenceOffset, ClassTensorIndex, ClassOffset, Label, ScoreThreshold);
+			Boxes = GetDetectedBoxesInternal<float>(Tensors, DetectionTensorIndex, BBoxOffsets, ConfidenceTensorIndex, ConfidenceOffset, ClassTensorIndex, ClassOffset, Label, ScoreThreshold, LenBoxVector, LenConfidenceVector, LenClassVector);
 		break;
 		default:
 			const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
@@ -156,11 +180,77 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(UPARAM(ref) TAr
 	return Boxes;
 }
 
+
+template <typename T>
+TArray<FVector2D> Get2DLandmarksInternal(TArray<UBandTensor*> Tensors,
+	int LandmarkTensorIndex,
+	int TensorDim,
+	int NumLandmarks,
+	TArray<int32> Offsets // Offsets[0] = X, Offsets[1] = Y, (Offsets[2] = Z)
+	)
+{
+	TArray<FVector2D> Landmarks;
+
+	if(Offsets.Num() < 2) // Will access only 2 (because we want to make 2D-vectors)
+		{
+		UE_LOG(LogBand, Error, TEXT("UBandBlueprintLibrary: Get2DLandmarks: Number of offsets(%d) != Dim(%d)"),
+			Offsets.Num(), TensorDim);
+		return Landmarks;
+		}
+	
+	const TArray<T>& LandmarkResults = Tensors[LandmarkTensorIndex]->GetBuffer<T>();
+
+	for(int Idx=0; Idx < NumLandmarks; Idx++)
+	{
+		FVector2D TempVector = FVector2D(LandmarkResults[Idx*TensorDim + Offsets[0]], LandmarkResults[Idx*TensorDim + Offsets[1]]);
+		Landmarks.Push(TempVector);
+	}
+
+	return Landmarks;
+}
+
+TArray<FVector2D> UBandBlueprintLibrary::Get2DLandmarks(TArray<UBandTensor*> Tensors, EBandLandmark ModelType)
+{
+	TArray<FVector2D> Landmarks;
+	int LandmarkTensorIndex = 0;
+	int NumLandmarks = 0;
+	int TensorDim = 0;
+	TArray<int32> Offsets = {0, 1}; // XYZ
+	
+	if(ModelType == EBandLandmark::MoveNetSingleThunder)
+	{
+		LandmarkTensorIndex = 0;
+		NumLandmarks = 17;
+		TensorDim = 3;
+		Offsets = {1, 0}; // Tensor = [Y, X, Z]
+	}
+	else if(ModelType == EBandLandmark::Unknown)
+	{
+		UE_LOG(LogBand, Error, TEXT("Unknown landmark model type"));
+		return Landmarks;
+	}
+
+	const EBandTensorType TensorType = Tensors[LandmarkTensorIndex]->Type();
+	switch (TensorType)
+	{
+	case EBandTensorType::Float32:
+		Landmarks = Get2DLandmarksInternal<float>(Tensors, LandmarkTensorIndex, TensorDim, NumLandmarks, Offsets);
+		break;
+	default:
+		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+		UE_LOG(LogBand, Error, TEXT("Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+	}
+	
+	return Landmarks;
+}
+
+
+
 float BoxIntersection(FRect A, FRect B)
 {
 	if (A.Right <= B.Left || B.Right <= A.Left)
 		return 0.0f;
-	if (A.Top <= B.Bottom || B.Top <= A.Bottom)
+	if (A.Bottom <= B.Top || B.Bottom <= A.Top)
 		return 0.0f;
 	return (FGenericPlatformMath::Min(A.Right, B.Right) - FGenericPlatformMath::Max(A.Left, B.Left))
 		* (FGenericPlatformMath::Min(A.Top, B.Top) - FGenericPlatformMath::Max(A.Bottom, B.Bottom));
@@ -186,7 +276,7 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::NMS(TArray<FBandBoundingBox> Box
 	while (PrevBoxes.Num() > 0)
 	{
 		PrevBoxes.Sort([](const FBandBoundingBox& Box1, const FBandBoundingBox& Box2) {
-			return Box1.Confidence < Box2.Confidence;
+			return Box1.Confidence > Box2.Confidence;
 		});
 		TArray<FBandBoundingBox> CurrBoxes = TArray<FBandBoundingBox>(PrevBoxes);
 		FBandBoundingBox Max = CurrBoxes[0];

@@ -37,13 +37,21 @@ void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame, 
 		return;
 	}
 	SCOPE_CYCLE_COUNTER(STAT_BandCameraToTensor);
-	const UAndroidCameraFrame::NV12Frame& FrameData = Frame->GetData();
-	std::unique_ptr<Band::FrameBufferUtils> Utils = Band::FrameBufferUtils::Create(Band::FrameBufferUtils::ProcessEngine::kLibyuv);
-	std::unique_ptr<Band::FrameBuffer> YuvBuffer = Band::CreateFromYuvRawBuffer(
-		FrameData.Y, FrameData.U, FrameData.V, Band::FrameBuffer::Format::kNV12,
-		{ Frame->GetWidth(), Frame->GetHeight() },
-		FrameData.YRowStride, FrameData.UVRowStride, FrameData.UVPixelStride);
-
+	std::unique_ptr<Band::FrameBuffer> Buffer;
+	std::unique_ptr<Band::FrameBufferUtils> Utils = Band::FrameBufferUtils::Create(Band::FrameBufferUtils::ProcessEngine::kLibyuv);;
+	if(Frame->HasYUV()){
+		const UAndroidCameraFrame::NV12Frame& FrameData = Frame->GetData();
+		Buffer = Band::CreateFromYuvRawBuffer(
+			FrameData.Y, FrameData.U, FrameData.V, Band::FrameBuffer::Format::kNV12,
+			{ Frame->GetWidth(), Frame->GetHeight() },
+			FrameData.YRowStride, FrameData.UVRowStride, FrameData.UVPixelStride);
+	}
+	else
+	{
+		const uint8* FrameData = Frame->GetARGBBuffer();
+		Buffer = Band::CreateFromRgbaRawBuffer(FrameData, {Frame->GetWidth(), Frame->GetHeight()});
+	}
+	
 	// BWHC format
 	const int InputWidth = Dim(1);
 	const int InputHeight = Dim(2);
@@ -51,9 +59,8 @@ void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame, 
 	// Directly update uint8 buffer
 	uint8* TargetBufferPtr = Type() == EBandTensorType::UInt8 ? Data() : RGBBuffer;
 	std::unique_ptr<Band::FrameBuffer> OutputBuffer = Band::CreateFromRgbRawBuffer(TargetBufferPtr, { InputWidth, InputHeight });
-
 	// Image preprocessing
-	if (!Utils->Preprocess(*YuvBuffer, OutputBuffer.get()))
+	if (!Utils->Preprocess(*Buffer, OutputBuffer.get()))
 	{
 		UE_LOG(LogBand, Display, TEXT("FromCameraFrame: Failed to preprocess"));
 		return;
@@ -228,6 +235,7 @@ EBandStatus UBandTensor::CopyFromBuffer(TArray<uint8> Buffer)
 
 EBandStatus UBandTensor::CopyFromTexture(UPARAM(ref) UTexture2D* Texture, float Mean, float Std)
 {
+	// TODO(@juimdpp) Resize texture to allow any texture to be processed
 	SCOPE_CYCLE_COUNTER(STAT_BandTextureToTensor);
 	if (!Texture->PlatformData->Mips.Num())
 	{
