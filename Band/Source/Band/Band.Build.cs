@@ -23,10 +23,10 @@ public class Band : ModuleRules
 		}
 		else if (Target.Platform == UnrealTargetPlatform.Android)
 		{
-			string ExampleSoPath = Path.Combine(ModuleDirectory, "Data/Release/libtensorflowlite_c.so");
+			string ExampleSoPath = Path.Combine(ModuleDirectory, "Data/Debug/libband_c.so");
 			PublicAdditionalLibraries.Add(ExampleSoPath);
 			RuntimeDependencies.Add(ExampleSoPath);
-			PublicDelayLoadDLLs.Add("libtensorflowlite_c.so");
+			PublicDelayLoadDLLs.Add("libband_c.so");
 
 			AdditionalPropertiesForReceipt.Add(new ReceiptProperty("AndroidPlugin", Path.Combine(ModuleDirectory, "Band.xml")));
 		}

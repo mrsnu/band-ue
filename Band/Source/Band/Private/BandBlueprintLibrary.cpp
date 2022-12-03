@@ -236,28 +236,6 @@ TArray<FVector2D> UBandBlueprintLibrary::Get2DLandmarks(TArray<UBandTensor*> Ten
 	return Landmarks;
 }
 
-float BoxIntersection(FRect A, FRect B)
-{
-	if (A.Right <= B.Left || B.Right <= A.Left)
-		return 0.0f;
-	if (A.Bottom <= B.Top || B.Bottom <= A.Top)
-		return 0.0f;
-	return (FGenericPlatformMath::Min(A.Right, B.Right) - FGenericPlatformMath::Max(A.Left, B.Left))
-		* (FGenericPlatformMath::Min(A.Top, B.Top) - FGenericPlatformMath::Max(A.Bottom, B.Bottom));
-}
-
-float BoxUnion(FRect A, FRect B)
-{
-	return (A.Right - A.Left) * (A.Top - A.Bottom)
-		+ (B.Right - B.Left) * (B.Top - B.Bottom)
-		- BoxIntersection(A, B);
-}
-
-float BoxIou(FRect A, FRect B)
-{
-	return BoxIntersection(A, B) / BoxUnion(A, B);
-}
-
 TArray<FBandBoundingBox> UBandBlueprintLibrary::NMS(TArray<FBandBoundingBox> Boxes, const float IoU_Threshold)
 {
 	TArray<FBandBoundingBox> NMSBoxes;
