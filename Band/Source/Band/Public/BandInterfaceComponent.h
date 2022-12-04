@@ -52,6 +52,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	EBandStatus Wait(int32 JobId, UPARAM(ref) TArray<UBandTensor*> OutputTensors);
 
+	
+	UPROPERTY(EditAnywhere, Category = Band)
+	EBandDeviceType DeviceType;
+	
+	UPROPERTY(EditAnywhere, Category = Band)
+	int32 WorkerIndex;
+
 	UPROPERTY(BlueprintAssignable, Category = Band)
 	FOnEndInvokeDynamic OnEndInvokeDynamic;
 	/*

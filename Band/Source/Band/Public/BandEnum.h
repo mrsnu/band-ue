@@ -24,6 +24,15 @@ enum class EBandTensorType : uint8
 	Float64 UMETA(DisplayName = "Float64"),
 };
 
+UENUM(BlueprintType)
+enum class EBandDeviceType : uint8
+{
+	CPU UMETA(DisplayName = "CPU"),
+	GPU UMETA(DisplayName = "GPU"),
+	DSP UMETA(DisplayName = "DSP"),
+	NPU UMETA(DisplayName = "NPU"),
+};
+
 /*
 	UEnum for BandStatus in common.h
 */

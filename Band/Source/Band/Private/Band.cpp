@@ -28,7 +28,7 @@ void FBandModule::StartupModule()
 	#elif PLATFORM_MAC
 	LibraryPath = FString("libtensorflowlite_c.dylib");
 	#elif PLATFORM_ANDROID
-	LibraryPath = FString("libtensorflowlite_c.so");
+	LibraryPath = FString("libband_c.so");
 	#endif // PLATFORM_WINDOWS
 
 	UE_LOG(LogBand, Display, TEXT("Selected library path %s"), *LibraryPath);
@@ -79,7 +79,7 @@ bool FBandModule::InitializeInterpreter(FString ConfigPath)
 {
 	FString LogDirectory = FPaths::ProjectLogDir();
 	FString ProfileDirectory = FPaths::ProjectLogDir();
-	#if PLATFORM_ANDROID && USE_ANDROID_FILE
+	#if PLATFORM_ANDROID
 	LogDirectory = TEXT("/sdcard/UE4Game/BandExample/BandExample/Saved/Logs/");
 	ProfileDirectory = TEXT("/sdcard/UE4Game/BandExample/BandExample/Saved/Logs/");
 	#endif
@@ -87,7 +87,7 @@ bool FBandModule::InitializeInterpreter(FString ConfigPath)
 	ProfileDirectory += TEXT("band_profile.json");
 
 	BandConfigBuilder* ConfigBuilder = BandConfigBuilderCreate();
-	BandAddConfig(ConfigBuilder, BAND_PLANNER_LOG_PATH, 1, ToCStr(LogDirectory));
+	BandAddConfig(ConfigBuilder, BAND_PLANNER_LOG_PATH, 1, TCHAR_TO_ANSI(*LogDirectory));
 	BandAddConfig(ConfigBuilder, BAND_PLANNER_SCHEDULERS, 1, kBandFixedDevice);
 	BandAddConfig(ConfigBuilder, BAND_CPU_MASK, /*count=*/1, kBandAll);
 	BandAddConfig(ConfigBuilder, BAND_PLANNER_CPU_MASK, /*count=*/1, kBandPrimary);
@@ -96,7 +96,7 @@ bool FBandModule::InitializeInterpreter(FString ConfigPath)
 	BandAddConfig(ConfigBuilder, BAND_WORKER_NUM_THREADS, /*count=*/3, 1, 1, 1);
 	BandAddConfig(ConfigBuilder, BAND_PROFILE_SMOOTHING_FACTOR, /*count=*/1, 0.1f);
 	BandAddConfig(ConfigBuilder, BAND_PROFILE_DATA_PATH, /*count=*/1,
-		ToCStr(ProfileDirectory));
+		TCHAR_TO_ANSI(*ProfileDirectory));
 	BandAddConfig(ConfigBuilder, BAND_PROFILE_ONLINE, /*count=*/1, true);
 	BandAddConfig(ConfigBuilder, BAND_PROFILE_NUM_WARMUPS, /*count=*/1, 1);
 	BandAddConfig(ConfigBuilder, BAND_PROFILE_NUM_RUNS, /*count=*/1, 1);
@@ -110,6 +110,10 @@ bool FBandModule::InitializeInterpreter(FString ConfigPath)
 		EngineHandle = BandEngineCreate(Config);
 		BandConfigDelete(Config);
 	}
+	else
+	{
+		UE_LOG(LogBand, Display, TEXT("Failed to create config"));
+	}
 
 	if (EngineHandle)
 	{
@@ -117,6 +121,10 @@ bool FBandModule::InitializeInterpreter(FString ConfigPath)
 			FBandModule* BandModule = static_cast<FBandModule*>(UserData);
 			BandModule->OnEndInvokeInternal(JobId, Status);
 		}, this);
+	}
+	else
+	{
+		UE_LOG(LogBand, Display, TEXT("Failed to create EngineHandle"));
 	}
 
 	BandConfigBuilderDelete(ConfigBuilder);

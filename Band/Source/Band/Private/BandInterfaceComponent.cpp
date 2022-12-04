@@ -13,6 +13,24 @@ void UBandInterfaceComponent::BeginPlay()
 	// Reserve enough amount to avoid run-time realloc
 	JobToModel.reserve(1000);
 	FBandModule::Get().RegisterInterpreter(this);
+	
+	size_t num_worker = FBandModule::Get().BandEngineGetNumWorkers(GetHandle());
+
+	// Update default 
+	for (int i = 0; i < num_worker ; i++)
+	{
+		auto device_flag = FBandModule::Get().BandEngineGetWorkerDevice(GetHandle(), i);
+		if (device_flag == kBandNPU)
+		{
+			DeviceType = EBandDeviceType::NPU;
+			WorkerIndex = i;
+		} else if (device_flag == kBandDSP)
+		{
+			DeviceType = EBandDeviceType::DSP;
+			WorkerIndex = i;
+		}
+	}
+	
 	Super::BeginPlay();
 }
 
