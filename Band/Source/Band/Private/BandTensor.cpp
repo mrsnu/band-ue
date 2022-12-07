@@ -37,6 +37,7 @@ void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame, 
 		return;
 	}
 	SCOPE_CYCLE_COUNTER(STAT_BandCameraToTensor);
+	
 	std::unique_ptr<Band::FrameBuffer> Buffer;
 	std::unique_ptr<Band::FrameBufferUtils> Utils = Band::FrameBufferUtils::Create(Band::FrameBufferUtils::ProcessEngine::kLibyuv);;
 	if(Frame->HasYUV()){
@@ -46,41 +47,53 @@ void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame, 
 			{ Frame->GetWidth(), Frame->GetHeight() },
 			FrameData.YRowStride, FrameData.UVRowStride, FrameData.UVPixelStride);
 	}
-	else
+	else if (Frame->GetARGBBuffer())
 	{
 		const uint8* FrameData = Frame->GetARGBBuffer();
 		Buffer = Band::CreateFromRgbaRawBuffer(FrameData, {Frame->GetWidth(), Frame->GetHeight()});
 	}
 	
-	// BWHC format
-	const int InputWidth = Dim(1);
-	const int InputHeight = Dim(2);
+	const float Mean = Normalize ? 127.5f : 0.f;
+	const float Std = Normalize ? 127.5f : 1.f;
 
-	// Directly update uint8 buffer
-	uint8* TargetBufferPtr = Type() == EBandTensorType::UInt8 ? Data() : RGBBuffer;
-	std::unique_ptr<Band::FrameBuffer> OutputBuffer = Band::CreateFromRgbRawBuffer(TargetBufferPtr, { InputWidth, InputHeight });
-	// Image preprocessing
-	if (!Utils->Preprocess(*Buffer, OutputBuffer.get()))
+	if (Buffer.get())
 	{
-		UE_LOG(LogBand, Display, TEXT("FromCameraFrame: Failed to preprocess"));
-		return;
-	}
+		// BWHC format
+		const int InputWidth = Dim(1);
+		const int InputHeight = Dim(2);
 
-	// Type conversion (RGB8 to tensor type)
-	if (Type() != EBandTensorType::UInt8)
-	{
-		float Mean = Normalize ? 127.5f : 0.f;
-		float Std = Normalize ? 127.5f : 1.f;
-		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
-		switch (Type())
+		// Directly update uint8 buffer
+		uint8* TargetBufferPtr = Type() == EBandTensorType::UInt8 ? Data() : RGBBuffer;
+		std::unique_ptr<Band::FrameBuffer> OutputBuffer = Band::CreateFromRgbRawBuffer(TargetBufferPtr, { InputWidth, InputHeight });
+		// Image preprocessing
+		if (!Utils->Preprocess(*Buffer, OutputBuffer.get()))
 		{
-			case EBandTensorType::Float32:
-				BandTensorUtil::RGB8ToRGBArray<float>(TargetBufferPtr, reinterpret_cast<float*>(Data()), InputWidth * InputHeight, Mean, Std);
-				break;
-			default:
-				UE_LOG(LogBand, Display, TEXT("FromCameraFrame: Failed to convert from %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(Type())));
-				break;
+			UE_LOG(LogBand, Display, TEXT("FromCameraFrame: Failed to preprocess"));
+			return;
 		}
+
+		// Type conversion (RGB8 to tensor type)
+		if (Type() != EBandTensorType::UInt8)
+		{
+			const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+			switch (Type())
+			{
+				case EBandTensorType::Float32:
+					BandTensorUtil::RGB8ToRGBArray<float>(TargetBufferPtr, reinterpret_cast<float*>(Data()), InputWidth * InputHeight, Mean, Std);
+				break;
+				default:
+					UE_LOG(LogBand, Display, TEXT("FromCameraFrame: Failed to convert from %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(Type())));
+				break;
+			}
+		}
+	}
+	else if (Frame->GetTexture2D())
+	{
+		CopyFromTexture(Frame->GetTexture2D(), Mean, Std);
+	}
+	else
+	{
+		UE_LOG(LogBand, Display, TEXT("FromCameraFrame: Failed to copy from both buffer (YUV or ARGB) and texture"));
 	}
 }
 

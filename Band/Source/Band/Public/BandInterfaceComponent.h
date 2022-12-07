@@ -45,19 +45,18 @@ public:
 	int32 InvokeAsyncSingleInput(UPARAM(ref) UBandModel* Model, UBandTensor* InputTensor);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	void InvokeSync(UPARAM(ref) UBandModel* Model, UPARAM(ref) TArray<UBandTensor*> InputTensors, UPARAM(ref) TArray<UBandTensor*> OutputTensors);
+	void InvokeSync(UPARAM(ref) UBandModel* Model, UPARAM(ref) TArray<UBandTensor*> InputTensors, UPARAM(ref) TArray<UBandTensor*> OutputTensors, int DeviceFlag = 0);
 	UFUNCTION(BlueprintCallable, Category = "Band")
-	int32 InvokeAsync(UPARAM(ref) UBandModel* Model, UPARAM(ref) TArray<UBandTensor*> InputTensors);
+	int32 InvokeAsync(UPARAM(ref) UBandModel* Model, UPARAM(ref) TArray<UBandTensor*> InputTensors, int DeviceFlag = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	EBandStatus Wait(int32 JobId, UPARAM(ref) TArray<UBandTensor*> OutputTensors);
 
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	int32 GetNumWorkers() const;
 	
-	UPROPERTY(EditAnywhere, Category = Band)
-	EBandDeviceType DeviceType;
-	
-	UPROPERTY(EditAnywhere, Category = Band)
-	int32 WorkerIndex;
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	int32 GetWorkerDeviceType(int Index) const;
 
 	UPROPERTY(BlueprintAssignable, Category = Band)
 	FOnEndInvokeDynamic OnEndInvokeDynamic;
@@ -76,3 +75,4 @@ private:
 	mutable std::unordered_map<int32, BandModel*> JobToModel;
 	friend class FBandModule;
 };
+
