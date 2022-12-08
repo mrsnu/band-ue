@@ -23,7 +23,7 @@ public class Band : ModuleRules
 		}
 		else if (Target.Platform == UnrealTargetPlatform.Android)
 		{
-			string ExampleSoPath = Path.Combine(ModuleDirectory, "Data/Debug/libband_c.so");
+			string ExampleSoPath = Path.Combine(ModuleDirectory, "Data/Release/libband_c.so");
 			PublicAdditionalLibraries.Add(ExampleSoPath);
 			RuntimeDependencies.Add(ExampleSoPath);
 			PublicDelayLoadDLLs.Add("libband_c.so");
