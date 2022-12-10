@@ -131,7 +131,6 @@ int32 UBandInterfaceComponent::GetWorkerDeviceType(int Index) const
 void UBandInterfaceComponent::OnEndInvokeInternal(int32 JobId, BandStatus Status) const
 {
 	AsyncTask(ENamedThreads::GameThread, [&, JobId, Status]() {
-		UE_LOG(LogBand, Display, TEXT("Finished Job id %d."), JobId);
 		OnEndInvokeDynamic.Broadcast(JobId, BandEnum::ToBandStatus(Status));
 		JobToModel.erase(JobId);
 	});
