@@ -201,6 +201,7 @@ TArray<FVector2D> Get2DLandmarksInternal(TArray<UBandTensor*> Tensors,
 	return Landmarks;
 }
 
+// TODO: replace apps that use this function with GetLandmarks
 TArray<FVector2D> UBandBlueprintLibrary::Get2DLandmarks(TArray<UBandTensor*> Tensors, EBandLandmark ModelType)
 {
 	TArray<FVector2D> Landmarks;
@@ -231,6 +232,93 @@ TArray<FVector2D> UBandBlueprintLibrary::Get2DLandmarks(TArray<UBandTensor*> Ten
 		default:
 			const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
 			UE_LOG(LogBand, Error, TEXT("Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+	}
+
+	return Landmarks;
+}
+
+template <typename T>
+FBandBoundingBox GetLandmarksInternal(TArray<UBandTensor*> Tensors,
+	int LandmarkTensorIndex,
+	int TensorDim,
+	int NumLandmarks,
+	int NumCoords,
+	TArray<int32> Offsets, // Offsets[0] = X, Offsets[1] = Y, (Offsets[2] = Z)
+	int ConfOffset
+)
+{
+	FBandBoundingBox Landmarks = {0, {0, 0, 0, 0}};
+
+	if (Offsets.Num() < 2) // Will access only 2 (because we want to make 2D-vectors)
+		{
+		UE_LOG(LogBand, Error, TEXT("UBandBlueprintLibrary: GetLandmarks: Number of offsets(%d) != Dim(%d)"),
+			Offsets.Num(), TensorDim);
+		return Landmarks;
+		}
+	if(NumCoords > 3)
+	{
+		UE_LOG(LogBand, Error, TEXT("UBandBlueprintLibrary: Can't get more than 3 dimensions (only X, Y, Z)"));
+		return Landmarks;
+	}
+
+	const TArray<T>& LandmarkResults = Tensors[LandmarkTensorIndex]->GetBuffer<T>();
+
+	for (int Idx = 0; Idx < NumLandmarks; Idx++)
+	{
+		float Coords[3] = {0.0, 0.0, 0.0};
+		float Conf = 0.0;
+		for(int CIdx = 0; CIdx < NumCoords; CIdx++)
+		{
+			if(Offsets[CIdx] >= 0){
+				Coords[CIdx] = LandmarkResults[Idx * TensorDim + Offsets[CIdx]];
+			}
+		}
+		if(ConfOffset >= 0){ // Valid offset
+			Conf = LandmarkResults[Idx * TensorDim + ConfOffset];
+		}
+		FBandLandmark TempLandmark = FBandLandmark(Coords[0], Coords[1], Coords[2], Conf);
+		Landmarks.Landmark.Push(TempLandmark);
+	}
+	
+	return Landmarks;
+}
+
+FBandBoundingBox UBandBlueprintLibrary::GetLandmarks(TArray<UBandTensor*> Tensors, EBandLandmark ModelType)
+{
+	FBandBoundingBox Landmarks = {0, {0, 0, 0, 0}};
+	int LandmarkTensorIndex = 0;
+	int NumLandmarks = 0;
+	int NumCoords = 0;
+	int TensorDim = 0;
+	TArray<int32> Offsets = { -1, -1, -1 }; // XYZ, invalid offsets are negative
+	int ConfOffset = 0; // Confidence offset
+
+	if(Tensors.Num() == 0) return Landmarks;
+
+	if (ModelType == EBandLandmark::MoveNetSingleThunder || ModelType == EBandLandmark::MoveNetSingleLightning)
+	{
+		LandmarkTensorIndex = 0;
+		NumLandmarks = 17;
+		NumCoords = 2;
+		TensorDim = 3;
+		Offsets = { 1, 0, -1 }; // Tensor = [Y, X, Z]
+		ConfOffset = 2;
+	}
+	else if (ModelType == EBandLandmark::Unknown)
+	{
+		UE_LOG(LogBand, Error, TEXT("Unknown landmark model type"));
+		return Landmarks;
+	}
+
+	const EBandTensorType TensorType = Tensors[LandmarkTensorIndex]->Type();
+	switch (TensorType)
+	{
+	case EBandTensorType::Float32:
+		Landmarks = GetLandmarksInternal<float>(Tensors, LandmarkTensorIndex, TensorDim, NumLandmarks, NumCoords, Offsets, ConfOffset);
+		break;
+	default:
+		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+		UE_LOG(LogBand, Error, TEXT("Unsupported tensor type %s"), *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
 	}
 
 	return Landmarks;

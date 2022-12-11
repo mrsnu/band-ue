@@ -5,6 +5,7 @@
 #include "BandTensor.h"
 #include "BandEnum.h"
 #include "BandLabel.h"
+#include "BandLandmark.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "BandBlueprintLibrary.generated.h"
 
@@ -23,6 +24,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
 	static TArray<FVector2D> Get2DLandmarks(UPARAM(ref) TArray<UBandTensor *> OutputTensors, EBandLandmark ModelType);
+
+	UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
+	static FBandBoundingBox GetLandmarks(TArray<UBandTensor*> Tensors, EBandLandmark ModelType);
 
 	UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
 	static TArray<FBandBoundingBox> NMS(TArray<FBandBoundingBox> Boxes, const float IoU_Threshold);
