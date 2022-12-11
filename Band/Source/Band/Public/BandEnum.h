@@ -58,6 +58,7 @@ UENUM(BlueprintType)
 enum class EBandLandmark : uint8
 {
 	MoveNetSingleThunder UMETA(DisplayName = "SinglePoseMovenetThunder"),
+	MoveNetSingleLightning UMETA(DisplayName = "SinglePoseMovenetLightning"),
 	Unknown UMETA(DisplayName = "Unknown")
 };
 
