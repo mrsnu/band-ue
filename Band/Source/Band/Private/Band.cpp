@@ -24,7 +24,7 @@ void FBandModule::StartupModule()
 	// Add on the relative location of the third party dll and load it
 	FString LibraryPath;
 	#if PLATFORM_WINDOWS
-	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/Band/Data/Debug/band_c.dll"));
+	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/Band/Data/Release/band_c.dll"));
 	#elif PLATFORM_MAC
 	LibraryPath = FString("libtensorflowlite_c.dylib");
 	#elif PLATFORM_ANDROID
