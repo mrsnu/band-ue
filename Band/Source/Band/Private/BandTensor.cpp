@@ -24,7 +24,14 @@ void UBandTensor::BeginDestroy()
 	Super::BeginDestroy();
 }
 
-void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame, bool Normalize)
+void UBandTensor::FromCameraFrame(const UAndroidCameraFrame* Frame, bool Normalize)
+{
+	FromCameraFrameWithCrop(Frame, Normalize, false, FBandBoundingBox(0, {0, 0, 0, 0}));
+}
+
+
+
+void UBandTensor::FromCameraFrameWithCrop(UPARAM(ref) const UAndroidCameraFrame* Frame, bool Normalize, bool Crop, FBandBoundingBox BBox)
 {
 	if (!Frame)
 	{
@@ -65,8 +72,25 @@ void UBandTensor::FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame, 
 		// Directly update uint8 buffer
 		uint8* TargetBufferPtr = Type() == EBandTensorType::UInt8 ? Data() : RGBBuffer;
 		std::unique_ptr<Band::FrameBuffer> OutputBuffer = Band::CreateFromRgbRawBuffer(TargetBufferPtr, { InputWidth, InputHeight });
+
+		// Get BoundingBox to put to FrameBufferUtils::Preprocess
+		Band::BoundingBox BoundingBox;
+		if(Crop)
+		{
+			BoundingBox.origin_x = BBox.Position.Left;
+			BoundingBox.origin_y = BBox.Position.Top;
+			BoundingBox.width = BBox.Position.Right - BBox.Position.Left;
+			BoundingBox.height = BBox.Position.Bottom - BBox.Position.Top;
+		}
+		else
+		{
+			BoundingBox.origin_x = 0;
+			BoundingBox.origin_y = 0;
+			BoundingBox.width = Buffer->dimension().width;
+			BoundingBox.height = Buffer->dimension().height;
+		}
 		// Image preprocessing
-		if (!Utils->Preprocess(*Buffer, OutputBuffer.get()))
+		if (!Utils->Preprocess(*Buffer, BoundingBox, OutputBuffer.get()))
 		{
 			UE_LOG(LogBand, Display, TEXT("FromCameraFrame: Failed to preprocess"));
 			return;

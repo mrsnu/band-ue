@@ -5,6 +5,7 @@
 #include "BandEnum.h"
 
 #include "AndroidCameraFrame.h"
+#include "BandBoundingBox.h"
 #include "BandTensor.generated.h"
 
 UCLASS(Blueprintable)
@@ -14,6 +15,8 @@ class BAND_API UBandTensor : public UObject
 public:
 	UFUNCTION(BlueprintCallable, Category = Band)
 	void FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame, bool Normalize = false);
+	UFUNCTION(BlueprintCallable, Category = Band)
+	void FromCameraFrameWithCrop(UPARAM(ref) const UAndroidCameraFrame* Frame, bool Normalize, bool Crop, FBandBoundingBox BBox);
 
 	UFUNCTION(BlueprintCallable, Category = Band)
 	void ArgMax(int32& Index, float& Value);
