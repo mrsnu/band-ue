@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "BandLandmark.h"
 #include "UObject/ObjectMacros.h"
 #include "Rect.h"
 #include "BandBoundingBox.generated.h"
@@ -12,7 +13,7 @@ struct BAND_API FBandBoundingBox
 	GENERATED_BODY()
 
 	FBandBoundingBox() = default;
-	FBandBoundingBox(float Confidence, FRect Position, FString Label = TEXT(""), TArray<FVector> Landmark = {});
+	FBandBoundingBox(float Confidence, FRect Position, FString Label = TEXT(""), TArray<FBandLandmark> Landmark = {});
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float Confidence;
@@ -24,7 +25,7 @@ struct BAND_API FBandBoundingBox
 	FString Label;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<FVector> Landmark;
+	TArray<FBandLandmark> Landmark;
 };
 
 inline bool operator<(const FBandBoundingBox& Lhs, const FBandBoundingBox& Rhs)
