@@ -5,12 +5,11 @@
 #include "IAssetTypeActions.h"
 #include "Modules/ModuleManager.h"
 
-class BANDEDITOR_API FBandEditorModule : public IModuleInterface
-{
+class BANDEDITOR_API FBandEditorModule : public IModuleInterface {
 public:
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
+  virtual void StartupModule() override;
+  virtual void ShutdownModule() override;
 
 private:
-	TArray<TSharedPtr<IAssetTypeActions>> CreatedAssetTypeActions;
+  TArray<TSharedPtr<IAssetTypeActions>> CreatedAssetTypeActions;
 };

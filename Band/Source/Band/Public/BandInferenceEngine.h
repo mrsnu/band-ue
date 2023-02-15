@@ -18,59 +18,58 @@ class UBandLabel;
 class UTextBlock;
 
 UCLASS()
-class BAND_API ABandInferenceEngine : public AActor
-{
-	GENERATED_BODY()
+class BAND_API ABandInferenceEngine : public AActor {
+  GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
-	ABandInferenceEngine();
+  // Sets default values for this actor's properties
+  ABandInferenceEngine();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+  // Called when the game starts or when spawned
+  virtual void BeginPlay() override;
+  virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-	void OnFrameAvailable(const UAndroidCameraFrame* CameraFrame);
-	void OnBeginFrame();
-	void OnEndFrame();
-	void OnBeginFrameRT();
-	void OnEndFrameRT();
+  void OnFrameAvailable(const UAndroidCameraFrame* CameraFrame);
+  void OnBeginFrame();
+  void OnEndFrame();
+  void OnBeginFrameRT();
+  void OnEndFrameRT();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Band")
-	UBandModel* Model = nullptr;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Band")
-	UBandLabel* Label = nullptr;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
-	TSubclassOf<class UUserWidget> UIWidgetReference;
-	
-	UUserWidget* UIWidget;
-	UAndroidCameraComponent* CameraComponent = nullptr;
-	UBandInterfaceComponent* Interpreter = nullptr;
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Band")
+  UBandModel* Model = nullptr;
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Band")
+  UBandLabel* Label = nullptr;
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
+  TSubclassOf<class UUserWidget> UIWidgetReference;
 
-	uint64 BeginFrame = 0;
-	uint64 BeginFrameRT = 0;
+  UUserWidget* UIWidget;
+  UAndroidCameraComponent* CameraComponent = nullptr;
+  UBandInterfaceComponent* Interpreter = nullptr;
 
-	std::mutex CameraMutex;
-	uint64 BeginCameraFrame = 0;
-	std::queue<double> BeginCameraFrames;
-	bool RequiresCameraReport = false;
+  uint64 BeginFrame = 0;
+  uint64 BeginFrameRT = 0;
 
-	FString Main, Render, DNN;
+  std::mutex CameraMutex;
+  uint64 BeginCameraFrame = 0;
+  std::queue<double> BeginCameraFrames;
+  bool RequiresCameraReport = false;
 
-	UTextBlock* ClassTextBlock;
-	UTextBlock* MainTextBlock;
-	UTextBlock* RenderTextBlock;
-	UTextBlock* DNNTextBlock;
+  FString Main, Render, DNN;
 
-	FDelegateHandle OnBeginFrameHandle;
-	FDelegateHandle OnFrameHandle;
-	FDelegateHandle OnEndFrameHandle;
-	FDelegateHandle OnBeginFrameRTHandle;
-	FDelegateHandle OnEndFrameRTHandle;
+  UTextBlock* ClassTextBlock;
+  UTextBlock* MainTextBlock;
+  UTextBlock* RenderTextBlock;
+  UTextBlock* DNNTextBlock;
 
-	TArray<UBandTensor*> InputTensors;
-	TArray<UBandTensor*> OutputTensors;
-	
+  FDelegateHandle OnBeginFrameHandle;
+  FDelegateHandle OnFrameHandle;
+  FDelegateHandle OnEndFrameHandle;
+  FDelegateHandle OnBeginFrameRTHandle;
+  FDelegateHandle OnEndFrameRTHandle;
+
+  TArray<UBandTensor*> InputTensors;
+  TArray<UBandTensor*> OutputTensors;
+
 };

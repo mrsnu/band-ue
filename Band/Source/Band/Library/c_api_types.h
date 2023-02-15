@@ -1,7 +1,7 @@
 #ifndef BAND_C_C_API_TYPE_H_
 #define BAND_C_C_API_TYPE_H_
 
-typedef enum BandConfigField {
+using BandConfigField = enum BandConfigField {
   BAND_PROFILE_ONLINE = 0,
   BAND_PROFILE_NUM_WARMUPS = 1,
   BAND_PROFILE_NUM_RUNS = 2,
@@ -26,6 +26,6 @@ typedef enum BandConfigField {
   BAND_MINIMUM_SUBGRAPH_SIZE = 21,
   BAND_SUBGRAPH_PREPARATION_TYPE = 22,
   BAND_CPU_MASK = 23,
-} BandConfigField;
+};
 
 #endif

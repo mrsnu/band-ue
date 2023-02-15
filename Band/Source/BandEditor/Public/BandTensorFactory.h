@@ -5,10 +5,9 @@
 #include "BandTensorFactory.generated.h"
 
 UCLASS()
-class BANDEDITOR_API UBandTensorFactory : public UFactory
-{
-	GENERATED_BODY()
+class BANDEDITOR_API UBandTensorFactory : public UFactory {
+  GENERATED_BODY()
 
 public:
-	UBandTensorFactory(const FObjectInitializer& ObjectInitializer);
+  UBandTensorFactory(const FObjectInitializer& ObjectInitializer);
 };

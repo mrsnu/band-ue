@@ -9,34 +9,34 @@
 extern "C" {
 #endif  // __cplusplus
 
-typedef enum BandBackendType {
+using BandBackendType = enum BandBackendType {
   kBandTfLite = 0,
   kBandNumBackendTypes = 1
-} BandBackendType;
+};
 
 const char* BandBackendGetName(BandBackendType flag);
 const BandBackendType BandBackendGetType(const char* name);
 
-typedef enum BandStatus {
+using BandStatus = enum BandStatus {
   kBandOk = 0,
   kBandError = 1,
   kBandDelegateError = 2
-} BandStatus;
+};
 
-typedef enum {
+using BandCPUMaskFlags = enum {
   kBandAll = 0,
   kBandLittle = 1,
   kBandBig = 2,
   kBandPrimary = 3,
   kBandNumCpuMasks = 4
-} BandCPUMaskFlags;
+};
 
-typedef enum BandWorkerType {
+using BandWorkerType = enum BandWorkerType {
   kBandDeviceQueue = 1 << 0,
   kBandGlobalQueue = 1 << 1,
-} BandWorkerType;
+};
 
-typedef enum BandSchedulerType {
+using BandSchedulerType = enum BandSchedulerType {
   kBandFixedDevice = 0,
   kBandRoundRobin = 1,
   kBandShortestExpectedLatency = 2,
@@ -45,22 +45,22 @@ typedef enum BandSchedulerType {
   kBandLeastSlackTimeFirst = 5,
   kBandHeterogeneousEarliestFinishTimeReserved = 6,
   kNumSchedulerTypes = 7
-} BandSchedulerType;
+};
 
-typedef enum BandSubgraphPreparationType {
+using BandSubgraphPreparationType = enum BandSubgraphPreparationType {
   kBandNoFallbackSubgraph = 0,
   kBandFallbackPerDevice = 1,
   kBandUnitSubgraph = 2,
   kBandMergeUnitSubgraph = 3,
   kBandNumSubgraphPreparationType = 4,
-} BandSubgraphPreparationType;
+};
 
 // Fixed size list of integers. Used for dimensions and inputs/outputs tensor
 // indices
-typedef struct BandIntArray {
+using BandIntArray = struct BandIntArray {
   int size;
-// gcc 6.1+ have a bug where flexible members aren't properly handled
-// https://github.com/google/re2/commit/b94b7cd42e9f02673cd748c1ac1d16db4052514c
+  // gcc 6.1+ have a bug where flexible members aren't properly handled
+  // https://github.com/google/re2/commit/b94b7cd42e9f02673cd748c1ac1d16db4052514c
 #if (!defined(__clang__) && defined(__GNUC__) && __GNUC__ == 6 && \
      __GNUC_MINOR__ >= 1) ||                                      \
     defined(HEXAGON)
@@ -68,7 +68,7 @@ typedef struct BandIntArray {
 #else
   int data[];
 #endif
-} BandIntArray;
+};
 
 // Given the size (number of elements) in a BandIntArray, calculate its size
 // in bytes.
@@ -93,18 +93,18 @@ BandIntArray* BandIntArrayCopy(const BandIntArray* src);
 void BandIntArrayFree(BandIntArray* a);
 
 // Fixed size list of floats. Used for per-channel quantization.
-typedef struct BandFloatArray {
+using BandFloatArray = struct BandFloatArray {
   int size;
-// gcc 6.1+ have a bug where flexible members aren't properly handled
-// https://github.com/google/re2/commit/b94b7cd42e9f02673cd748c1ac1d16db4052514c
-// This also applies to the toolchain used for Qualcomm Hexagon DSPs.
+  // gcc 6.1+ have a bug where flexible members aren't properly handled
+  // https://github.com/google/re2/commit/b94b7cd42e9f02673cd748c1ac1d16db4052514c
+  // This also applies to the toolchain used for Qualcomm Hexagon DSPs.
 #if !defined(__clang__) && defined(__GNUC__) && __GNUC__ == 6 && \
     __GNUC_MINOR__ >= 1
   float data[0];
 #else
   float data[];
 #endif
-} BandFloatArray;
+};
 
 // Given the size (number of elements) in a BandFloatArray, calculate its size
 // in bytes.
@@ -211,17 +211,17 @@ void BandFloatArrayFree(BandFloatArray* a);
   } while (0)
 
 // Single-precision complex data type compatible with the C99 definition.
-typedef struct BandComplex64 {
-  float re, im;  // real and imaginary parts, respectively.
-} BandComplex64;
+using BandComplex64 = struct BandComplex64 {
+  float re, im; // real and imaginary parts, respectively.
+};
 
 // Half precision data type compatible with the C99 definition.
-typedef struct BandFloat16 {
+using BandFloat16 = struct BandFloat16 {
   uint16_t data;
-} BandFloat16;
+};
 
 // Types supported by tensor
-typedef enum {
+using BandType = enum {
   kBandNoType = 0,
   kBandFloat32 = 1,
   kBandInt32 = 2,
@@ -234,28 +234,28 @@ typedef enum {
   kBandInt8 = 9,
   kBandFloat16 = 10,
   kBandFloat64 = 11,
-} BandType;
+};
 
 // Return the name of a given type, for error reporting purposes.
 const char* BandTypeGetName(BandType type);
 
 // SupportedQuantizationTypes.
-typedef enum BandQuantizationType {
+using BandQuantizationType = enum BandQuantizationType {
   // No quantization.
   kBandNoQuantization = 0,
   // Affine quantization (with support for per-channel quantization).
   // Corresponds to BandAffineQuantization.
   kBandAffineQuantization = 1,
-} BandQuantizationType;
+};
 
 // Structure specifying the quantization used by the tensor, if-any.
-typedef struct BandQuantization {
+using BandQuantization = struct BandQuantization {
   // The type of quantization held by params.
   BandQuantizationType type;
   // Holds a reference to one of the quantization param structures specified
   // below.
   void* params;
-} BandQuantization;
+};
 
 // Legacy. Will be deprecated in favor of BandAffineQuantization.
 // If per-layer quantization is specified this field will still be populated in
@@ -263,10 +263,10 @@ typedef struct BandQuantization {
 // Parameters for asymmetric quantization. Quantized values can be converted
 // back to float using:
 //     real_value = scale * (quantized_value - zero_point)
-typedef struct BandQuantizationParams {
+using BandQuantizationParams = struct BandQuantizationParams {
   float scale;
   int32_t zero_point;
-} BandQuantizationParams;
+};
 
 // Parameters for asymmetric quantization across a dimension (i.e per output
 // channel quantization).
@@ -275,26 +275,26 @@ typedef struct BandQuantizationParams {
 // For a particular value in quantized_dimension, quantized values can be
 // converted back to float using:
 //     real_value = scale * (quantized_value - zero_point)
-typedef struct BandAffineQuantization {
+using BandAffineQuantization = struct BandAffineQuantization {
   BandFloatArray* scale;
   BandIntArray* zero_point;
   int32_t quantized_dimension;
-} BandAffineQuantization;
+};
 
 // TODO #23, #30
 // Add additional devices for HTA, NPU
-typedef enum {
+using BandDeviceFlags = enum {
   kBandCPU = 0,
   kBandGPU = 1,
   kBandDSP = 2,
   kBandNPU = 3,
   kBandNumDevices = 4,
-} BandDeviceFlags;
+};
 
 const char* BandDeviceGetName(BandDeviceFlags flag);
 const BandDeviceFlags BandDeviceGetFlag(const char* name);
 
 #ifdef __cplusplus
-}  // extern "C"
+} // extern "C"
 #endif  // __cplusplus
 #endif  // BAND_C_COMMON_H

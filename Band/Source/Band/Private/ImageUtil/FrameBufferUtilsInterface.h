@@ -16,11 +16,12 @@ limitations under the License.
 #pragma once
 
 #include "FrameBuffer.h"
+
 namespace Band {
 
 // Interface for the FrameBuffer image processing library.
 class FrameBufferUtilsInterface {
- public:
+public:
   virtual ~FrameBufferUtilsInterface() = default;
 
   // Crops `buffer` to the specified points.
@@ -33,7 +34,7 @@ class FrameBufferUtilsInterface {
   // The `output_buffer` should have metadata populated and its backing buffer
   // should be big enough to store the operation result.
   virtual bool Crop(const FrameBuffer& buffer, int x0, int y0, int x1,
-                            int y1, FrameBuffer* output_buffer) = 0;
+                    int y1, FrameBuffer* output_buffer) = 0;
 
   // Resizes `buffer` to the size of the given `output_buffer`.
   //
@@ -42,7 +43,7 @@ class FrameBufferUtilsInterface {
   // The `output_buffer` should have metadata populated and its backing buffer
   // should be big enough to store the operation result.
   virtual bool Resize(const FrameBuffer& buffer,
-                              FrameBuffer* output_buffer) = 0;
+                      FrameBuffer* output_buffer) = 0;
 
   // Rotates `buffer` counter-clockwise by the given `angle_deg` (in degrees).
   //
@@ -53,27 +54,27 @@ class FrameBufferUtilsInterface {
   // The `output_buffer` should have metadata populated and its backing buffer
   // should be big enough to store the operation result.
   virtual bool Rotate(const FrameBuffer& buffer, int angle_deg,
-                              FrameBuffer* output_buffer) = 0;
+                      FrameBuffer* output_buffer) = 0;
 
   // Flips `buffer` horizontally.
   //
   // The `output_buffer` should have metadata populated and its backing buffer
   // should be big enough to store the operation result.
   virtual bool FlipHorizontally(const FrameBuffer& buffer,
-                                        FrameBuffer* output_buffer) = 0;
+                                FrameBuffer* output_buffer) = 0;
 
   // Flips `buffer` vertically.
   //
   // The `output_buffer` should have metadata populated and its backing buffer
   // should be big enough to store the operation result.
   virtual bool FlipVertically(const FrameBuffer& buffer,
-                                      FrameBuffer* output_buffer) = 0;
+                              FrameBuffer* output_buffer) = 0;
 
   // Converts `buffer`'s format to the format of the given `output_buffer`.
   //
   // The `output_buffer` should have metadata populated and its backing buffer
   // should be big enough to store the operation result.
   virtual bool Convert(const FrameBuffer& buffer,
-                               FrameBuffer* output_buffer) = 0;
+                       FrameBuffer* output_buffer) = 0;
 };
-}  // namespace Band
+} // namespace Band

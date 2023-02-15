@@ -28,9 +28,9 @@ void UBandTensor::FromCameraFrame(const UAndroidCameraFrame* Frame,
 }
 
 void UBandTensor::FromCameraFrameWithCrop(UPARAM(ref)
-                                              const UAndroidCameraFrame* Frame,
-                                          bool Normalize, bool Crop,
-                                          FBandBoundingBox BBox) {
+    const UAndroidCameraFrame* Frame,
+    bool Normalize, bool Crop,
+    FBandBoundingBox BBox) {
   if (!Frame) {
     UE_LOG(LogBand, Display,
            TEXT("FromCameraFrame: Something went wrong, Null frame"));
@@ -46,8 +46,7 @@ void UBandTensor::FromCameraFrameWithCrop(UPARAM(ref)
   std::unique_ptr<Band::FrameBuffer> Buffer;
   std::unique_ptr<Band::FrameBufferUtils> Utils =
       Band::FrameBufferUtils::Create(
-          Band::FrameBufferUtils::ProcessEngine::kLibyuv);
-  ;
+          Band::FrameBufferUtils::ProcessEngine::kLibyuv);;
   if (Frame->HasYUV()) {
     const UAndroidCameraFrame::NV12Frame& FrameData = Frame->GetData();
     Buffer = Band::CreateFromYuvRawBuffer(
@@ -116,7 +115,7 @@ void UBandTensor::FromCameraFrameWithCrop(UPARAM(ref)
   } else {
     UE_LOG(LogBand, Display,
            TEXT("FromCameraFrame: Failed to copy from both buffer (YUV or "
-                "ARGB) and texture"));
+             "ARGB) and texture"));
   }
 }
 
@@ -295,9 +294,9 @@ EBandStatus UBandTensor::CopyFromBuffer(TArray<uint8> Buffer) {
 }
 
 EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
-                                                     UTexture2D* Texture,
-                                                 FBandBoundingBox Roi,
-                                                 float Mean, float Std) {
+    UTexture2D* Texture,
+    FBandBoundingBox Roi,
+    float Mean, float Std) {
   // TODO(@juimdpp) Resize texture to allow any texture to be processed
   return CopyFromTexture(Texture, Mean, Std);
 }

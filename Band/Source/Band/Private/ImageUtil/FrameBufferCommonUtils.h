@@ -71,34 +71,34 @@ bool ValidateBufferFormat(const FrameBuffer& buffer);
 // Validates that the given buffers have the correct format for their
 // configuration.
 bool ValidateBufferFormats(const FrameBuffer& buffer1,
-                                   const FrameBuffer& buffer2);
+                           const FrameBuffer& buffer2);
 
 // Validates the given inputs for resizing `buffer`.
 bool ValidateResizeBufferInputs(const FrameBuffer& buffer,
-                                        const FrameBuffer& output_buffer);
+                                const FrameBuffer& output_buffer);
 
 // Validates the given inputs for rotating `buffer`.
 bool ValidateRotateBufferInputs(const FrameBuffer& buffer,
-                                        const FrameBuffer& output_buffer,
-                                        int angle_deg);
+                                const FrameBuffer& output_buffer,
+                                int angle_deg);
 
 // Validates the given inputs for cropping `buffer`.
 //
 // (x0, y0) represents the top-left point of the buffer.
 // (x1, y1) represents the bottom-right point of the buffer.
 bool ValidateCropBufferInputs(const FrameBuffer& buffer,
-                                      const FrameBuffer& output_buffer, int x0,
-                                      int y0, int x1, int y1);
+                              const FrameBuffer& output_buffer, int x0,
+                              int y0, int x1, int y1);
 
 // Validates the given inputs for flipping `buffer` horizontally or vertically.
 bool ValidateFlipBufferInputs(const FrameBuffer& buffer,
-                                      const FrameBuffer& output_buffer);
+                              const FrameBuffer& output_buffer);
 
 // Validates that `from_format` can be converted to `to_format`.
 //
 // The given formats must not be equal.
 bool ValidateConvertFormats(FrameBuffer::Format from_format,
-                                    FrameBuffer::Format to_format);
+                            FrameBuffer::Format to_format);
 
 // Creation Methods
 // -----------------------------------------------------------------
@@ -139,4 +139,4 @@ std::unique_ptr<FrameBuffer> CreateFromRawBuffer(
     FrameBuffer::Orientation orientation = FrameBuffer::Orientation::kTopLeft,
     uint64 timestamp = FPlatformTime::Cycles64());
 
-}  // namespace Band
+} // namespace Band

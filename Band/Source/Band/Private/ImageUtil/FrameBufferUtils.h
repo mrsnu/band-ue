@@ -63,8 +63,10 @@ struct OrientParams {
   // Counterclockwise rotation angle in degrees. This is expressed as a
   // multiple of 90 degrees.
   int rotation_angle_deg;
+
   // Flipping operation. It must come after the rotation.
   enum class FlipType { kNo, kHorizontal, kVertical };
+
   FlipType flip;
 };
 
@@ -73,12 +75,19 @@ struct OrientParams {
 OrientParams GetOrientParams(FrameBuffer::Orientation from_orientation,
                              FrameBuffer::Orientation to_orientation);
 
-struct FrameBufferOperation
-{
-    virtual ~FrameBufferOperation() {}
-    // Use Enum-based type checking to avoid RTTI
-    enum class Type { kCropResize = 0, kUniformCropResize = 1, kConvert = 2, kOrient = 3 };
-    virtual Type IsType() const = 0;
+struct FrameBufferOperation {
+  virtual ~FrameBufferOperation() {
+  }
+
+  // Use Enum-based type checking to avoid RTTI
+  enum class Type {
+    kCropResize = 0,
+    kUniformCropResize = 1,
+    kConvert = 2,
+    kOrient = 3
+  };
+
+  virtual Type IsType() const = 0;
 };
 
 // The parameters needed to crop / resize.
@@ -97,10 +106,11 @@ struct CropResizeOperation : public FrameBufferOperation {
   CropResizeOperation(int crop_origin_x, int crop_origin_y,
                       FrameBuffer::Dimension crop_dimension,
                       FrameBuffer::Dimension resize_dimension)
-      : crop_origin_x(crop_origin_x),
-        crop_origin_y(crop_origin_y),
-        crop_dimension(crop_dimension),
-        resize_dimension(resize_dimension) {}
+    : crop_origin_x(crop_origin_x),
+      crop_origin_y(crop_origin_y),
+      crop_dimension(crop_dimension),
+      resize_dimension(resize_dimension) {
+  }
 
   virtual Type IsType() const override { return Type::kCropResize; }
 
@@ -131,10 +141,11 @@ struct UniformCropResizeOperation : public FrameBufferOperation {
   UniformCropResizeOperation(int crop_origin_x, int crop_origin_y,
                              FrameBuffer::Dimension crop_dimension,
                              FrameBuffer::Dimension output_dimension)
-      : crop_origin_x(crop_origin_x),
-        crop_origin_y(crop_origin_y),
-        crop_dimension(crop_dimension),
-        output_dimension(output_dimension) {}
+    : crop_origin_x(crop_origin_x),
+      crop_origin_y(crop_origin_y),
+      crop_dimension(crop_dimension),
+      output_dimension(output_dimension) {
+  }
 
   virtual Type IsType() const override { return Type::kUniformCropResize; }
 
@@ -147,7 +158,9 @@ struct UniformCropResizeOperation : public FrameBufferOperation {
 // The parameters needed to convert to the specified format.
 struct ConvertOperation : public FrameBufferOperation {
   explicit ConvertOperation(FrameBuffer::Format to_format)
-      : to_format(to_format) {}
+    : to_format(to_format) {
+  }
+
   virtual Type IsType() const override { return Type::kConvert; }
   FrameBuffer::Format to_format;
 };
@@ -155,7 +168,9 @@ struct ConvertOperation : public FrameBufferOperation {
 // The parameters needed to change the orientation.
 struct OrientOperation : public FrameBufferOperation {
   explicit OrientOperation(FrameBuffer::Orientation to_orientation)
-      : to_orientation(to_orientation) {}
+    : to_orientation(to_orientation) {
+  }
+
   virtual Type IsType() const override { return Type::kOrient; }
   FrameBuffer::Orientation to_orientation;
 };
@@ -186,7 +201,7 @@ struct OrientOperation : public FrameBufferOperation {
 //      OrientOperation(FrameBuffer::Orientation::kLeftTop)};
 //  utils->Execute(*input, operations, output.get());
 class FrameBufferUtils {
- public:
+public:
   // Counter-clockwise rotation in degree.
   enum class RotationDegree { k0 = 0, k90 = 1, k180 = 2, k270 = 3 };
 
@@ -215,7 +230,7 @@ class FrameBufferUtils {
   // size dimension does not match with crop dimension, then a resize is
   // automatically performed.
   bool Crop(const FrameBuffer& buffer, int x0, int y0, int x1, int y1,
-                    FrameBuffer* output_buffer);
+            FrameBuffer* output_buffer);
 
   // Performs resizing operation.
   //
@@ -232,21 +247,21 @@ class FrameBufferUtils {
   // The output_buffer should have metadata populated and its backing buffer
   // should be big enough to store the operation result.
   bool Rotate(const FrameBuffer& buffer, RotationDegree rotation,
-                      FrameBuffer* output_buffer);
+              FrameBuffer* output_buffer);
 
   // Performs horizontal flip operation.
   //
   // The `output_buffer` should have metadata populated and its backing buffer
   // should be big enough to store the operation result.
   bool FlipHorizontally(const FrameBuffer& buffer,
-                                FrameBuffer* output_buffer);
+                        FrameBuffer* output_buffer);
 
   // Performs vertical flip operation.
   //
   // The `output_buffer` should have metadata populated and its backing buffer
   // should be big enough to store the operation result.
   bool FlipVertically(const FrameBuffer& buffer,
-                              FrameBuffer* output_buffer);
+                      FrameBuffer* output_buffer);
 
   // Performs buffer format conversion.
   //
@@ -269,8 +284,8 @@ class FrameBufferUtils {
   // The `output_buffer` should have metadata populated and its backing buffer
   // should be big enough to store the operation result.
   bool Execute(const FrameBuffer& buffer,
-                       const std::vector<FrameBufferOperation*>& operations,
-                       FrameBuffer* output_buffer);
+               const std::vector<FrameBufferOperation*>& operations,
+               FrameBuffer* output_buffer);
 
   // Performs a chain of operations to convert `buffer` to desired metadata
   // (width, height, format, orientation) defined by `output_buffer` and
@@ -296,15 +311,15 @@ class FrameBufferUtils {
   //
   // The input param `bounding_box` is defined in the `buffer` coordinate space.
   bool Preprocess(const FrameBuffer& buffer,
-                          BoundingBox bounding_box,
-                          FrameBuffer* output_buffer,
-                          bool uniform_resizing = false);
+                  BoundingBox bounding_box,
+                  FrameBuffer* output_buffer,
+                  bool uniform_resizing = false);
 
   bool Preprocess(const FrameBuffer& buffer,
-      FrameBuffer* output_buffer,
-      bool uniform_resizing = false);
+                  FrameBuffer* output_buffer,
+                  bool uniform_resizing = false);
 
- private:
+private:
   // Returns the new FrameBuffer size after the operation is applied.
   FrameBuffer::Dimension GetSize(const FrameBuffer& buffer,
                                  const FrameBufferOperation& operation);
@@ -325,11 +340,11 @@ class FrameBufferUtils {
 
   // Executes command with params.
   bool Execute(const FrameBuffer& buffer,
-                       const FrameBufferOperation& operation,
-                       FrameBuffer* output_buffer);
+               const FrameBufferOperation& operation,
+               FrameBuffer* output_buffer);
 
   // Execution engine conforms to FrameBufferUtilsInterface.
   std::unique_ptr<FrameBufferUtilsInterface> utils_;
 };
 
-}  // namespace Band
+} // namespace Band

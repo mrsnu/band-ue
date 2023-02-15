@@ -8,27 +8,27 @@
 #include "BandBoundingBox.generated.h"
 
 USTRUCT(BlueprintType)
-struct BAND_API FBandBoundingBox
-{
-	GENERATED_BODY()
+struct BAND_API FBandBoundingBox {
+  GENERATED_BODY()
 
-	FBandBoundingBox() = default;
-	FBandBoundingBox(float Confidence, FRect Position, FString Label = TEXT(""), TArray<FBandLandmark> Landmark = {});
+  FBandBoundingBox() = default;
+  FBandBoundingBox(float Confidence, FRect Position, FString Label = TEXT(""),
+                   TArray<FBandLandmark> Landmark = {});
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float Confidence;
+  UPROPERTY(EditAnywhere, BlueprintReadOnly)
+  float Confidence;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FRect Position;
+  UPROPERTY(EditAnywhere, BlueprintReadOnly)
+  FRect Position;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FString Label;
+  UPROPERTY(EditAnywhere, BlueprintReadOnly)
+  FString Label;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<FBandLandmark> Landmark;
+  UPROPERTY(EditAnywhere, BlueprintReadOnly)
+  TArray<FBandLandmark> Landmark;
 };
 
-inline bool operator<(const FBandBoundingBox& Lhs, const FBandBoundingBox& Rhs)
-{
-	return Lhs.Confidence > Rhs.Confidence;
+inline bool operator<(const FBandBoundingBox& Lhs,
+                      const FBandBoundingBox& Rhs) {
+  return Lhs.Confidence > Rhs.Confidence;
 }

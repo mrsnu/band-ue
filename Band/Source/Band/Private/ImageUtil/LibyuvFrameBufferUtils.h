@@ -25,9 +25,9 @@ namespace Band {
 // APIs defined in frame_buffer_utils.h for higher level abstraction and better
 // functionality support.
 class LibyuvFrameBufferUtils : public FrameBufferUtilsInterface {
- public:
+public:
   LibyuvFrameBufferUtils() = default;
-  ~LibyuvFrameBufferUtils() override = default;
+  virtual ~LibyuvFrameBufferUtils() override = default;
 
   // Crops input `buffer` to the specified subregions and resizes the cropped
   // region to the target image resolution defined by the `output_buffer`.
@@ -37,32 +37,32 @@ class LibyuvFrameBufferUtils : public FrameBufferUtilsInterface {
   //
   // Crop region dimensions must be equal or smaller than input `buffer`
   // dimensions.
-  bool Crop(const FrameBuffer& buffer, int x0, int y0, int x1, int y1,
+  virtual bool Crop(const FrameBuffer& buffer, int x0, int y0, int x1, int y1,
                     FrameBuffer* output_buffer) override;
 
   // Resizes `buffer` to the size of the given `output_buffer`.
-  bool Resize(const FrameBuffer& buffer,
+  virtual bool Resize(const FrameBuffer& buffer,
                       FrameBuffer* output_buffer) override;
 
   // Rotates `buffer` counter-clockwise by the given `angle_deg` (in degrees).
   //
   // The given angle must be a multiple of 90 degrees.
-  bool Rotate(const FrameBuffer& buffer, int angle_deg,
+  virtual bool Rotate(const FrameBuffer& buffer, int angle_deg,
                       FrameBuffer* output_buffer) override;
 
   // Flips `buffer` horizontally.
-  bool FlipHorizontally(const FrameBuffer& buffer,
+  virtual bool FlipHorizontally(const FrameBuffer& buffer,
                                 FrameBuffer* output_buffer) override;
 
   // Flips `buffer` vertically.
-  bool FlipVertically(const FrameBuffer& buffer,
+  virtual bool FlipVertically(const FrameBuffer& buffer,
                               FrameBuffer* output_buffer) override;
 
   // Converts `buffer`'s format to the format of the given `output_buffer`.
   //
   // Grayscale format cannot be converted to other formats.
-  bool Convert(const FrameBuffer& buffer,
+  virtual bool Convert(const FrameBuffer& buffer,
                        FrameBuffer* output_buffer) override;
 };
 
-}  // namespace Band
+} // namespace Band

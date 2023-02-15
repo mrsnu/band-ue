@@ -17,37 +17,40 @@
 
 #define LOCTEXT_NAMESPACE "FBandEditorModule"
 
-void FBandEditorModule::StartupModule()
-{
-	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-    EAssetTypeCategories::Type BandCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Band")), FText::FromString("Band"));
-    // register our custom asset with example category
-    TSharedPtr<IAssetTypeActions> ModelAction = MakeShareable(new FBandModelTypeActions(BandCategory));
-    AssetTools.RegisterAssetTypeActions(ModelAction.ToSharedRef());
-	TSharedPtr<IAssetTypeActions> TensorAction = MakeShareable(new FBandTensorTypeActions(BandCategory));
-	AssetTools.RegisterAssetTypeActions(TensorAction.ToSharedRef());
-    // saved it here for unregister later
-    CreatedAssetTypeActions.Add(ModelAction);
-	CreatedAssetTypeActions.Add(TensorAction);
+void FBandEditorModule::StartupModule() {
+  IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<
+    FAssetToolsModule>("AssetTools").Get();
+  EAssetTypeCategories::Type BandCategory = AssetTools.
+      RegisterAdvancedAssetCategory(FName(TEXT("Band")),
+                                    FText::FromString("Band"));
+  // register our custom asset with example category
+  TSharedPtr<IAssetTypeActions> ModelAction = MakeShareable(
+      new FBandModelTypeActions(BandCategory));
+  AssetTools.RegisterAssetTypeActions(ModelAction.ToSharedRef());
+  TSharedPtr<IAssetTypeActions> TensorAction = MakeShareable(
+      new FBandTensorTypeActions(BandCategory));
+  AssetTools.RegisterAssetTypeActions(TensorAction.ToSharedRef());
+  // saved it here for unregister later
+  CreatedAssetTypeActions.Add(ModelAction);
+  CreatedAssetTypeActions.Add(TensorAction);
 }
 
-void FBandEditorModule::ShutdownModule()
-{
-	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
-	// we call this function before unloading the module.
+void FBandEditorModule::ShutdownModule() {
+  // This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
+  // we call this function before unloading the module.
 
-	// Unregister all the asset types that we registered
-	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
-	{
-		IAssetTools& AssetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-		for (int32 i = 0; i < CreatedAssetTypeActions.Num(); ++i)
-		{
-			AssetTools.UnregisterAssetTypeActions(CreatedAssetTypeActions[i].ToSharedRef());
-		}
-	}
-	CreatedAssetTypeActions.Empty();
+  // Unregister all the asset types that we registered
+  if (FModuleManager::Get().IsModuleLoaded("AssetTools")) {
+    IAssetTools& AssetTools = FModuleManager::GetModuleChecked<
+      FAssetToolsModule>("AssetTools").Get();
+    for (int32 i = 0; i < CreatedAssetTypeActions.Num(); ++i) {
+      AssetTools.UnregisterAssetTypeActions(
+          CreatedAssetTypeActions[i].ToSharedRef());
+    }
+  }
+  CreatedAssetTypeActions.Empty();
 }
 
 #undef LOCTEXT_NAMESPACE
-	
+
 IMPLEMENT_MODULE(FBandEditorModule, BandEditor)
