@@ -249,7 +249,7 @@ FBandBoundingBox GetLandmarksInternal(TArray<UBandTensor*> Tensors,
 {
 	FBandBoundingBox Landmarks = {0, {0, 0, 0, 0}};
 
-	if (Offsets.Num() < 2) // Will access only 2 (because we want to make 2D-vectors)
+	if (Offsets.Num() != TensorDim) // Will access only 2 (because we want to make 2D-vectors)
 		{
 		UE_LOG(LogBand, Error, TEXT("UBandBlueprintLibrary: GetLandmarks: Number of offsets(%d) != Dim(%d)"),
 			Offsets.Num(), TensorDim);
@@ -261,6 +261,11 @@ FBandBoundingBox GetLandmarksInternal(TArray<UBandTensor*> Tensors,
 		return Landmarks;
 	}
 
+	for(int i=0; i<4; i++)
+	{
+		UE_LOG(LogBand, Display, TEXT("Tensor index %d --> %d"), i, Tensors[i]->GetBuffer<T>().Num());
+	}
+
 	const TArray<T>& LandmarkResults = Tensors[LandmarkTensorIndex]->GetBuffer<T>();
 
 	for (int Idx = 0; Idx < NumLandmarks; Idx++)
@@ -269,17 +274,17 @@ FBandBoundingBox GetLandmarksInternal(TArray<UBandTensor*> Tensors,
 		float Conf = 0.0;
 		for(int CIdx = 0; CIdx < NumCoords; CIdx++)
 		{
-			if(Offsets[CIdx] >= 0){
+			if(Offsets[CIdx] >= 0 && Idx * TensorDim + Offsets[CIdx] < LandmarkResults.Num()){
 				Coords[CIdx] = LandmarkResults[Idx * TensorDim + Offsets[CIdx]];
 			}
 		}
-		if(ConfOffset >= 0){ // Valid offset
+		if(ConfOffset >= 0 && Idx * TensorDim + ConfOffset < LandmarkResults.Num()){ // Valid offset
 			Conf = LandmarkResults[Idx * TensorDim + ConfOffset];
 		}
 		FBandLandmark TempLandmark = FBandLandmark(Coords[0], Coords[1], Coords[2], Conf);
 		Landmarks.Landmark.Push(TempLandmark);
 	}
-	
+	UE_LOG(LogBand, Display, TEXT("Draw lanfmark %d"), Landmarks.Landmark.Num());
 	return Landmarks;
 }
 
@@ -303,6 +308,19 @@ FBandBoundingBox UBandBlueprintLibrary::GetLandmarks(TArray<UBandTensor*> Tensor
 		TensorDim = 3;
 		Offsets = { 1, 0, -1 }; // Tensor = [Y, X, Z]
 		ConfOffset = 2;
+	}
+	else if (ModelType == EBandLandmark::HandLandmarkMediapipe)
+	{
+		LandmarkTensorIndex = 3;
+		NumLandmarks = 21;
+		NumCoords = 3;
+		TensorDim = 3; // ?
+		Offsets = {0, 1, 2};
+		ConfOffset = 0;
+		int ConfTensorIndex = 2;
+		int ConfTensorDim = 1;
+		Landmarks.Confidence = Tensors[ConfTensorIndex]->GetBuffer<float>()[0 * ConfTensorDim + ConfOffset];
+		ConfOffset = -1;
 	}
 	else if (ModelType == EBandLandmark::Unknown)
 	{

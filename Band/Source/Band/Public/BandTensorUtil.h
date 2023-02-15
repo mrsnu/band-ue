@@ -57,4 +57,19 @@ namespace BandTensorUtil
 		}
 		return true;
 	}
+	
+	template <typename DST_T, typename SRC_T>
+	bool FromTArray(TArray<SRC_T> Elements, DST_T* Dst, int NumElements)
+	{
+		if(Elements.Num() > NumElements)
+		{
+			UE_LOG(LogBand, Error, TEXT("Number of elements filling exceeds number of elements to fill (%d vs %d)"), Elements.Num(), NumElements);
+			return false;
+		}
+		for(int i=0; i<Elements.Num(); i++)
+		{
+			Dst[i] = (static_cast<DST_T>(Elements[i]));
+		}
+		return true;
+	}
 } // namespace BandTensorUtil

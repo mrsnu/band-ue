@@ -19,6 +19,9 @@ public:
 	void FromCameraFrameWithCrop(UPARAM(ref) const UAndroidCameraFrame* Frame, bool Normalize, bool Crop, FBandBoundingBox BBox);
 
 	UFUNCTION(BlueprintCallable, Category = Band)
+	void FromBoundingBox(UPARAM(ref) const FBandBoundingBox Box);
+
+	UFUNCTION(BlueprintCallable, Category = Band)
 	void ArgMax(int32& Index, float& Value);
 
 	UFUNCTION(BlueprintCallable, Category = "Band")
@@ -51,6 +54,8 @@ public:
 	EBandStatus CopyFromBuffer(TArray<uint8> Buffer);
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	EBandStatus CopyFromTexture(UPARAM(ref) UTexture2D* Texture, float Mean, float Std = 1.f);
+	UFUNCTION(BlueprintCallable, Category = "Band")
+	EBandStatus CopyFromTextureWithCrop(UPARAM(ref) UTexture2D* Texture, FBandBoundingBox BBox, float Mean, float Std = 1.f);
 	UFUNCTION(BlueprintCallable, Category = "Band")
 	EBandStatus CopyToBuffer(TArray<uint8> Buffer);
 

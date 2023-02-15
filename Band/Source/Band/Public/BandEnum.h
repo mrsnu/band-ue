@@ -59,6 +59,7 @@ enum class EBandLandmark : uint8
 {
 	MoveNetSingleThunder UMETA(DisplayName = "SinglePoseMovenetThunder"),
 	MoveNetSingleLightning UMETA(DisplayName = "SinglePoseMovenetLightning"),
+	HandLandmarkMediapipe UMETA(DIsplayName = "HandLandmarkMediapipe"),
 	Unknown UMETA(DisplayName = "Unknown")
 };
 

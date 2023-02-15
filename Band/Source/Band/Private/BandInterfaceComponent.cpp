@@ -65,7 +65,8 @@ void UBandInterfaceComponent::InvokeSync(UPARAM(ref) UBandModel* Model, UPARAM(r
 {
 	if (Model->IsRegistered() && (InputTensors.Num() == 0 || OutputTensors.Num() == 0))
 	{
-		FBandModule::Get().BandEngineRequestSyncOnWorker(GetHandle(), Model->GetHandle(), DeviceFlag, nullptr, nullptr);	
+		UE_LOG(LogBand, Error, TEXT("InvokeSync: Failed to invoke. Please check that the input/output tensors are non null"));
+		// FBandModule::Get().BandEngineRequestSyncOnWorker(GetHandle(), Model->GetHandle(), DeviceFlag, nullptr, nullptr);	
 		
 	}
 	else if (Model->IsRegistered() && GetInputTensorCount(Model) == InputTensors.Num() && GetOutputTensorCount(Model) == OutputTensors.Num())
