@@ -1,24 +1,28 @@
 #pragma once
 
-#include "UObject/ObjectMacros.h"
-#include "BandLibrary.h"
-#include "BandEnum.h"
+#include <memory>
 
 #include "AndroidCameraFrame.h"
 #include "BandBoundingBox.h"
+#include "BandEnum.h"
+#include "BandLibrary.h"
 #include "BandTensor.generated.h"
+#include "UObject/ObjectMacros.h"
+
+namespace Band {
+class FrameBuffer;
+}
 
 UCLASS(Blueprintable)
 class BAND_API UBandTensor : public UObject {
   GENERATED_BODY()
-public:
+ public:
   UFUNCTION(BlueprintCallable, Category = Band)
   void FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame,
                        bool Normalize = false);
   UFUNCTION(BlueprintCallable, Category = Band)
   void FromCameraFrameWithCrop(UPARAM(ref) const UAndroidCameraFrame* Frame,
-                               bool Normalize, bool Crop,
-                               FBandBoundingBox BBox);
+                               FBandBoundingBox RoI, bool Normalize);
 
   UFUNCTION(BlueprintCallable, Category = Band)
   void FromBoundingBox(UPARAM(ref) const FBandBoundingBox Box);
@@ -57,18 +61,20 @@ public:
   EBandStatus CopyFromTexture(UPARAM(ref) UTexture2D* Texture, float Mean,
                               float Std = 1.f);
   UFUNCTION(BlueprintCallable, Category = "Band")
-  EBandStatus CopyFromTextureWithCrop(
-      UPARAM(ref) UTexture2D* Texture, FBandBoundingBox BBox, float Mean,
-      float Std = 1.f);
+  EBandStatus CopyFromTextureWithCrop(UPARAM(ref) UTexture2D* Texture,
+                                      FBandBoundingBox BBox, float Mean,
+                                      float Std = 1.f);
   UFUNCTION(BlueprintCallable, Category = "Band")
   EBandStatus CopyToBuffer(TArray<uint8> Buffer);
 
   BandTensor* Handle() const;
 
-private:
+ private:
   friend class UBandInterfaceComponent;
 
   void Initialize(BandTensor* TensorHandle);
+  EBandStatus CopyFromFrameBuffer(std::unique_ptr<Band::FrameBuffer> Src,
+                                  FBandBoundingBox RoI, float Mean, float Std);
   virtual void BeginDestroy() override;
 
   BandTensor* TensorHandle = nullptr;

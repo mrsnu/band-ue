@@ -15,6 +15,11 @@ struct BAND_API FBandBoundingBox {
   FBandBoundingBox(float Confidence, FRect Position, FString Label = TEXT(""),
                    TArray<FBandLandmark> Landmark = {});
 
+  bool operator==(const FBandBoundingBox& rhs) const {
+    return (Confidence == rhs.Confidence) && (Position == rhs.Position) && (
+             Label == rhs.Label) && (Landmark == rhs.Landmark);
+  }
+
   UPROPERTY(EditAnywhere, BlueprintReadOnly)
   float Confidence;
 

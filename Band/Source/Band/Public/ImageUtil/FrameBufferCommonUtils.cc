@@ -446,10 +446,30 @@ std::unique_ptr<FrameBuffer> CreateFromRawBuffer(
     case FrameBuffer::Format::kGRAY:
       return CreateFromGrayRawBuffer(buffer, dimension, orientation, timestamp);
     default:
-
       UE_LOG(LogBand, Display, TEXT("Unsupported buffer format: %i"),
              target_format);
       return nullptr;
+  }
+}
+
+std::unique_ptr<FrameBuffer> CreateFromAndroidCameraFrame(
+    const UAndroidCameraFrame& camera_frame) {
+  if (camera_frame.HasYUV()) {
+    const UAndroidCameraFrame::NV12Frame& frame_data = camera_frame.GetData();
+    return Band::CreateFromYuvRawBuffer(
+        frame_data.Y, frame_data.U, frame_data.V,
+        Band::FrameBuffer::Format::kNV12,
+        {camera_frame.GetWidth(), camera_frame.GetHeight()},
+        frame_data.YRowStride,
+        frame_data.UVRowStride, frame_data.UVPixelStride);
+  } else if (camera_frame.GetARGBBuffer()) {
+    const uint8* frame_data = camera_frame.GetARGBBuffer();
+    return Band::CreateFromRgbaRawBuffer(
+        frame_data, {camera_frame.GetWidth(), camera_frame.GetHeight()});
+  } else {
+    UE_LOG(LogBand, Display,
+           TEXT("Camera frame is missing both YUV and ARGB buffer"));
+    return nullptr;
   }
 }
 

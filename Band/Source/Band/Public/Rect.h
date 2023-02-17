@@ -6,34 +6,42 @@ USTRUCT(BlueprintType)
 struct FRect {
   GENERATED_BODY()
 
+  bool operator==(const FRect& Rhs) const {
+    return Left == Rhs.Left &&
+           Right == Rhs.Right &&
+           Top == Rhs.Top &&
+           Bottom == Rhs.Bottom;
+  }
+
   float Left;
   float Right;
   float Top;
   float Bottom;
 };
 
-inline float BoxArea(FRect A) {
-  return (A.Right - A.Left) * (A.Top - A.Bottom);
+inline float BoxArea(FRect Rect) {
+  return (Rect.Right - Rect.Left) * (Rect.Top - Rect.Bottom);
 }
 
-inline float BoxIntersection(FRect A, FRect B) {
-  if (A.Right <= B.Left || B.Right <= A.Left) {
+inline float BoxIntersection(FRect Lhs, FRect Rhs) {
+  if (Lhs.Right <= Rhs.Left || Rhs.Right <= Lhs.Left) {
     return 0.0f;
   }
-  if (A.Top <= B.Bottom || B.Top <= A.Bottom) {
+  if (Lhs.Top <= Rhs.Bottom || Rhs.Top <= Lhs.Bottom) {
     return 0.0f;
   }
-  return (FGenericPlatformMath::Min(A.Right, B.Right) -
-          FGenericPlatformMath::Max(A.Left, B.Left))
-         * (FGenericPlatformMath::Min(A.Top, B.Top) - FGenericPlatformMath::Max(
-                A.Bottom, B.Bottom));
+  return (FGenericPlatformMath::Min(Lhs.Right, Rhs.Right) -
+          FGenericPlatformMath::Max(Lhs.Left, Rhs.Left))
+         * (FGenericPlatformMath::Min(Lhs.Top, Rhs.Top) -
+            FGenericPlatformMath::Max(
+                Lhs.Bottom, Rhs.Bottom));
 }
 
 
-inline float BoxUnion(FRect A, FRect B) {
-  return BoxArea(A) + BoxArea(B) - BoxIntersection(A, B);
+inline float BoxUnion(FRect Lhs, FRect Rhs) {
+  return BoxArea(Lhs) + BoxArea(Rhs) - BoxIntersection(Lhs, Rhs);
 }
 
-inline float BoxIou(FRect A, FRect B) {
-  return BoxIntersection(A, B) / BoxUnion(A, B);
+inline float BoxIou(FRect Lhs, FRect Rhs) {
+  return BoxIntersection(Lhs, Rhs) / BoxUnion(Lhs, Rhs);
 }

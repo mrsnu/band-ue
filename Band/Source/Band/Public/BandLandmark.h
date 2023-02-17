@@ -21,6 +21,11 @@ struct BAND_API FBandLandmark {
       Point(X, Y, Z) {
   };
 
+  bool operator==(const FBandLandmark& rhs) const {
+    return (X == rhs.X) && (Y == rhs.Y) && (Z == rhs.Z) && (
+             Confidence == rhs.Confidence) && (Point == rhs.Point);
+  }
+
   UPROPERTY(EditAnywhere, BlueprintReadOnly)
   float X = 0.0;
   UPROPERTY(EditAnywhere, BlueprintReadOnly)

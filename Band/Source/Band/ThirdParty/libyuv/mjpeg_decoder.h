@@ -42,13 +42,13 @@ enum JpegSubsamplingType {
   kJpegUnknown
 };
 
-struct Buffer {
+struct buffer {
   const uint8_t* data;
   int len;
 };
 
 struct BufferVector {
-  Buffer* buffers;
+  buffer* buffers;
   int len;
   int pos;
 };
@@ -168,7 +168,7 @@ class LIBYUV_API MJpegDecoder {
   int GetComponentScanlinePadding(int component);
 
   // A buffer holding the input data for a frame.
-  Buffer buf_;
+  buffer buf_;
   BufferVector buf_vec_;
 
   jpeg_decompress_struct* decompress_struct_;

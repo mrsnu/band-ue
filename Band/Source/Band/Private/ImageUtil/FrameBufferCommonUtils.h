@@ -20,6 +20,7 @@ limitations under the License.
 #include "HAL/PlatformTime.h"
 
 #include "FrameBuffer.h"
+#include "AndroidCameraFrame.h"
 
 namespace Band {
 
@@ -138,5 +139,8 @@ std::unique_ptr<FrameBuffer> CreateFromRawBuffer(
     FrameBuffer::Format target_format,
     FrameBuffer::Orientation orientation = FrameBuffer::Orientation::kTopLeft,
     uint64 timestamp = FPlatformTime::Cycles64());
+
+std::unique_ptr<FrameBuffer> CreateFromAndroidCameraFrame(
+    const UAndroidCameraFrame& camera_frame);
 
 } // namespace Band
