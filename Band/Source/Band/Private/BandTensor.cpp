@@ -69,8 +69,8 @@ void UBandTensor::FromBoundingBox(UPARAM(ref) const FBandBoundingBox BBox) {
 
   TArray<float> SrcElements;
   for (int i = 0; i < BBox.Landmark.Num(); i++) {
-    SrcElements.Push(BBox.Landmark[i].X);
-    SrcElements.Push(BBox.Landmark[i].Y);
+    SrcElements.Push(BBox.Landmark[i].Point.X);
+    SrcElements.Push(BBox.Landmark[i].Point.Y);
   }
 
   if (Type() != EBandTensorType::UInt8) {
@@ -304,7 +304,7 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
   TextureCompressionSettings PreviousCompressionSettings =
       Texture->CompressionSettings;
 
-  auto clean_up = [&]() {
+  auto CleanUp = [&]() {
     if (ChangedTexture2d) {
       Texture->SRGB = PreviousSrgb;
       Texture->CompressionSettings = PreviousCompressionSettings;
@@ -396,7 +396,7 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
     }
   }
   Mip.BulkData.Unlock();
-  clean_up();
+  CleanUp();
   return Processed ? EBandStatus::Ok : EBandStatus::Error;
 }
 

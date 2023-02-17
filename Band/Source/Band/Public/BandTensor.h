@@ -6,8 +6,8 @@
 #include "BandBoundingBox.h"
 #include "BandEnum.h"
 #include "BandLibrary.h"
-#include "BandTensor.generated.h"
 #include "UObject/ObjectMacros.h"
+#include "BandTensor.generated.h"
 
 namespace Band {
 class FrameBuffer;
@@ -16,7 +16,7 @@ class FrameBuffer;
 UCLASS(Blueprintable)
 class BAND_API UBandTensor : public UObject {
   GENERATED_BODY()
- public:
+public:
   UFUNCTION(BlueprintCallable, Category = Band)
   void FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame,
                        bool Normalize = false);
@@ -69,7 +69,7 @@ class BAND_API UBandTensor : public UObject {
 
   BandTensor* Handle() const;
 
- private:
+private:
   friend class UBandInterfaceComponent;
 
   void Initialize(BandTensor* TensorHandle);
