@@ -15,9 +15,10 @@ struct BAND_API FBandBoundingBox {
   FBandBoundingBox(float Confidence, FRect Position, FString Label = TEXT(""),
                    TArray<FBandLandmark> Landmark = {});
 
-  bool operator==(const FBandBoundingBox& rhs) const {
-    return (Confidence == rhs.Confidence) && (Position == rhs.Position) && (
-             Label == rhs.Label) && (Landmark == rhs.Landmark);
+  bool operator==(const FBandBoundingBox& Rhs) const {
+    return (Confidence == Rhs.Confidence) && (Position == Rhs.Position) && (
+             Label == Rhs.Label) && (Landmark == Rhs.Landmark) && (
+             LandmarkEdge == Rhs.LandmarkEdge);
   }
 
   UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -31,6 +32,9 @@ struct BAND_API FBandBoundingBox {
 
   UPROPERTY(EditAnywhere, BlueprintReadOnly)
   TArray<FBandLandmark> Landmark;
+
+  UPROPERTY(EditAnywhere, BlueprintReadOnly)
+  TArray<FIntPoint> LandmarkEdge;
 };
 
 inline bool operator<(const FBandBoundingBox& Lhs,

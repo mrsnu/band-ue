@@ -26,7 +26,7 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
   if (Tensors.Num() <= DetectionTensorIndex) {
     UE_LOG(LogBand, Error,
            TEXT("UBandBlueprintLibrary: GetDetectedBoxes: Given tensor index "
-                "offset %d out of bound %d"),
+             "offset %d out of bound %d"),
            DetectionTensorIndex, Tensors.Num());
     return Boxes;
   }
@@ -34,7 +34,7 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
   if (Tensors.Num() <= ConfidenceTensorIndex) {
     UE_LOG(LogBand, Error,
            TEXT("UBandBlueprintLibrary: GetDetectedBoxes: Given confidence "
-                "index offset %d out of bound %d"),
+             "index offset %d out of bound %d"),
            ConfidenceTensorIndex, Tensors.Num());
     return Boxes;
   }
@@ -45,8 +45,8 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
   const size_t BatchOffset = Tensors[DetectionTensorIndex]->Dim(0) == 1 ? 1 : 0;
   const int32 NumBoxes = Tensors[DetectionTensorIndex]->Dim(BatchOffset);
   LenBoxVector = LenBoxVector < 0
-                     ? Tensors[DetectionTensorIndex]->Dim(1 + BatchOffset)
-                     : LenBoxVector;
+                   ? Tensors[DetectionTensorIndex]->Dim(1 + BatchOffset)
+                   : LenBoxVector;
 
   const int32 NumTrueDims =
       Tensors[ConfidenceTensorIndex]->NumDims() - BatchOffset;
@@ -55,23 +55,24 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
       Tensors[ConfidenceTensorIndex]->GetBuffer<T>();
   LenConfidenceVector =
       LenConfidenceVector < 0
-          ? (NumTrueDims >= 2
-                 ? Tensors[ConfidenceTensorIndex]->Dim(1 + BatchOffset)
-                 : 1)
-          : LenConfidenceVector;
+        ? (NumTrueDims >= 2
+             ? Tensors[ConfidenceTensorIndex]->Dim(1 + BatchOffset)
+             : 1)
+        : LenConfidenceVector;
   // Assumption: (1) x [NumBoxes] x [LenConfidenceVector] or (1) x [NumBoxes]
   const TArray<T>& ClassResults = Tensors[ClassTensorIndex]->GetBuffer<T>();
   LenClassVector =
       LenClassVector < 0
-          ? (NumTrueDims >= 2 ? Tensors[ClassTensorIndex]->Dim(1 + BatchOffset)
-                              : 1)
-          : LenClassVector;
+        ? (NumTrueDims >= 2
+             ? Tensors[ClassTensorIndex]->Dim(1 + BatchOffset)
+             : 1)
+        : LenClassVector;
 
   for (int32 BBoxOffset : BBoxOffsets) {
     if (BBoxOffset >= LenBoxVector) {
       UE_LOG(LogBand, Error,
              TEXT("UBandBlueprintLibrary: GetDetectedBoxes: Given box offset "
-                  "%d out of bound %d"),
+               "%d out of bound %d"),
              BBoxOffset, LenBoxVector);
       return Boxes;
     }
@@ -80,7 +81,7 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
   if (ConfidenceOffset >= LenConfidenceVector) {
     UE_LOG(LogBand, Error,
            TEXT("UBandBlueprintLibrary: GetDetectedBoxes: Given confidence "
-                "offset %d out of bound %d"),
+             "offset %d out of bound %d"),
            ConfidenceOffset, LenConfidenceVector);
     return Boxes;
   }
@@ -88,7 +89,7 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
   if (Label && ClassOffset >= LenClassVector) {
     UE_LOG(LogBand, Error,
            TEXT("UBandBlueprintLibrary: GetDetectedBoxes: Given class offset "
-                "%d out of bound %d"),
+             "%d out of bound %d"),
            ClassOffset, LenClassVector);
     return Boxes;
   }
@@ -96,7 +97,7 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
   if (LenBoxVector * NumBoxes != DetectionResults.Num()) {
     UE_LOG(LogBand, Error,
            TEXT("UBandBlueprintLibrary: GetDetectedBoxes: output_shape * "
-                "output_offset != length of results (%d * %d = %d)"),
+             "output_offset != length of results (%d * %d = %d)"),
            LenBoxVector, NumBoxes, DetectionResults.Num());
     return Boxes;
   }
@@ -114,7 +115,7 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
 
       if (Label) {
         TempBox.Label = Label->GetClassName(static_cast<int32>(
-            ClassResults[BoxIndex * LenClassVector + ClassOffset]));
+          ClassResults[BoxIndex * LenClassVector + ClassOffset]));
       }
 
       Boxes.Push(TempBox);
@@ -153,7 +154,7 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(
     ConfidenceOffset = 0;
     ScoreThreshold = 0.5f;
     ClassTensorIndex = 1;
-    BBoxOffsets = {1, 0, 3, 2};  // ymin, xmin, ymax, xmax
+    BBoxOffsets = {1, 0, 3, 2}; // ymin, xmin, ymax, xmax
   } else if (DetectorType == EBandDetector::PalmDetection) {
     UE_LOG(LogBand, Log, TEXT("Not implemented detector type - PalmDetection"));
     return Boxes;
@@ -167,7 +168,7 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(
     ScoreThreshold = 0.7f;
     ConfidenceOffset = 15;
     LenBoxVector = LenConfidenceVector = LenClassVector = 16;
-    BBoxOffsets = {0, 3, 2, 1};  // xmin, ymin, xmax, ymax
+    BBoxOffsets = {0, 3, 2, 1}; // xmin, ymin, xmax, ymax
   }
 
   const EBandTensorType TensorType = Tensors[DetectionTensorIndex]->Type();
@@ -193,7 +194,7 @@ TArray<FVector2D> Get2DLandmarksInternal(
     TArray<UBandTensor*> Tensors, int LandmarkTensorIndex, int TensorDim,
     int NumLandmarks, TArray<int32> Offsets
     // Offsets[0] = X, Offsets[1] = Y, (Offsets[2] = Z)
-) {
+    ) {
   TArray<FVector2D> Landmarks;
 
   if (Offsets.Num() < 2)
@@ -201,7 +202,7 @@ TArray<FVector2D> Get2DLandmarksInternal(
   {
     UE_LOG(LogBand, Error,
            TEXT("UBandBlueprintLibrary: Get2DLandmarks: Number of offsets(%d) "
-                "!= Dim(%d)"),
+             "!= Dim(%d)"),
            Offsets.Num(), TensorDim);
     return Landmarks;
   }
@@ -226,13 +227,13 @@ TArray<FVector2D> UBandBlueprintLibrary::Get2DLandmarks(
   int LandmarkTensorIndex = 0;
   int NumLandmarks = 0;
   int TensorDim = 0;
-  TArray<int32> Offsets = {0, 1};  // XYZ
+  TArray<int32> Offsets = {0, 1}; // XYZ
 
   if (ModelType == EBandLandmark::MoveNetSingleThunder) {
     LandmarkTensorIndex = 0;
     NumLandmarks = 17;
     TensorDim = 3;
-    Offsets = {1, 0};  // Tensor = [Y, X, Z]
+    Offsets = {1, 0}; // Tensor = [Y, X, Z]
   } else if (ModelType == EBandLandmark::Unknown) {
     UE_LOG(LogBand, Error, TEXT("Unknown landmark model type"));
     return Landmarks;
@@ -267,14 +268,14 @@ FBandBoundingBox GetLandmarksInternal(
   {
     UE_LOG(LogBand, Error,
            TEXT("UBandBlueprintLibrary: GetLandmarks: Number of offsets(%d) != "
-                "Dim(%d)"),
+             "Dim(%d)"),
            Offsets.Num(), TensorDim);
     return Landmarks;
   }
   if (NumCoords > 3) {
     UE_LOG(LogBand, Error,
            TEXT("UBandBlueprintLibrary: Can't get more than 3 dimensions (only "
-                "X, Y, Z)"));
+             "X, Y, Z)"));
     return Landmarks;
   }
 
@@ -299,7 +300,6 @@ FBandBoundingBox GetLandmarksInternal(
         FBandLandmark(Coords[0], Coords[1], Coords[2], Conf);
     Landmarks.Landmark.Push(TempLandmark);
   }
-  UE_LOG(LogBand, Display, TEXT("Draw lanfmark %d"), Landmarks.Landmark.Num());
   return Landmarks;
 }
 
@@ -310,33 +310,28 @@ FBandBoundingBox UBandBlueprintLibrary::GetLandmarks(
   int NumLandmarks = 0;
   int NumCoords = 0;
   int TensorDim = 0;
-  TArray<int32> Offsets = {-1, -1, -1};  // XYZ, invalid offsets are negative
-  int ConfOffset = 0;                    // Confidence offset
+  TArray<int32> Offsets = {-1, -1, -1}; // XYZ, invalid offsets are negative
+  int ConfOffset = 0;                   // Confidence offset
 
   if (Tensors.Num() == 0) {
     return Landmarks;
   }
 
+  // reference: https://github.com/tensorflow/hub/blob/master/examples/colab/movenet.ipynb
   if (ModelType == EBandLandmark::MoveNetSingleThunder ||
       ModelType == EBandLandmark::MoveNetSingleLightning) {
     LandmarkTensorIndex = 0;
     NumLandmarks = 17;
     NumCoords = 2;
     TensorDim = 3;
-    Offsets = {1, 0, -1};  // Tensor = [Y, X, Z]
+    Offsets = {1, 0, -1}; // Tensor = [Y, X, Z]
     ConfOffset = 2;
   } else if (ModelType == EBandLandmark::HandLandmarkMediapipe) {
     LandmarkTensorIndex = 3;
     NumLandmarks = 21;
     NumCoords = 3;
-    TensorDim = 3;  // ?
+    TensorDim = 3; // ?
     Offsets = {0, 1, 2};
-    ConfOffset = 0;
-    int ConfTensorIndex = 2;
-    int ConfTensorDim = 1;
-    Landmarks.Confidence =
-        Tensors[ConfTensorIndex]
-            ->GetBuffer<float>()[0 * ConfTensorDim + ConfOffset];
     ConfOffset = -1;
   } else if (ModelType == EBandLandmark::Unknown) {
     UE_LOG(LogBand, Error, TEXT("Unknown landmark model type"));
@@ -355,6 +350,38 @@ FBandBoundingBox UBandBlueprintLibrary::GetLandmarks(
           FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
       UE_LOG(LogBand, Error, TEXT("Unsupported tensor type %s"),
              *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+  }
+
+  // Post-fix
+  if (ModelType == EBandLandmark::MoveNetSingleThunder ||
+      ModelType == EBandLandmark::MoveNetSingleLightning) {
+    Landmarks.LandmarkEdge = {
+        {0, 1},
+        {0, 2},
+        {1, 3},
+        {2, 4},
+        {0, 5},
+        {0, 6},
+        {5, 7},
+        {7, 9},
+        {6, 8},
+        {8, 10},
+        {5, 6},
+        {5, 11},
+        {6, 12},
+        {11, 12},
+        {11, 13},
+        {13, 15},
+        {12, 14},
+        {14, 16}
+    };
+  } else if (ModelType == EBandLandmark::HandLandmarkMediapipe) {
+    ConfOffset = 0;
+    int ConfTensorIndex = 2;
+    int ConfTensorDim = 1;
+    Landmarks.Confidence =
+        Tensors[ConfTensorIndex]
+        ->GetBuffer<float>()[0 * ConfTensorDim + ConfOffset];
   }
 
   return Landmarks;
