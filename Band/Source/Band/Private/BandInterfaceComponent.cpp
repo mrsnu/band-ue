@@ -23,21 +23,21 @@ void UBandInterfaceComponent::EndPlay(
 }
 
 int32 UBandInterfaceComponent::GetInputTensorCount(
-    UPARAM(ref) UBandModel* Model) {
+    UPARAM(ref) const UBandModel* Model) {
   // Skip model registration check (lazily register in get handle)
   return FBandModule::Get().BandEngineGetNumInputTensors(
       GetHandle(), Model->GetHandle());
 }
 
 int32 UBandInterfaceComponent::GetOutputTensorCount(
-    UPARAM(ref) UBandModel* Model) {
+    UPARAM(ref) const UBandModel* Model) {
   // Skip model registration check (lazily register in get handle)
   return FBandModule::Get().BandEngineGetNumOutputTensors(
       GetHandle(), Model->GetHandle());
 }
 
 UBandTensor* UBandInterfaceComponent::AllocateInputTensor(
-    UPARAM(ref) UBandModel* Model, int32 InputIndex) {
+    UPARAM(ref) const UBandModel* Model, int32 InputIndex) {
   // Skip model registration check (lazily register in get handle)
   UBandTensor* Tensor = NewObject<UBandTensor>();
   Tensor->Initialize(
@@ -47,7 +47,7 @@ UBandTensor* UBandInterfaceComponent::AllocateInputTensor(
 }
 
 UBandTensor* UBandInterfaceComponent::AllocateOutputTensor(
-    UPARAM(ref) UBandModel* Model, int32 OutputIndex) {
+    UPARAM(ref) const UBandModel* Model, int32 OutputIndex) {
   // Skip model registration check (lazily register in get handle)
   UBandTensor* Tensor = NewObject<UBandTensor>();
   Tensor->Initialize(
@@ -57,17 +57,18 @@ UBandTensor* UBandInterfaceComponent::AllocateOutputTensor(
 }
 
 void UBandInterfaceComponent::InvokeSyncSingleIO(
-    UBandModel* Model, UBandTensor* InputTensor, UBandTensor* OutputTensor) {
+    const UBandModel* Model, UBandTensor* InputTensor,
+    UBandTensor* OutputTensor) {
   InvokeSync(Model, {InputTensor}, {OutputTensor});
 }
 
 int32 UBandInterfaceComponent::InvokeAsyncSingleInput(
-    UBandModel* Model, UBandTensor* InputTensor) {
+    const UBandModel* Model, UBandTensor* InputTensor) {
   return InvokeAsync(Model, {InputTensor});
 }
 
 void UBandInterfaceComponent::InvokeSync(
-    UPARAM(ref) UBandModel* Model,
+    UPARAM(ref) const UBandModel* Model,
     UPARAM(ref) TArray<UBandTensor*> InputTensors,
     UPARAM(ref) TArray<UBandTensor*> OutputTensors, int DeviceFlag) {
   if (Model->IsRegistered() && (InputTensors.Num() == 0 || OutputTensors.Num()
@@ -97,7 +98,7 @@ void UBandInterfaceComponent::InvokeSync(
 }
 
 int32 UBandInterfaceComponent::InvokeAsync(
-    UPARAM(ref) UBandModel* Model,
+    UPARAM(ref) const UBandModel* Model,
     UPARAM(ref) TArray<UBandTensor*> InputTensors, int DeviceFlag) {
   if (Model->IsRegistered() && InputTensors.Num() == 0) {
     const int32 JobId = FBandModule::Get().BandEngineRequestAsyncOnWorker(

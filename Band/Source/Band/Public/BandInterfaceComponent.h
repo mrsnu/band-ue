@@ -32,31 +32,31 @@ public:
   virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
   UFUNCTION(BlueprintCallable, Category = "Band")
-  int32 GetInputTensorCount(UPARAM(ref) UBandModel* Model);
+  int32 GetInputTensorCount(UPARAM(ref) const UBandModel* Model);
   UFUNCTION(BlueprintCallable, Category = "Band")
-  int32 GetOutputTensorCount(UPARAM(ref) UBandModel* Model);
+  int32 GetOutputTensorCount(UPARAM(ref) const UBandModel* Model);
   UFUNCTION(BlueprintCallable, Category = "Band")
-  UBandTensor* AllocateInputTensor(UPARAM(ref) UBandModel* Model,
+  UBandTensor* AllocateInputTensor(UPARAM(ref) const UBandModel* Model,
                                    int32 InputIndex);
   UFUNCTION(BlueprintCallable, Category = "Band")
-  UBandTensor* AllocateOutputTensor(UPARAM(ref) UBandModel* Model,
+  UBandTensor* AllocateOutputTensor(UPARAM(ref) const UBandModel* Model,
                                     int32 OutputIndex);
 
 
   UFUNCTION(BlueprintCallable, Category = "Band")
-  void InvokeSyncSingleIO(UPARAM(ref) UBandModel* Model,
+  void InvokeSyncSingleIO(UPARAM(ref) const UBandModel* Model,
                           UBandTensor* InputTensor, UBandTensor* OutputTensor);
   UFUNCTION(BlueprintCallable, Category = "Band")
-  int32 InvokeAsyncSingleInput(UPARAM(ref) UBandModel* Model,
+  int32 InvokeAsyncSingleInput(UPARAM(ref) const UBandModel* Model,
                                UBandTensor* InputTensor);
 
   UFUNCTION(BlueprintCallable, Category = "Band")
-  void InvokeSync(UPARAM(ref) UBandModel* Model,
+  void InvokeSync(UPARAM(ref) const UBandModel* Model,
                   UPARAM(ref) TArray<UBandTensor*> InputTensors,
                   UPARAM(ref) TArray<UBandTensor*> OutputTensors,
                   int DeviceFlag = 0);
   UFUNCTION(BlueprintCallable, Category = "Band")
-  int32 InvokeAsync(UPARAM(ref) UBandModel* Model,
+  int32 InvokeAsync(UPARAM(ref) const UBandModel* Model,
                     UPARAM(ref) TArray<UBandTensor*> InputTensors,
                     int DeviceFlag = 0);
 

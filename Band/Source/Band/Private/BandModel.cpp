@@ -3,7 +3,8 @@
 #include "BandLibrary.h"
 
 bool UBandModel::IsRegistered() const {
-  return Registered;
+  std::unique_lock<std::mutex> RegisterLock(RegisterMutex);
+  return ModelHandle != nullptr;
 }
 
 void UBandModel::BeginDestroy() {
@@ -13,7 +14,7 @@ void UBandModel::BeginDestroy() {
   Super::BeginDestroy();
 }
 
-BandModel* UBandModel::GetHandle() {
+BandModel* UBandModel::GetHandle() const {
   // Delay-register model
   // TODO(dostos): figure out how to register
   // when UObject imported to editor as an uasset
@@ -27,16 +28,15 @@ const TArray<uint8>& UBandModel::GetBinary() const {
   return ModelBinary;
 }
 
-void UBandModel::RegisterModel() {
+void UBandModel::RegisterModel() const {
   std::unique_lock<std::mutex> RegisterLock(RegisterMutex);
-  if (ModelBinary.Num() && !IsRegistered()) {
+  if (ModelBinary.Num() && ModelHandle == nullptr) {
     ModelHandle = FBandModule::Get().BandModelCreate();
     if (FBandModule::Get().BandModelAddFromBuffer(
             ModelHandle, kBandTfLite, ModelBinary.GetData(),
             ModelBinary.Num()) == kBandOk
         && FBandModule::Get().BandEngineRegisterModel(
             FBandModule::Get().GetEngineHandle(), ModelHandle) == kBandOk) {
-      Registered = true;
     } else {
       FBandModule::Get().BandModelDelete(ModelHandle);
     }

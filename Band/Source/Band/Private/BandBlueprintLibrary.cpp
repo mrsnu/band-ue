@@ -127,10 +127,11 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
 TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(
     UPARAM(ref) TArray<UBandTensor*> Tensors, EBandDetector DetectorType,
     UBandLabel* Label) {
-  UE_LOG(LogBand, Error, TEXT("Empty tensors to GetDetectedBoxes"));
   if (Tensors.Num() == 0) {
+    UE_LOG(LogBand, Error, TEXT("Empty tensors to GetDetectedBoxes"));
     return {};
   }
+
   TArray<FBandBoundingBox> Boxes;
   // Default parameters from RetinaFace
   size_t DetectionTensorIndex = 0;
