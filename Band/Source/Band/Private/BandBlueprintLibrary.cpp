@@ -442,6 +442,10 @@ void UBandBlueprintLibrary::PrintBox(FBandBoundingBox BoundingBox) {
          BoundingBox.Position.Bottom);
 }
 
+FString UBandBlueprintLibrary::BoxToString(FBandBoundingBox BoundingBox) {
+  return BoundingBox.ToString();
+}
+
 void UBandBlueprintLibrary::ParseRectF(FBandBoundingBox BoundingBox,
                                        const int ImageHeight,
                                        const int ImageWidth, float& PosX,

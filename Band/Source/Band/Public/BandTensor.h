@@ -73,8 +73,9 @@ private:
   friend class UBandInterfaceComponent;
 
   void Initialize(BandTensor* TensorHandle);
-  EBandStatus CopyFromFrameBuffer(std::unique_ptr<Band::FrameBuffer> Src,
-                                  FBandBoundingBox RoI, float Mean, float Std);
+  EBandStatus CopyFromFrameBuffer(
+      std::unique_ptr<Band::FrameBuffer> SourceFrameBuffer,
+      FBandBoundingBox RoI, float Mean, float Std);
   virtual void BeginDestroy() override;
 
   BandTensor* TensorHandle = nullptr;

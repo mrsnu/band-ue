@@ -46,6 +46,9 @@ public:
   static void PrintBox(FBandBoundingBox BoundingBox);
 
   UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
+  static FString BoxToString(FBandBoundingBox BoundingBox);
+
+  UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
   static void ParseRectF(FBandBoundingBox BoundingBox, const int ImageHeight,
                          const int ImageWidth, float& PosX, float& PosY,
                          float& SizeX, float& SizeY);

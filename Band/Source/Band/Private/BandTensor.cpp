@@ -1,5 +1,7 @@
 #include "BandTensor.h"
 
+#include <fstream>
+
 #include "Band.h"
 #include "BandLibrary.h"
 #include "BandTensorUtil.h"
@@ -27,7 +29,8 @@ void UBandTensor::FromCameraFrame(const UAndroidCameraFrame* Frame,
 
 void UBandTensor::FromCameraFrameWithCrop(UPARAM(ref)
     const UAndroidCameraFrame* Frame,
-    FBandBoundingBox RoI, bool Normalize) {
+    FBandBoundingBox RoI,
+    bool Normalize) {
   if (!Frame) {
     UE_LOG(LogBand, Display,
            TEXT("FromCameraFrame: Something went wrong, Null Frame"));
@@ -191,14 +194,19 @@ EBandStatus UBandTensor::CopyFromFrameBuffer(
     target_bbox.width = Src->dimension().width;
     target_bbox.height = Src->dimension().height;
   } else {
-    target_bbox.origin_x = RoI.Position.Left;
-    target_bbox.origin_y = RoI.Position.Top;
-    target_bbox.width = RoI.Position.Right - RoI.Position.Left;
-    target_bbox.height = RoI.Position.Bottom - RoI.Position.Top;
+    target_bbox.origin_x = std::min(RoI.Position.Left, RoI.Position.Right) *
+                           Src->dimension().width;
+    target_bbox.origin_y = std::min(RoI.Position.Top, RoI.Position.Bottom) *
+                           Src->dimension().height;
+    target_bbox.width = std::abs(RoI.Position.Right - RoI.Position.Left) *
+                        Src->dimension().width;
+    target_bbox.height = std::abs(RoI.Position.Bottom - RoI.Position.Top) *
+                         Src->dimension().height;
   }
 
+  // TODO: we might need to crop and resize while preserving aspect ratio of the input RoI
   // Image preprocessing
-  if (!utils->Preprocess(*Src, target_bbox, OutputBuffer.get())) {
+  if (!utils->Preprocess(*Src, target_bbox, OutputBuffer.get(), true)) {
     UE_LOG(LogBand, Display, TEXT("FromCameraFrame: Failed to preprocess"));
     return EBandStatus::Error;
   }
@@ -290,7 +298,8 @@ EBandStatus UBandTensor::CopyFromBuffer(TArray<uint8> Buffer) {
 }
 
 EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
-    UTexture2D* Texture, FBandBoundingBox RoI,
+    UTexture2D* Texture,
+    FBandBoundingBox RoI,
     float Mean, float Std) {
   SCOPE_CYCLE_COUNTER(STAT_BandTextureToTensor);
   if (!Texture->PlatformData->Mips.Num()) {
@@ -335,9 +344,9 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
   EPixelFormat TargetPixelFormat = Texture->PlatformData->PixelFormat;
 
   bool Processed = true;
-  // resize or crop afterwards 
-  const bool RequiresResize = (NumTensorElements != NumTextureElements) ||
-                              !(RoI == FBandBoundingBox());
+  // resize or crop afterwards
+  const bool RequiresResize =
+      (NumTensorElements != NumTextureElements) || !(RoI == FBandBoundingBox());
   const uint8* SourceData =
       static_cast<const uint8*>(Mip.BulkData.Lock(LOCK_READ_ONLY));
   if (!SourceData) {
@@ -356,8 +365,7 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
               LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"),
               *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
           BandTensorUtil::TextureToRGBArray<float>(
-              SourceData, TargetPixelFormat,
-              reinterpret_cast<float*>(Data()),
+              SourceData, TargetPixelFormat, reinterpret_cast<float*>(Data()),
               NumTensorElements, Mean, Std);
           break;
         case EBandTensorType::UInt8:
@@ -365,8 +373,7 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
               LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"),
               *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
           BandTensorUtil::TextureToRGBArray<uint8>(
-              SourceData, TargetPixelFormat, Data(), NumTensorElements,
-              Mean,
+              SourceData, TargetPixelFormat, Data(), NumTensorElements, Mean,
               Std);
           break;
         case EBandTensorType::Int8:
@@ -374,8 +381,7 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
               LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"),
               *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
           BandTensorUtil::TextureToRGBArray<int8>(
-              SourceData, TargetPixelFormat,
-              reinterpret_cast<int8_t*>(Data()),
+              SourceData, TargetPixelFormat, reinterpret_cast<int8_t*>(Data()),
               NumTensorElements, Mean, Std);
           break;
         default:

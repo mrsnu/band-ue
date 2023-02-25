@@ -8,47 +8,39 @@
 #include "BandBoundingBox.generated.h"
 
 USTRUCT(BlueprintType)
-struct BAND_API FBandBoundingBox
-{
-	GENERATED_BODY()
+struct BAND_API FBandBoundingBox {
+  GENERATED_BODY()
 
-	FBandBoundingBox() = default;
-	FBandBoundingBox(float Confidence, FRect Position, FString Label = TEXT(""),
-	                 TArray<FBandLandmark> Landmark = {});
+  FBandBoundingBox() = default;
+  FBandBoundingBox(float Confidence, FRect Position, FString Label = TEXT(""),
+                   TArray<FBandLandmark> Landmark = {},
+                   TArray<FIntPoint> LandmarkEdge = {});
 
-	bool operator==(const FBandBoundingBox& Rhs) const
-	{
-		return (Confidence == Rhs.Confidence) && (Position == Rhs.Position) && (
-			Label == Rhs.Label) && (Landmark == Rhs.Landmark) && (
-			LandmarkEdge == Rhs.LandmarkEdge);
-	}
+  bool operator==(const FBandBoundingBox& Rhs) const;
+  FString ToString() const;
 
-	FString ToString() const
-	{
-		return FString::Printf(TEXT("FBandBoundingBox [%f %f %f %f] with confidence %f"),
-		                       Position.Bottom, Position.Top,
-		                       Position.Left,
-		                       Position.Right, Confidence);
-	}
+  float GetWidth() const;
+  float GetHeight() const;
+  float GetCenterX() const;
+  float GetCenterY() const;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float Confidence;
+  UPROPERTY(EditAnywhere, BlueprintReadOnly)
+  float Confidence;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FRect Position;
+  UPROPERTY(EditAnywhere, BlueprintReadOnly)
+  FRect Position;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FString Label;
+  UPROPERTY(EditAnywhere, BlueprintReadOnly)
+  FString Label;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<FBandLandmark> Landmark;
+  UPROPERTY(EditAnywhere, BlueprintReadOnly)
+  TArray<FBandLandmark> Landmark;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<FIntPoint> LandmarkEdge;
+  UPROPERTY(EditAnywhere, BlueprintReadOnly)
+  TArray<FIntPoint> LandmarkEdge;
 };
 
 inline bool operator<(const FBandBoundingBox& Lhs,
-                      const FBandBoundingBox& Rhs)
-{
-	return Lhs.Confidence > Rhs.Confidence;
+                      const FBandBoundingBox& Rhs) {
+  return Lhs.Confidence > Rhs.Confidence;
 }
