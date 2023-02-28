@@ -308,6 +308,8 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
     return EBandStatus::Error;
   }
 
+  bool Processed = true;
+  auto task_reference = FFunctionGraphTask::CreateAndDispatchWhenReady([&]() {
   bool ChangedTexture2d = false;
   bool PreviousSrgb = Texture->SRGB;
   TextureCompressionSettings PreviousCompressionSettings =
@@ -343,7 +345,6 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
 
   EPixelFormat TargetPixelFormat = Texture->PlatformData->PixelFormat;
 
-  bool Processed = true;
   // resize or crop afterwards
   const bool RequiresResize =
       (NumTensorElements != NumTextureElements) || !(RoI == FBandBoundingBox());
@@ -403,6 +404,8 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
   }
   Mip.BulkData.Unlock();
   CleanUp();
+  }, TStatId(), nullptr, ENamedThreads::GameThread);
+  task_reference->Wait();
   return Processed ? EBandStatus::Ok : EBandStatus::Error;
 }
 
