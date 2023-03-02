@@ -161,11 +161,6 @@ void UBandTensor::Initialize(BandTensor* NewTensorHandle) {
       DimensionString += "x";
     }
   }
-  UE_LOG(LogBand, Log,
-         TEXT("Allocate new Tensor dimension(%s) name(%s) type(%s)"),
-         *DimensionString, *Name(),
-         *EnumPtr->GetNameStringByValue(static_cast<int64>(Type())));
-
   RGBBuffer = new uint8[NumElements()];
 }
 
@@ -310,100 +305,102 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
 
   bool Processed = true;
   auto task_reference = FFunctionGraphTask::CreateAndDispatchWhenReady([&]() {
-  bool ChangedTexture2d = false;
-  bool PreviousSrgb = Texture->SRGB;
-  TextureCompressionSettings PreviousCompressionSettings =
-      Texture->CompressionSettings;
+    bool ChangedTexture2d = false;
+    bool PreviousSrgb = Texture->SRGB;
+    TextureCompressionSettings PreviousCompressionSettings =
+        Texture->CompressionSettings;
 
-  auto CleanUp = [&]() {
-    if (ChangedTexture2d) {
-      Texture->SRGB = PreviousSrgb;
-      Texture->CompressionSettings = PreviousCompressionSettings;
+    auto CleanUp = [&]() {
+      if (ChangedTexture2d) {
+        Texture->SRGB = PreviousSrgb;
+        Texture->CompressionSettings = PreviousCompressionSettings;
+        Texture->UpdateResource();
+      }
+    };
+
+    if ((PreviousSrgb != false) ||
+        (PreviousCompressionSettings != TC_VectorDisplacementmap)) {
+      ChangedTexture2d = true;
+      Texture->SRGB = false;
+      Texture->CompressionSettings = TC_VectorDisplacementmap;
       Texture->UpdateResource();
     }
-  };
 
-  if ((PreviousSrgb != false) ||
-      (PreviousCompressionSettings != TC_VectorDisplacementmap)) {
-    ChangedTexture2d = true;
-    Texture->SRGB = false;
-    Texture->CompressionSettings = TC_VectorDisplacementmap;
-    Texture->UpdateResource();
-  }
+    const EBandTensorType TensorType = Type();
+    const size_t TypeBytes = BandEnum::TensorTypeBytes(TensorType);
+    const int32 SizeX = Texture->PlatformData->Mips[0].SizeX;
+    const int32 SizeY = Texture->PlatformData->Mips[0].SizeY;
 
-  const EBandTensorType TensorType = Type();
-  const size_t TypeBytes = BandEnum::TensorTypeBytes(TensorType);
-  const int32 SizeX = Texture->PlatformData->Mips[0].SizeX;
-  const int32 SizeY = Texture->PlatformData->Mips[0].SizeY;
+    FTexture2DMipMap& Mip = Texture->PlatformData->Mips[0];
+    const size_t NumTensorElements = ByteSize() / 3 / TypeBytes;
+    const size_t NumTextureElements = SizeX * SizeY;
+    UE_LOG(LogBand, Log,
+           TEXT("CopyFromTexture: NumTextureElements: %llu (%d * %d)"),
+           NumTextureElements, SizeX, SizeY);
 
-  FTexture2DMipMap& Mip = Texture->PlatformData->Mips[0];
-  const size_t NumTensorElements = ByteSize() / 3 / TypeBytes;
-  const size_t NumTextureElements = SizeX * SizeY;
-  UE_LOG(LogBand, Log,
-         TEXT("CopyFromTexture: NumTextureElements: %llu (%d * %d)"),
-         NumTextureElements, SizeX, SizeY);
+    EPixelFormat TargetPixelFormat = Texture->PlatformData->PixelFormat;
 
-  EPixelFormat TargetPixelFormat = Texture->PlatformData->PixelFormat;
-
-  // resize or crop afterwards
-  const bool RequiresResize =
-      (NumTensorElements != NumTextureElements) || !(RoI == FBandBoundingBox());
-  const uint8* SourceData =
-      static_cast<const uint8*>(Mip.BulkData.Lock(LOCK_READ_ONLY));
-  if (!SourceData) {
-    UE_LOG(LogBand, Error,
-           TEXT("CopyFromTexture: Tried to access null source data"));
-    Processed = false;
-  } else {
-    // directly copy from the source to tensor
-    if (!RequiresResize) {
-      const UEnum* EnumPtr =
-          FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
-
-      switch (TensorType) {
-        case EBandTensorType::Float32:
-          UE_LOG(
-              LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"),
-              *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
-          BandTensorUtil::TextureToRGBArray<float>(
-              SourceData, TargetPixelFormat, reinterpret_cast<float*>(Data()),
-              NumTensorElements, Mean, Std);
-          break;
-        case EBandTensorType::UInt8:
-          UE_LOG(
-              LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"),
-              *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
-          BandTensorUtil::TextureToRGBArray<uint8>(
-              SourceData, TargetPixelFormat, Data(), NumTensorElements, Mean,
-              Std);
-          break;
-        case EBandTensorType::Int8:
-          UE_LOG(
-              LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"),
-              *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
-          BandTensorUtil::TextureToRGBArray<int8>(
-              SourceData, TargetPixelFormat, reinterpret_cast<int8_t*>(Data()),
-              NumTensorElements, Mean, Std);
-          break;
-        default:
-          UE_LOG(
-              LogBand, Error,
-              TEXT("CopyFromTexture: Unsupported tensor type %s"),
-              *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
-          Processed = false;
-          break;
-      }
+    // resize or crop afterwards
+    const bool RequiresResize =
+        (NumTensorElements != NumTextureElements) || !(
+          RoI == FBandBoundingBox());
+    const uint8* SourceData =
+        static_cast<const uint8*>(Mip.BulkData.Lock(LOCK_READ_ONLY));
+    if (!SourceData) {
+      UE_LOG(LogBand, Error,
+             TEXT("CopyFromTexture: Tried to access null source data"));
+      Processed = false;
     } else {
-      std::unique_ptr<Band::FrameBuffer> Buffer =
-          Band::CreateFromRgbaRawBuffer(SourceData, {SizeX, SizeY});
-      if (CopyFromFrameBuffer(std::move(Buffer), RoI, Mean, Std) ==
-          EBandStatus::Error) {
-        Processed = false;
+      // directly copy from the source to tensor
+      if (!RequiresResize) {
+        const UEnum* EnumPtr =
+            FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+
+        switch (TensorType) {
+          case EBandTensorType::Float32:
+            UE_LOG(
+                LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"),
+                *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+            BandTensorUtil::TextureToRGBArray<float>(
+                SourceData, TargetPixelFormat, reinterpret_cast<float*>(Data()),
+                NumTensorElements, Mean, Std);
+            break;
+          case EBandTensorType::UInt8:
+            UE_LOG(
+                LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"),
+                *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+            BandTensorUtil::TextureToRGBArray<uint8>(
+                SourceData, TargetPixelFormat, Data(), NumTensorElements, Mean,
+                Std);
+            break;
+          case EBandTensorType::Int8:
+            UE_LOG(
+                LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"),
+                *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+            BandTensorUtil::TextureToRGBArray<int8>(
+                SourceData, TargetPixelFormat,
+                reinterpret_cast<int8_t*>(Data()),
+                NumTensorElements, Mean, Std);
+            break;
+          default:
+            UE_LOG(
+                LogBand, Error,
+                TEXT("CopyFromTexture: Unsupported tensor type %s"),
+                *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
+            Processed = false;
+            break;
+        }
+      } else {
+        std::unique_ptr<Band::FrameBuffer> Buffer =
+            Band::CreateFromRgbaRawBuffer(SourceData, {SizeX, SizeY});
+        if (CopyFromFrameBuffer(std::move(Buffer), RoI, Mean, Std) ==
+            EBandStatus::Error) {
+          Processed = false;
+        }
       }
     }
-  }
-  Mip.BulkData.Unlock();
-  CleanUp();
+    Mip.BulkData.Unlock();
+    CleanUp();
   }, TStatId(), nullptr, ENamedThreads::GameThread);
   task_reference->Wait();
   return Processed ? EBandStatus::Ok : EBandStatus::Error;
