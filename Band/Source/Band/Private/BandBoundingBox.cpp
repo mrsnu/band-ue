@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "BandBoundingBox.h"
-#include "GenericPlatform/GenericPlatformMath.h"
+#include <cmath>
+#include "Rect.h"
 
 FBandBoundingBox::FBandBoundingBox(float Confidence, FRect Position,
                                    FString Label,
@@ -43,4 +44,17 @@ float FBandBoundingBox::GetCenterX() const {
 
 float FBandBoundingBox::GetCenterY() const {
   return (Position.Bottom + Position.Top) / 2;
+}
+
+float FBandBoundingBox::GetSimilarity(const FBandBoundingBox& Rhs) const {
+  const float iou = BoxIou(Position, Rhs.Position);
+  // return iou if overlap
+  if (iou > 0.f) {
+    return -iou;
+  }
+  // otherwise return center_distance
+  const float center_distance = std::sqrt(
+      std::pow(GetCenterX() - Rhs.GetCenterX(), 2) +
+      std::pow(GetCenterY() - Rhs.GetCenterY(), 2));
+  return center_distance;
 }

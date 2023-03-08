@@ -23,6 +23,7 @@ struct BAND_API FBandBoundingBox {
   float GetHeight() const;
   float GetCenterX() const;
   float GetCenterY() const;
+  float GetSimilarity(const FBandBoundingBox& Rhs) const;
 
   UPROPERTY(EditAnywhere, BlueprintReadOnly)
   float Confidence;

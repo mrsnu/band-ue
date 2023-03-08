@@ -410,7 +410,6 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::NMS(
       }
     }
   }
-
   return NMSBoxes;
 }
 
