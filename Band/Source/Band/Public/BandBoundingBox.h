@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include "BandLandmark.h"
 #include "UObject/ObjectMacros.h"
 #include "Rect.h"
@@ -24,6 +26,13 @@ struct BAND_API FBandBoundingBox {
   float GetCenterX() const;
   float GetCenterY() const;
   float GetSimilarity(const FBandBoundingBox& Rhs) const;
+
+  static std::function<bool(const FBandBoundingBox&, const FBandBoundingBox&)>
+  GetPositionBasedComparator() {
+    return [](const FBandBoundingBox& Lhs, const FBandBoundingBox& Rhs) {
+      return Lhs.Position.Left < Rhs.Position.Left;
+    };
+  }
 
   UPROPERTY(EditAnywhere, BlueprintReadOnly)
   float Confidence;
