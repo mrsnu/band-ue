@@ -2,6 +2,8 @@
 
 #include "BandBoundingBox.h"
 #include <cmath>
+
+#include "JsonObjectConverter.h"
 #include "Rect.h"
 
 FBandBoundingBox::FBandBoundingBox(float Confidence, FRect Position,
@@ -22,12 +24,9 @@ bool FBandBoundingBox::operator==(const FBandBoundingBox& Rhs) const {
 }
 
 FString FBandBoundingBox::ToString() const {
-  return FString::Printf(
-      TEXT(
-          "FBandBoundingBox [%f %f %f %f] with confidence %f"),
-      Position.Bottom, Position.Top,
-      Position.Left,
-      Position.Right, Confidence);
+  FString json_string;
+  FJsonObjectConverter::UStructToJsonObjectString(*this, json_string);
+  return json_string;
 }
 
 float FBandBoundingBox::GetWidth() const {

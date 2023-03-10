@@ -28,25 +28,28 @@ public class Band : ModuleRules
 			RuntimeDependencies.Add(ExampleSoPath);
 			PublicDelayLoadDLLs.Add("libband_c.so");
 
-			AdditionalPropertiesForReceipt.Add(new ReceiptProperty("AndroidPlugin", Path.Combine(ModuleDirectory, "Band.xml")));
+			AdditionalPropertiesForReceipt.Add(new ReceiptProperty("AndroidPlugin",
+				Path.Combine(ModuleDirectory, "Band.xml")));
 		}
 
 		PublicIncludePaths.AddRange(
-			new string[] {
+			new string[]
+			{
 				Path.Combine(ModuleDirectory, "Library"),
 				Path.Combine(ModuleDirectory, "ThirdParty")
 				// ... add public include paths required here ...
 			}
-			);
-				
-		
+		);
+
+
 		PrivateIncludePaths.AddRange(
-			new string[] {
+			new string[]
+			{
 				// ... add other private include paths required here ...
 			}
-			);
-			
-		
+		);
+
+
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -54,9 +57,9 @@ public class Band : ModuleRules
 				"Projects"
 				// ... add other public dependencies that you statically link with here ...
 			}
-			);
-			
-		
+		);
+
+
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -65,17 +68,18 @@ public class Band : ModuleRules
 				"RHI",
 				"UMG",
 				"TraceLog",
+				"JsonUtilities",
 				"AndroidCamera"
 				// ... add private dependencies that you statically link with here ...	
 			}
-			);
-		
-		
+		);
+
+
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
 				// ... add any modules that your module loads dynamically here ...
 			}
-			);
+		);
 	}
 }
