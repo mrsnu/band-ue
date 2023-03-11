@@ -63,7 +63,6 @@ void UBandTensor::FromCameraFrameWithCrop(UPARAM(ref)
 // TODO (juimdpp): this is rough implementation for Hand Gesture. Implement more
 // general implementation
 void UBandTensor::FromBoundingBox(UPARAM(ref) const FBandBoundingBox BBox) {
-  UE_LOG(LogBand, Display, TEXT("FromCameraFrame: Entering"));
   if (!TensorHandle) {
     UE_LOG(LogBand, Display,
            TEXT("FromCameraFrame: Something went wrong, Null tensor"));
@@ -334,9 +333,6 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
     FTexture2DMipMap& Mip = Texture->PlatformData->Mips[0];
     const size_t NumTensorElements = ByteSize() / 3 / TypeBytes;
     const size_t NumTextureElements = SizeX * SizeY;
-    UE_LOG(LogBand, Log,
-           TEXT("CopyFromTexture: NumTextureElements: %llu (%d * %d)"),
-           NumTextureElements, SizeX, SizeY);
 
     EPixelFormat TargetPixelFormat = Texture->PlatformData->PixelFormat;
 
