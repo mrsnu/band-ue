@@ -27,7 +27,54 @@ bool FBandBoundingBox::operator==(const FBandBoundingBox& Rhs) const {
 
 FString FBandBoundingBox::ToString() const {
   FString json_string;
-  FJsonObjectConverter::UStructToJsonObjectString(*this, json_string);
+  json_string += TEXT("{");
+  
+  json_string += FString::Printf(
+        TEXT("\"confidence\": %f,"), Confidence);
+
+  json_string += FString::Printf(
+    TEXT("\"position\": [%f, %f, %f, %f],"), Position.Top, Position.Left, Position.Bottom, Position.Right
+    );
+
+  json_string += FString::Printf(
+    TEXT("\"label\": \"%s\","), *Label);
+
+  json_string += TEXT("\"landmark\": [");
+  for(int i=0; i<Landmark.Num(); i++)
+  {
+    json_string += TEXT("{");
+    json_string += FString::Printf(TEXT("\"confidence\": %f,"), Landmark[i].Confidence);
+    json_string += TEXT("Point: ");
+    json_string += FString::Printf(
+     TEXT("[%f, %f, %f]"), Landmark[i].Point.X, Landmark[i].Point.Y, Landmark[i].Point.Z
+     );
+    json_string += TEXT("}");
+    if(i != Landmark.Num()-1)
+    {
+      json_string += TEXT(", ");
+    }
+  }
+  json_string += TEXT("],");
+
+  json_string += TEXT("\"landmarkEdge\": [");
+  for(int i=0; i<LandmarkEdge.Num(); i++)
+  {
+    json_string += FString::Printf(
+     TEXT("(%d, %d)"), LandmarkEdge[i].X, LandmarkEdge[i].Y
+     );
+    if(i != LandmarkEdge.Num()-1)
+    {
+      json_string += TEXT(", ");
+    }
+  }
+  json_string += TEXT("],");
+  
+  json_string += FString::Printf(
+    TEXT("\"displacement\": \"%s\""), *Label
+    );
+
+  json_string += TEXT("}");
+  // FJsonObjectConverter::UStructToJsonObjectString(*this, json_string);
   return json_string;
 }
 
