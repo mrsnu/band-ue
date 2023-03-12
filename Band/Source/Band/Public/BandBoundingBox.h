@@ -14,7 +14,10 @@ struct BAND_API FBandBoundingBox {
   GENERATED_BODY()
 
   FBandBoundingBox() = default;
-  FBandBoundingBox(float Confidence, FRect Position, FString Label = TEXT(""),
+  FBandBoundingBox(float Confidence,
+                   FRect Position,
+                   FString Label = TEXT(""),
+                   float Displacement = 100000.f,  // Default to have low priority
                    TArray<FBandLandmark> Landmark = {},
                    TArray<FIntPoint> LandmarkEdge = {});
 
@@ -34,6 +37,13 @@ struct BAND_API FBandBoundingBox {
     };
   }
 
+  static std::function<bool(const FBandBoundingBox&, const FBandBoundingBox&)>
+  GetDisplacementBasedComparator() {
+    return [](const FBandBoundingBox& Lhs, const FBandBoundingBox& Rhs) {
+      return Lhs.Displacement > Rhs.Displacement;
+    };
+  }
+
   UPROPERTY(EditAnywhere, BlueprintReadOnly)
   float Confidence;
 
@@ -48,6 +58,9 @@ struct BAND_API FBandBoundingBox {
 
   UPROPERTY(EditAnywhere, BlueprintReadOnly)
   TArray<FIntPoint> LandmarkEdge;
+
+  UPROPERTY(EditAnywhere, BlueprintReadOnly)
+  float Displacement;
 };
 
 inline bool operator<(const FBandBoundingBox& Lhs,

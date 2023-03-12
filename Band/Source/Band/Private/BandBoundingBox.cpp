@@ -8,11 +8,13 @@
 
 FBandBoundingBox::FBandBoundingBox(float Confidence, FRect Position,
                                    FString Label,
+                                   float Displacement,
                                    TArray<FBandLandmark> Landmark,
                                    TArray<FIntPoint> LandmarkEdge)
   : Confidence(Confidence),
     Position(Position),
     Label(Label),
+    Displacement(Displacement),
     Landmark(Landmark),
     LandmarkEdge(LandmarkEdge) {
 }
