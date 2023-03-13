@@ -105,9 +105,11 @@ float FBandBoundingBox::GetSimilarity(const FBandBoundingBox& Rhs) const {
   if (iou > 0.f) {
     return -iou;
   }
-  // otherwise return center_distance
-  const float center_distance = std::sqrt(
-      std::pow(GetCenterX() - Rhs.GetCenterX(), 2) +
-      std::pow(GetCenterY() - Rhs.GetCenterY(), 2));
-  return center_distance;
+  // otherwise return distance
+  return GetDistance(Rhs);
+}
+
+float FBandBoundingBox::GetDistance(const FBandBoundingBox& Rhs) const {
+  return std::sqrt(std::pow(GetCenterX() - Rhs.GetCenterX(), 2) +
+                   std::pow(GetCenterY() - Rhs.GetCenterY(), 2));
 }

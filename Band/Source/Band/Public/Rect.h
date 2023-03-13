@@ -13,9 +13,13 @@ struct FRect {
            Bottom == Rhs.Bottom;
   }
 
+  UPROPERTY()
   float Left;
+  UPROPERTY()
   float Right;
+  UPROPERTY()
   float Top;
+  UPROPERTY()
   float Bottom;
 };
 
