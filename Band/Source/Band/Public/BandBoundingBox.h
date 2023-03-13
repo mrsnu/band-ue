@@ -17,7 +17,8 @@ struct BAND_API FBandBoundingBox {
   FBandBoundingBox(float Confidence,
                    FRect Position,
                    FString Label = TEXT(""),
-                   float Displacement = 100000.f,  // Default to have low priority
+                   float Displacement = 0.f,
+                   // Default to have low priority
                    TArray<FBandLandmark> Landmark = {},
                    TArray<FIntPoint> LandmarkEdge = {});
 
@@ -29,6 +30,7 @@ struct BAND_API FBandBoundingBox {
   float GetCenterX() const;
   float GetCenterY() const;
   float GetSimilarity(const FBandBoundingBox& Rhs) const;
+  float GetDistance(const FBandBoundingBox& Rhs) const;
 
   static std::function<bool(const FBandBoundingBox&, const FBandBoundingBox&)>
   GetPositionBasedComparator() {
