@@ -79,6 +79,8 @@ FString FBandBoundingBox::ToString() const {
   //   TEXT("\"displacement\": \"%f\""), Displacement
   //   );
 
+  json_string += TEXT(", ");
+  json_string += TEXT("\"processing_end_ts\": ");
   json_string += std::to_string(std::chrono::system_clock::now().time_since_epoch().count()).c_str();
   
   json_string += TEXT("}");
