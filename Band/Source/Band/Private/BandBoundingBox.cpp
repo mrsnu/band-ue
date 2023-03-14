@@ -2,7 +2,8 @@
 
 #include "BandBoundingBox.h"
 #include <cmath>
-
+#include <string>
+#include <chrono>
 #include "JsonObjectConverter.h"
 #include "Rect.h"
 
@@ -78,6 +79,8 @@ FString FBandBoundingBox::ToString() const {
   //   TEXT("\"displacement\": \"%f\""), Displacement
   //   );
 
+  json_string += std::to_string(std::chrono::system_clock::now().time_since_epoch().count()).c_str();
+  
   json_string += TEXT("}");
   // FJsonObjectConverter::UStructToJsonObjectString(*this, json_string);
   return json_string;
