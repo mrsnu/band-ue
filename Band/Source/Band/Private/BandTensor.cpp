@@ -23,14 +23,15 @@ void UBandTensor::BeginDestroy() {
 }
 
 void UBandTensor::FromCameraFrame(const UAndroidCameraFrame* Frame,
-                                  bool Normalize) {
-  FromCameraFrameWithCrop(Frame, {}, Normalize);
+                                  const float Mean, const float Std) {
+  FromCameraFrameWithCrop(Frame, {}, Mean, Std);
 }
 
 void UBandTensor::FromCameraFrameWithCrop(UPARAM(ref)
     const UAndroidCameraFrame* Frame,
     FBandBoundingBox RoI,
-    bool Normalize) {
+    const float Mean,
+    const float Std) {
   if (!Frame) {
     UE_LOG(LogBand, Display,
            TEXT("FromCameraFrame: Something went wrong, Null Frame"));
@@ -46,9 +47,7 @@ void UBandTensor::FromCameraFrameWithCrop(UPARAM(ref)
   std::unique_ptr<Band::FrameBuffer> Buffer =
       Band::CreateFromAndroidCameraFrame(*Frame);
 
-  const float Mean = Normalize ? 127.5f : 0.f;
-  const float Std = Normalize ? 127.5f : 1.f;
-
+  UE_LOG(LogBand, Log, TEXT("Normalizing with mean %f and std %f"), Mean, Std);
   if (Buffer.get()) {
     CopyFromFrameBuffer(std::move(Buffer), RoI, Mean, Std);
   } else if (Frame->GetTexture2D()) {
