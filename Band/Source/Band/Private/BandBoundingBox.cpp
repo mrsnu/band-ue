@@ -93,7 +93,7 @@ float FBandBoundingBox::GetWidth() const {
 }
 
 float FBandBoundingBox::GetHeight() const {
-  return std::abs(Position.Top - Position.Bottom);
+  return std::abs(Position.Bottom - Position.Top);
 }
 
 float FBandBoundingBox::GetCenterX() const {

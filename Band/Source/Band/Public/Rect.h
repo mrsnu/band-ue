@@ -24,21 +24,20 @@ struct FRect {
 };
 
 inline float BoxArea(FRect Rect) {
-  return (Rect.Right - Rect.Left) * (Rect.Top - Rect.Bottom);
+  return (Rect.Right - Rect.Left) * (Rect.Bottom - Rect.Top);
 }
 
 inline float BoxIntersection(FRect Lhs, FRect Rhs) {
   if (Lhs.Right <= Rhs.Left || Rhs.Right <= Lhs.Left) {
     return 0.0f;
   }
-  if (Lhs.Top <= Rhs.Bottom || Rhs.Top <= Lhs.Bottom) {
+  if (Lhs.Bottom <= Rhs.Top || Rhs.Bottom <= Lhs.Top) {
     return 0.0f;
   }
   return (FGenericPlatformMath::Min(Lhs.Right, Rhs.Right) -
-          FGenericPlatformMath::Max(Lhs.Left, Rhs.Left))
-         * (FGenericPlatformMath::Min(Lhs.Top, Rhs.Top) -
-            FGenericPlatformMath::Max(
-                Lhs.Bottom, Rhs.Bottom));
+          FGenericPlatformMath::Max(Lhs.Left, Rhs.Left)) *
+         (FGenericPlatformMath::Min(Lhs.Bottom, Rhs.Bottom) -
+          FGenericPlatformMath::Max(Lhs.Top, Rhs.Top));
 }
 
 

@@ -19,13 +19,13 @@ class BAND_API UBandTensor : public UObject {
 public:
   UFUNCTION(BlueprintCallable, Category = Band)
   void FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame,
-                       const float Mean = 127.5f,
-                       const float Std = 127.5f);
+                       const float Mean = 0.0f,
+                       const float Std = 1.0f);
   UFUNCTION(BlueprintCallable, Category = Band)
   void FromCameraFrameWithCrop(UPARAM(ref) const UAndroidCameraFrame* Frame,
                                FBandBoundingBox RoI,
-                               const float Mean = 127.5f,
-                               const float Std = 127.5f);
+                               const float Mean = 0.0f,
+                               const float Std = 1.0f);
 
   UFUNCTION(BlueprintCallable, Category = Band)
   void FromBoundingBox(UPARAM(ref) const FBandBoundingBox Box);
