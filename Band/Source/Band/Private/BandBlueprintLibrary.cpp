@@ -117,7 +117,6 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
         TempBox.Label = Label->GetClassName(static_cast<int32>(
           ClassResults[BoxIndex * LenClassVector + ClassOffset]));
       }
-      UE_LOG(LogBand, Log, TEXT("Box detected = %s"), TCHAR_TO_ANSI(*TempBox.ToString()));
       Boxes.Push(TempBox);
     }
   }
@@ -166,7 +165,7 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(
     DetectionTensorIndex = 0;
     ConfidenceTensorIndex = 0;
     ClassTensorIndex = 0;
-    ScoreThreshold = 0.7f;
+    ScoreThreshold = 0.5f;
     ConfidenceOffset = 15;
     LenBoxVector = LenConfidenceVector = LenClassVector = 16;
     BBoxOffsets = {0, 3, 2, 1}; // xmin, ymin, xmax, ymax
