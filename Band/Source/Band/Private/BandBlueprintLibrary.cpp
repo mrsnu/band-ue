@@ -165,7 +165,7 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(
     DetectionTensorIndex = 0;
     ConfidenceTensorIndex = 0;
     ClassTensorIndex = 0;
-    ScoreThreshold = 0.5f;
+    ScoreThreshold = 0.2f;
     ConfidenceOffset = 15;
     LenBoxVector = LenConfidenceVector = LenClassVector = 16;
     BBoxOffsets = {0, 3, 2, 1}; // xmin, ymin, xmax, ymax
