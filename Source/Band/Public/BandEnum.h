@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include "c_api_types.h"
 #include "Modules/ModuleManager.h"
 #include "BandEnum.generated.h"
 

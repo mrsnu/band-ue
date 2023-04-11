@@ -5,7 +5,6 @@
 #include <stdint.h>
 
 #include "c_api_types.h"
-#include "common.h"
 
 #ifdef SWIG
 #define BAND_CAPI_EXPORT
@@ -28,12 +27,12 @@ extern "C" {
 #endif  // __cplusplus
 
 // Forward decl of internal types - details are in `c_api_types.h`
-using BandConfigBuilder = struct BandConfigBuilder;
-using BandConfig = struct BandConfig;
-using BandModel = struct BandModel;
-using BandTensor = struct BandTensor;
-using BandEngine = struct BandEngine;
-using BandRequestHandle = int;
+typedef struct BandConfigBuilder BandConfigBuilder;
+typedef struct BandConfig BandConfig;
+typedef struct BandModel BandModel;
+typedef struct BandTensor BandTensor;
+typedef struct BandEngine BandEngine;
+typedef int BandRequestHandle;
 
 /* config builder */
 BAND_CAPI_EXPORT extern BandConfigBuilder* BandConfigBuilderCreate();
@@ -63,8 +62,13 @@ BAND_CAPI_EXPORT extern size_t BandTensorGetNumDims(BandTensor* tensor);
 BAND_CAPI_EXPORT extern const int* BandTensorGetDims(BandTensor* tensor);
 BAND_CAPI_EXPORT extern size_t BandTensorGetBytes(BandTensor* tensor);
 BAND_CAPI_EXPORT extern const char* BandTensorGetName(BandTensor* tensor);
-BAND_CAPI_EXPORT extern BandQuantization BandTensorGetQuantization(
+BAND_CAPI_EXPORT extern BandQuantizationType BandTensorGetQuantizationType(
     BandTensor* tensor);
+BAND_CAPI_EXPORT extern void* BandTensorGetQuantizationParams(
+    BandTensor* tensor);
+
+/* request option */
+BAND_CAPI_EXPORT extern BandRequestOption BandRequestOptionGetDefault();
 
 /* engine */
 // TODO: Error reporter
@@ -93,11 +97,11 @@ BAND_CAPI_EXPORT extern BandStatus BandEngineRequestSync(
     BandTensor** output_tensors);
 BAND_CAPI_EXPORT extern BandRequestHandle BandEngineRequestAsync(
     BandEngine* engine, BandModel* model, BandTensor** input_tensors);
-BAND_CAPI_EXPORT extern BandStatus BandEngineRequestSyncOnWorker(
-    BandEngine* engine, BandModel* model, int target_worker,
+BAND_CAPI_EXPORT extern BandStatus BandEngineRequestSyncOptions(
+    BandEngine* engine, BandModel* model, BandRequestOption options,
     BandTensor** input_tensors, BandTensor** output_tensors);
-BAND_CAPI_EXPORT extern BandRequestHandle BandEngineRequestAsyncOnWorker(
-    BandEngine* engine, BandModel* model, int target_worker,
+BAND_CAPI_EXPORT extern BandRequestHandle BandEngineRequestAsyncOptions(
+    BandEngine* engine, BandModel* model, BandRequestOption options,
     BandTensor** input_tensors);
 BAND_CAPI_EXPORT extern BandStatus BandEngineWait(BandEngine* engine,
                                                   BandRequestHandle handle,
@@ -108,50 +112,51 @@ BAND_CAPI_EXPORT extern void BandEngineSetOnEndRequest(
     void (*on_end_invoke)(void* user_data, int job_id, BandStatus status),
     void* user_data);
 
-using PFN_BandConfigBuilderCreate = BandConfigBuilder* (*)();
-using PFN_BandAddConfig = void(*)(BandConfigBuilder*, int, int, ...);
-using PFN_BandConfigBuilderDelete = void(*)(BandConfigBuilder*);
-using PFN_BandConfigCreate = BandConfig* (*)(BandConfigBuilder*);
-using PFN_BandConfigDelete = void(*)(BandConfig*);
-using PFN_BandModelCreate = BandModel* (*)();
-using PFN_BandModelDelete = void(*)(BandModel*);
-using PFN_BandModelAddFromBuffer = BandStatus(*)(BandModel*, BandBackendType,
+typedef BandConfigBuilder* (*PFN_BandConfigBuilderCreate)();
+typedef void (*PFN_BandAddConfig)(BandConfigBuilder*, int, int, ...);
+typedef void (*PFN_BandConfigBuilderDelete)(BandConfigBuilder*);
+typedef BandConfig* (*PFN_BandConfigCreate)(BandConfigBuilder*);
+typedef void (*PFN_BandConfigDelete)(BandConfig*);
+typedef BandModel* (*PFN_BandModelCreate)();
+typedef void (*PFN_BandModelDelete)(BandModel*);
+typedef BandStatus (*PFN_BandModelAddFromBuffer)(BandModel*, BandBackendType,
                                                  const void*, size_t);
-using PFN_BandModelAddFromFile = BandStatus(*)(BandModel*, BandBackendType,
+typedef BandStatus (*PFN_BandModelAddFromFile)(BandModel*, BandBackendType,
                                                const char*);
-using PFN_BandTensorDelete = void(*)(BandTensor*);
-using PFN_BandTensorGetType = BandType(*)(BandTensor*);
-using PFN_BandTensorGetData = void* (*)(BandTensor*);
-using PFN_BandTensorGetNumDims = size_t(*)(BandTensor*);
-using PFN_BandTensorGetDims = const int* (*)(BandTensor*);
-using PFN_BandTensorGetBytes = size_t(*)(BandTensor*);
-using PFN_BandTensorGetName = const char* (*)(BandTensor*);
-using PFN_BandTensorGetQuantization = BandQuantization(*)(BandTensor*);
-using PFN_BandEngineCreate = BandEngine* (*)(BandConfig*);
-using PFN_BandEngineDelete = void(*)(BandEngine*);
-using PFN_BandEngineRegisterModel = BandStatus(*)(BandEngine*, BandModel*);
-using PFN_BandEngineGetNumInputTensors = int(*)(BandEngine*, BandModel*);
-using PFN_BandEngineGetNumOutputTensors = int(*)(BandEngine*, BandModel*);
-using PFN_BandEngineGetNumWorkers = int(*)(BandEngine*);
-using PFN_BandEngineGetWorkerDevice = BandDeviceFlags(*)(BandEngine*, int);
-using PFN_BandEngineCreateInputTensor = BandTensor* (*)(BandEngine*, BandModel*,
+typedef void (*PFN_BandTensorDelete)(BandTensor*);
+typedef BandType (*PFN_BandTensorGetType)(BandTensor*);
+typedef void* (*PFN_BandTensorGetData)(BandTensor*);
+typedef size_t (*PFN_BandTensorGetNumDims)(BandTensor*);
+typedef const int* (*PFN_BandTensorGetDims)(BandTensor*);
+typedef size_t (*PFN_BandTensorGetBytes)(BandTensor*);
+typedef const char* (*PFN_BandTensorGetName)(BandTensor*);
+typedef BandQuantizationType (*PFN_BandTensorGetQuantizationType)(BandTensor*);
+typedef void* (*PFN_BandTensorGetQuantizationParams)(BandTensor*);
+typedef BandEngine* (*PFN_BandEngineCreate)(BandConfig*);
+typedef void (*PFN_BandEngineDelete)(BandEngine*);
+typedef BandStatus (*PFN_BandEngineRegisterModel)(BandEngine*, BandModel*);
+typedef int (*PFN_BandEngineGetNumInputTensors)(BandEngine*, BandModel*);
+typedef int (*PFN_BandEngineGetNumOutputTensors)(BandEngine*, BandModel*);
+typedef int (*PFN_BandEngineGetNumWorkers)(BandEngine*);
+typedef BandDeviceFlags (*PFN_BandEngineGetWorkerDevice)(BandEngine*, int);
+typedef BandTensor* (*PFN_BandEngineCreateInputTensor)(BandEngine*, BandModel*,
   size_t);
-using PFN_BandEngineCreateOutputTensor = BandTensor* (*)(
-    BandEngine*, BandModel*,
-    size_t);
-using PFN_BandEngineRequestSync = BandStatus(*)(BandEngine*, BandModel*,
+typedef BandTensor* (*PFN_BandEngineCreateOutputTensor)(BandEngine*, BandModel*,
+  size_t);
+typedef BandStatus (*PFN_BandEngineRequestSync)(BandEngine*, BandModel*,
                                                 BandTensor**, BandTensor**);
-using PFN_BandEngineRequestAsync = BandRequestHandle(*)(BandEngine*, BandModel*,
+typedef BandRequestHandle (*PFN_BandEngineRequestAsync)(BandEngine*, BandModel*,
   BandTensor**);
-using PFN_BandEngineRequestSyncOnWorker = BandStatus(*)(BandEngine*, BandModel*,
-  int, BandTensor**,
-  BandTensor**);
-using PFN_BandEngineRequestAsyncOnWorker = BandRequestHandle(*)(BandEngine*,
-  BandModel*, int,
-  BandTensor**);
-using PFN_BandEngineWait = BandStatus(*)(BandEngine*, BandRequestHandle,
+typedef BandStatus (*PFN_BandEngineRequestSyncOptions)(BandEngine*, BandModel*,
+  BandRequestOption,
+  BandTensor**, BandTensor**);
+typedef BandRequestHandle (*PFN_BandEngineRequestAsyncOptions)(
+    BandEngine*, BandModel*,
+    BandRequestOption,
+    BandTensor**);
+typedef BandStatus (*PFN_BandEngineWait)(BandEngine*, BandRequestHandle,
                                          BandTensor**, size_t);
-using PFN_BandEngineSetOnEndRequest = void(*)(BandEngine*,
+typedef void (*PFN_BandEngineSetOnEndRequest)(BandEngine*,
                                               void (*)(void*, int, BandStatus),
                                               void*);
 

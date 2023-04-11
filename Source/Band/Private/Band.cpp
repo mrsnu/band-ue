@@ -83,7 +83,7 @@ bool FBandModule::InitializeInterpreter(FString ConfigPath) {
   BandConfigBuilder* ConfigBuilder = BandConfigBuilderCreate();
   BandAddConfig(ConfigBuilder, BAND_PLANNER_LOG_PATH, 1,
                 TCHAR_TO_ANSI(*LogDirectory));
-  BandAddConfig(ConfigBuilder, BAND_PLANNER_SCHEDULERS, 1, kBandFixedDevice);
+  BandAddConfig(ConfigBuilder, BAND_PLANNER_SCHEDULERS, 1, kBandFixedWorker);
   BandAddConfig(ConfigBuilder, BAND_CPU_MASK, /*count=*/1, kBandAll);
   BandAddConfig(ConfigBuilder, BAND_PLANNER_CPU_MASK, /*count=*/1,
                 kBandPrimary);
@@ -172,8 +172,8 @@ bool FBandModule::LoadDllFunction(FString LibraryPath) {
   LoadFunction(LibraryHandle, BandEngineRegisterModel);
   LoadFunction(LibraryHandle, BandEngineRequestAsync);
   LoadFunction(LibraryHandle, BandEngineRequestSync);
-  LoadFunction(LibraryHandle, BandEngineRequestAsyncOnWorker);
-  LoadFunction(LibraryHandle, BandEngineRequestSyncOnWorker);
+  LoadFunction(LibraryHandle, BandEngineRequestAsyncOptions);
+  LoadFunction(LibraryHandle, BandEngineRequestSyncOptions);
   LoadFunction(LibraryHandle, BandEngineWait);
   LoadFunction(LibraryHandle, BandEngineSetOnEndRequest);
   LoadFunction(LibraryHandle, BandModelAddFromBuffer);
@@ -186,7 +186,8 @@ bool FBandModule::LoadDllFunction(FString LibraryPath) {
   LoadFunction(LibraryHandle, BandTensorGetNumDims);
   LoadFunction(LibraryHandle, BandTensorGetDims);
   LoadFunction(LibraryHandle, BandTensorGetName);
-  LoadFunction(LibraryHandle, BandTensorGetQuantization);
+  LoadFunction(LibraryHandle, BandTensorGetQuantizationType);
+  LoadFunction(LibraryHandle, BandTensorGetQuantizationParams);
   LoadFunction(LibraryHandle, BandTensorGetType);
   IsDllLoaded = true;
   return true;

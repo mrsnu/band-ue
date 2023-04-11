@@ -78,11 +78,10 @@ void UBandInterfaceComponent::InvokeSync(
              "InvokeSync: Failed to invoke. Please check that the input/output tensors are non null"
            ));
     // FBandModule::Get().BandEngineRequestSyncOnWorker(GetHandle(), Model->GetHandle(), DeviceFlag, nullptr, nullptr);	
-
   } else if (Model->IsRegistered() && GetInputTensorCount(Model) == InputTensors
              .Num() && GetOutputTensorCount(Model) == OutputTensors.Num()) {
-    FBandModule::Get().BandEngineRequestSyncOnWorker(
-        GetHandle(), Model->GetHandle(), DeviceFlag,
+    FBandModule::Get().BandEngineRequestSyncOptions(
+        GetHandle(), Model->GetHandle(), {DeviceFlag, false, -1, -1},
         BandTensorUtil::TensorsFromTArray(InputTensors).GetData(),
         BandTensorUtil::TensorsFromTArray(OutputTensors).GetData());
   } else {
@@ -94,22 +93,20 @@ void UBandInterfaceComponent::InvokeSync(
            InputTensors.Num(), GetOutputTensorCount(Model),
            OutputTensors.Num());
   }
-
 }
 
 int32 UBandInterfaceComponent::InvokeAsync(
     UPARAM(ref) const UBandModel* Model,
     UPARAM(ref) TArray<UBandTensor*> InputTensors, int DeviceFlag) {
   if (Model->IsRegistered() && InputTensors.Num() == 0) {
-    const int32 JobId = FBandModule::Get().BandEngineRequestAsyncOnWorker(
-        GetHandle(), Model->GetHandle(), DeviceFlag, nullptr);
+    const int32 JobId = FBandModule::Get().BandEngineRequestAsyncOptions(
+        GetHandle(), Model->GetHandle(), {DeviceFlag, false, -1, -1}, nullptr);
     JobToModel[JobId] = Model->GetHandle();
     return JobId;
-
   } else if (Model->IsRegistered() && GetInputTensorCount(Model) == InputTensors
              .Num()) {
-    const int32 JobId = FBandModule::Get().BandEngineRequestAsyncOnWorker(
-        GetHandle(), Model->GetHandle(), DeviceFlag,
+    const int32 JobId = FBandModule::Get().BandEngineRequestAsyncOptions(
+        GetHandle(), Model->GetHandle(), {DeviceFlag, false, -1, -1},
         BandTensorUtil::TensorsFromTArray(InputTensors).GetData());
     JobToModel[JobId] = Model->GetHandle();
     return JobId;

@@ -70,8 +70,8 @@ private:
   PFN_BandEngineRegisterModel BandEngineRegisterModel = nullptr;
   PFN_BandEngineRequestAsync BandEngineRequestAsync = nullptr;
   PFN_BandEngineRequestSync BandEngineRequestSync = nullptr;
-  PFN_BandEngineRequestAsyncOnWorker BandEngineRequestAsyncOnWorker = nullptr;
-  PFN_BandEngineRequestSyncOnWorker BandEngineRequestSyncOnWorker = nullptr;
+  PFN_BandEngineRequestAsyncOptions BandEngineRequestAsyncOptions = nullptr;
+  PFN_BandEngineRequestSyncOptions BandEngineRequestSyncOptions = nullptr;
   PFN_BandEngineWait BandEngineWait = nullptr;
   PFN_BandEngineSetOnEndRequest BandEngineSetOnEndRequest = nullptr;
   PFN_BandModelAddFromBuffer BandModelAddFromBuffer = nullptr;
@@ -84,6 +84,7 @@ private:
   PFN_BandTensorGetNumDims BandTensorGetNumDims = nullptr;
   PFN_BandTensorGetDims BandTensorGetDims = nullptr;
   PFN_BandTensorGetName BandTensorGetName = nullptr;
-  PFN_BandTensorGetQuantization BandTensorGetQuantization = nullptr;
+  PFN_BandTensorGetQuantizationType BandTensorGetQuantizationType = nullptr;
+  PFN_BandTensorGetQuantizationParams BandTensorGetQuantizationParams = nullptr;
   PFN_BandTensorGetType BandTensorGetType = nullptr;
 };
