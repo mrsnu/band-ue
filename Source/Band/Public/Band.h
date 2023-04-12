@@ -42,7 +42,7 @@ private:
   /* Reference to interpreter. Mainly for callback propagation */
   void RegisterInterpreter(UBandInterfaceComponent* Interpreter);
   void UnregisterInterpreter(UBandInterfaceComponent* Interpreter);
-  TWeakObjectPtr<UBandInterfaceComponent> Interpreter = nullptr;
+  TSet<TWeakObjectPtr<UBandInterfaceComponent>> RegisteredInterpreters;
 
   BandEngine* EngineHandle = nullptr;
   void* LibraryHandle = nullptr;
