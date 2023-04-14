@@ -47,7 +47,6 @@ void UBandTensor::FromCameraFrameWithCrop(UPARAM(ref)
   std::unique_ptr<Band::FrameBuffer> Buffer =
       Band::CreateFromAndroidCameraFrame(*Frame);
 
-  UE_LOG(LogBand, Log, TEXT("Normalizing with mean %f and std %f"), Mean, Std);
   if (Buffer.get()) {
     CopyFromFrameBuffer(std::move(Buffer), RoI, Mean, Std);
   } else if (Frame->GetTexture2D()) {
@@ -91,7 +90,6 @@ void UBandTensor::FromBoundingBox(UPARAM(ref) const FBandBoundingBox BBox) {
         break;
     }
   }
-  UE_LOG(LogBand, Display, TEXT("FromCameraFrame: Exiting"));
 }
 
 template <typename T>
