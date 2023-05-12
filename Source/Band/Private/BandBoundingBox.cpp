@@ -118,3 +118,12 @@ float FBandBoundingBox::GetDistance(const FBandBoundingBox& Rhs) const {
   return std::sqrt(std::pow(GetCenterX() - Rhs.GetCenterX(), 2) +
                    std::pow(GetCenterY() - Rhs.GetCenterY(), 2));
 }
+
+float FBandBoundingBox::GetLandmarkDistance(const FBandBoundingBox& Rhs) const {
+  float result = 0.f;
+  check(Landmark.Num() == Rhs.Landmark.Num());
+  for (size_t i = 0; i < Landmark.Num(); i++) {
+    result += Landmark[i].GetDistance(Rhs.Landmark[i]);
+  }
+  return result / static_cast<float>(Landmark.Num());
+}

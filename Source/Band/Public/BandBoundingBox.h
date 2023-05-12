@@ -31,6 +31,7 @@ struct BAND_API FBandBoundingBox {
   float GetCenterY() const;
   float GetSimilarity(const FBandBoundingBox& Rhs) const;
   float GetDistance(const FBandBoundingBox& Rhs) const;
+  float GetLandmarkDistance(const FBandBoundingBox& Rhs) const;
 
   static std::function<bool(const FBandBoundingBox&, const FBandBoundingBox&)>
   GetPositionBasedComparator() {
@@ -39,12 +40,21 @@ struct BAND_API FBandBoundingBox {
     };
   }
 
-  static std::function<bool(const FBandBoundingBox&, const FBandBoundingBox&)>
-  GetDisplacementBasedComparator() {
-    return [](const FBandBoundingBox& Lhs, const FBandBoundingBox& Rhs) {
-      return Lhs.Displacement > Rhs.Displacement;
+  static std::function<float(const FBandBoundingBox&, const FBandBoundingBox&)>
+  GetDisplacementMeasure() {
+    return [](const FBandBoundingBox& prev, const FBandBoundingBox& cur) {
+      return prev.GetDistance(cur);
     };
   }
+
+  static std::function<float(const FBandBoundingBox&, const FBandBoundingBox&)>
+  GetLandmarkDisplacementMeasure() {
+    return [](const FBandBoundingBox& prev, const FBandBoundingBox& cur) -> float {
+      return prev.GetLandmarkDistance(cur);
+    };
+  }
+
+  
 
   UPROPERTY(EditAnywhere, BlueprintReadOnly)
   float Confidence;
@@ -63,6 +73,9 @@ struct BAND_API FBandBoundingBox {
 
   UPROPERTY(EditAnywhere, BlueprintReadOnly)
   float Displacement;
+
+  UPROPERTY(EditAnywhere, BlueprintReadOnly)
+  float LandmarkDisplacement;
 };
 
 inline bool operator<(const FBandBoundingBox& Lhs,
