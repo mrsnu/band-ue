@@ -16,17 +16,18 @@ FString UBandBlueprintLibrary::GetVersion() {
 /* BBox offsets: Offset of Left, Bottom, Right, Top (in this order) */
 template <typename T>
 TArray<FBandBoundingBox> GetDetectedBoxesInternal(
-    TArray<UBandTensor*> Tensors, const size_t DetectionTensorIndex,
+    EBandDetector DetectorType, TArray<UBandTensor*> Tensors, const size_t DetectionTensorIndex,
     TArray<int32> BBoxOffsets, const size_t ConfidenceTensorIndex,
     const size_t ConfidenceOffset, const size_t ClassTensorIndex,
-    const size_t ClassOffset, const UBandLabel* Label,
-    const float ScoreThreshold, int32 LenBoxVector = -1,
-    int32 LenConfidenceVector = -1, int32 LenClassVector = -1) {
+    const size_t ClassOffset, const size_t LandmarkTensorIndex,
+    const size_t LandmarkOffset, const UBandLabel* Label,
+    const float ScoreThreshold, int32 LenBoxVector,
+    int32 LenConfidenceVector, int32 LenClassVector, int32 NumLandmarks) {
   TArray<FBandBoundingBox> Boxes;
   if (Tensors.Num() <= DetectionTensorIndex) {
     UE_LOG(LogBand, Error,
            TEXT("UBandBlueprintLibrary: GetDetectedBoxes: Given tensor index "
-             "offset %d out of bound %d"),
+             "offset %llu out of bound %d"),
            DetectionTensorIndex, Tensors.Num());
     return Boxes;
   }
@@ -34,8 +35,16 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
   if (Tensors.Num() <= ConfidenceTensorIndex) {
     UE_LOG(LogBand, Error,
            TEXT("UBandBlueprintLibrary: GetDetectedBoxes: Given confidence "
-             "index offset %d out of bound %d"),
+             "index offset %llu out of bound %d"),
            ConfidenceTensorIndex, Tensors.Num());
+    return Boxes;
+  }
+
+  if (Tensors.Num() <= LandmarkTensorIndex) {
+    UE_LOG(LogBand, Error,
+           TEXT("UBandBlueprintLibrary: GetDetectedBoxes: Given landmark "
+             "index offset %llu out of bound %d"),
+           LandmarkTensorIndex, Tensors.Num());
     return Boxes;
   }
 
@@ -47,26 +56,29 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
   LenBoxVector = LenBoxVector < 0
                    ? Tensors[DetectionTensorIndex]->Dim(1 + BatchOffset)
                    : LenBoxVector;
-
-  const int32 NumTrueDims =
-      Tensors[ConfidenceTensorIndex]->NumDims() - BatchOffset;
+  
   // Assumption: (1) x [NumBoxes] x [LenConfidenceVector] or (1) x [NumBoxes]
   const TArray<T>& ConfidenceResults =
       Tensors[ConfidenceTensorIndex]->GetBuffer<T>();
+  const int32 NumTrueDims =
+      Tensors[ConfidenceTensorIndex]->NumDims() - BatchOffset;
   LenConfidenceVector =
       LenConfidenceVector < 0
         ? (NumTrueDims >= 2
              ? Tensors[ConfidenceTensorIndex]->Dim(1 + BatchOffset)
              : 1)
         : LenConfidenceVector;
-  // Assumption: (1) x [NumBoxes] x [LenConfidenceVector] or (1) x [NumBoxes]
+  
+  // Assumption: (1) x [NumBoxes] x [LenConfidenceVector] or (1) x [NumBoxes]  
   const TArray<T>& ClassResults = Tensors[ClassTensorIndex]->GetBuffer<T>();
   LenClassVector =
-      LenClassVector < 0
-        ? (NumTrueDims >= 2
-             ? Tensors[ClassTensorIndex]->Dim(1 + BatchOffset)
-             : 1)
-        : LenClassVector;
+     LenClassVector < 0
+       ? (NumTrueDims >= 2
+            ? Tensors[ClassTensorIndex]->Dim(1 + BatchOffset)
+            : 1)
+       : LenClassVector;
+  
+  const TArray<T>& LandmarkResults = Tensors[LandmarkTensorIndex]->GetBuffer<T>();
 
   for (int32 BBoxOffset : BBoxOffsets) {
     if (BBoxOffset >= LenBoxVector) {
@@ -81,7 +93,7 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
   if (ConfidenceOffset >= LenConfidenceVector) {
     UE_LOG(LogBand, Error,
            TEXT("UBandBlueprintLibrary: GetDetectedBoxes: Given confidence "
-             "offset %d out of bound %d"),
+             "offset %llu out of bound %d"),
            ConfidenceOffset, LenConfidenceVector);
     return Boxes;
   }
@@ -89,7 +101,7 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
   if (Label && ClassOffset >= LenClassVector) {
     UE_LOG(LogBand, Error,
            TEXT("UBandBlueprintLibrary: GetDetectedBoxes: Given class offset "
-             "%d out of bound %d"),
+             "%llu out of bound %d"),
            ClassOffset, LenClassVector);
     return Boxes;
   }
@@ -117,6 +129,30 @@ TArray<FBandBoundingBox> GetDetectedBoxesInternal(
         TempBox.Label = Label->GetClassName(static_cast<int32>(
           ClassResults[BoxIndex * LenClassVector + ClassOffset]));
       }
+
+      if (NumLandmarks >= 0) {
+        for (int i = 0; i < NumLandmarks; i++) {
+          float GlobalX = LandmarkResults[BoxIndex * LenBoxVector + LandmarkOffset + i * 2 + 0];
+          float GlobalY = LandmarkResults[BoxIndex * LenBoxVector + LandmarkOffset + i * 2 + 1];
+          float LocalX = (GlobalX - TempBox.Position.Left) / TempBox.GetWidth();
+          float LocalY = (GlobalY - TempBox.Position.Top) / TempBox.GetHeight();
+          TempBox.Landmark.Add(FBandLandmark(
+              LocalX, LocalY, 0,
+              LandmarkResults[BoxIndex * LenBoxVector + LandmarkOffset + NumLandmarks * 2]));
+        }
+        if (DetectorType == EBandDetector::RetinaFace) {
+          TempBox.LandmarkEdge = {
+            {0, 1},
+            {1, 2},
+            {2, 4},
+            {4, 0},
+            {0, 3},
+            {1, 3},
+            {2, 3},
+            {4, 3}
+          };
+        }
+      }
       Boxes.Push(TempBox);
     }
   }
@@ -132,16 +168,20 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(
   }
   
   TArray<FBandBoundingBox> Boxes;
-  // Default parameters from RetinaFace
   size_t DetectionTensorIndex = 0;
-  TArray<int32> BBoxOffsets = {0, 1, 2, 3};
   size_t ConfidenceTensorIndex = 0;
-  size_t ConfidenceOffset = 15;
   size_t ClassTensorIndex = 0;
+  size_t LandmarkTensorIndex = 0;
+
+  TArray<int32> BBoxOffsets = {0, 1, 2, 3};
+  size_t ConfidenceOffset = 15;
   size_t ClassOffset = 0;
+  size_t LandmarkOffset = 0;
+  
   int32 LenBoxVector = -1;
   int32 LenConfidenceVector = -1;
   int32 LenClassVector = -1;
+  int32 LenLandmarkVector = -1;
   float ScoreThreshold = 0.2f;
 
   if (DetectorType == EBandDetector::SSD) {
@@ -164,10 +204,13 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(
   } else if (DetectorType == EBandDetector::RetinaFace) {
     DetectionTensorIndex = 0;
     ConfidenceTensorIndex = 0;
+    LandmarkTensorIndex = 0;
     ClassTensorIndex = 0;
     ScoreThreshold = 0.2f;
+    LandmarkOffset = 4;
     ConfidenceOffset = 15;
     LenBoxVector = LenConfidenceVector = LenClassVector = 16;
+    LenLandmarkVector = 5;
     BBoxOffsets = {0, 3, 2, 1}; // xmin, ymin, xmax, ymax
   }
 
@@ -175,9 +218,22 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(
   switch (TensorType) {
     case EBandTensorType::Float32:
       Boxes = GetDetectedBoxesInternal<float>(
-          Tensors, DetectionTensorIndex, BBoxOffsets, ConfidenceTensorIndex,
-          ConfidenceOffset, ClassTensorIndex, ClassOffset, Label,
-          ScoreThreshold, LenBoxVector, LenConfidenceVector, LenClassVector);
+          DetectorType,
+          Tensors,
+          DetectionTensorIndex,
+          BBoxOffsets,
+          ConfidenceTensorIndex,
+          ConfidenceOffset,
+          ClassTensorIndex,
+          ClassOffset,
+          LandmarkTensorIndex,
+          LandmarkOffset,
+          Label,
+          ScoreThreshold,
+          LenBoxVector,
+          LenConfidenceVector,
+          LenClassVector,
+          LenLandmarkVector);
       break;
     default:
       const UEnum* EnumPtr =

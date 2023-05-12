@@ -18,6 +18,8 @@ struct BAND_API FBandLandmark {
       Point(X, Y, Z) {
   };
 
+  float GetDistance(const FBandLandmark& Rhs) const;
+
   bool operator==(const FBandLandmark& rhs) const {
     return (Confidence == rhs.Confidence) && (Point == rhs.Point);
   }
