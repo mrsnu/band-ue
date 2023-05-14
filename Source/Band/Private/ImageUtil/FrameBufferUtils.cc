@@ -26,10 +26,8 @@ limitations under the License.
 #include "ImageUtil/FrameBufferCommonUtils.h"
 #include "ImageUtil/LibyuvFrameBufferUtils.h"
 
-namespace Band {
-
+namespace band {
 namespace {
-
 // Exif grouping to help determine rotation and flipping neededs between
 // different orientations.
 constexpr int kExifGroup[] = {1, 6, 3, 8, 2, 5, 4, 7};
@@ -141,7 +139,6 @@ static void RotateCoordinates(int from_x, int from_y, int angle,
       break;
   }
 }
-
 } // namespace
 
 int GetBufferByteSize(FrameBuffer::Dimension dimension,
@@ -707,5 +704,4 @@ bool FrameBufferUtils::Preprocess(const FrameBuffer& buffer,
   }
   return true;
 }
-
 } // namespace Band

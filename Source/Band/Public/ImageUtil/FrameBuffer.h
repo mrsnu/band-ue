@@ -25,8 +25,7 @@ limitations under the License.
 #include "Core.h"
 #include "HAL/PlatformTime.h"
 
-namespace Band {
-
+namespace band {
 // A `FrameBuffer` provides a view into the provided backing buffer (e.g. camera
 // frame or still image) with buffer format information. FrameBuffer doesn't
 // take ownership of the provided backing buffer. The caller is responsible to
@@ -289,5 +288,4 @@ private:
   Orientation orientation_;
   uint64 timestamp_;
 };
-
 } // namespace Band

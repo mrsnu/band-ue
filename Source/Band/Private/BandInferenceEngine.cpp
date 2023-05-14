@@ -104,8 +104,8 @@ void ABandInferenceEngine::OnFrameAvailable(
     auto Texture2D = CameraFrame->GetTexture2D();
     // Update Widget
     auto ImageWidget = Cast<UImage>(UIWidget->GetWidgetFromName("CameraImage"));
-    ImageWidget->SetBrushFromTexture(Texture2D, true);
-    {
+      ImageWidget->SetBrushFromTexture(Texture2D, true);
+      {
     }
   });
   {

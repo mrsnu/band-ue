@@ -21,7 +21,7 @@ limitations under the License.
 #include <string>
 #include <vector>
 
-namespace Band {
+namespace band {
 namespace {
 constexpr int kRgbaChannels = 4;
 constexpr int kRgbChannels = 3;
@@ -69,7 +69,6 @@ bool AreBufferFormatsCompatible(const FrameBuffer& buffer1,
       return buffer1.format() == buffer2.format();
   }
 }
-
 } // namespace
 
 // Miscellaneous Methods
@@ -456,15 +455,15 @@ std::unique_ptr<FrameBuffer> CreateFromAndroidCameraFrame(
     const UAndroidCameraFrame& camera_frame) {
   if (camera_frame.HasYUV()) {
     const UAndroidCameraFrame::NV12Frame& frame_data = camera_frame.GetData();
-    return Band::CreateFromYuvRawBuffer(
+    return band::CreateFromYuvRawBuffer(
         frame_data.Y, frame_data.U, frame_data.V,
-        Band::FrameBuffer::Format::kNV12,
+        band::FrameBuffer::Format::kNV12,
         {camera_frame.GetWidth(), camera_frame.GetHeight()},
         frame_data.YRowStride,
         frame_data.UVRowStride, frame_data.UVPixelStride);
   } else if (camera_frame.GetARGBBuffer()) {
     const uint8* frame_data = camera_frame.GetARGBBuffer();
-    return Band::CreateFromRgbaRawBuffer(
+    return band::CreateFromRgbaRawBuffer(
         frame_data, {camera_frame.GetWidth(), camera_frame.GetHeight()});
   } else {
     UE_LOG(LogBand, Display,
@@ -472,5 +471,4 @@ std::unique_ptr<FrameBuffer> CreateFromAndroidCameraFrame(
     return nullptr;
   }
 }
-
 } // namespace Band

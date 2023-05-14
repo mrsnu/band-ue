@@ -41,6 +41,13 @@ struct BAND_API FBandBoundingBox {
   }
 
   static std::function<float(const FBandBoundingBox&, const FBandBoundingBox&)>
+  GetSimilarityMeasure() {
+    return [](const FBandBoundingBox& prev, const FBandBoundingBox& cur) {
+      return prev.GetSimilarity(cur);
+    };
+  }
+
+  static std::function<float(const FBandBoundingBox&, const FBandBoundingBox&)>
   GetDisplacementMeasure() {
     return [](const FBandBoundingBox& prev, const FBandBoundingBox& cur) {
       return prev.GetDistance(cur);
@@ -49,12 +56,12 @@ struct BAND_API FBandBoundingBox {
 
   static std::function<float(const FBandBoundingBox&, const FBandBoundingBox&)>
   GetLandmarkDisplacementMeasure() {
-    return [](const FBandBoundingBox& prev, const FBandBoundingBox& cur) -> float {
+    return [](const FBandBoundingBox& prev,
+              const FBandBoundingBox& cur) -> float {
       return prev.GetLandmarkDistance(cur);
     };
   }
 
-  
 
   UPROPERTY(EditAnywhere, BlueprintReadOnly)
   float Confidence;

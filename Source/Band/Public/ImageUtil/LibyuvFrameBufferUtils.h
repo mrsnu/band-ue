@@ -18,8 +18,7 @@ limitations under the License.
 #include "ImageUtil/FrameBuffer.h"
 #include "ImageUtil/FrameBufferUtilsInterface.h"
 
-namespace Band {
-
+namespace band {
 // Libyuv image processing engine conforms to FrameBufferUtilsInterface.
 // Although this class provides public APIs, it is recommended to use the public
 // APIs defined in frame_buffer_utils.h for higher level abstraction and better
@@ -64,5 +63,4 @@ public:
   virtual bool Convert(const FrameBuffer& buffer,
                        FrameBuffer* output_buffer) override;
 };
-
 } // namespace Band

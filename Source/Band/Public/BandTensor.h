@@ -9,13 +9,14 @@
 #include "UObject/ObjectMacros.h"
 #include "BandTensor.generated.h"
 
-namespace Band {
+namespace band {
 class FrameBuffer;
 }
 
 UCLASS(Blueprintable)
 class BAND_API UBandTensor : public UObject {
   GENERATED_BODY()
+
 public:
   UFUNCTION(BlueprintCallable, Category = Band)
   void FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame,
@@ -78,7 +79,7 @@ private:
 
   void Initialize(BandTensor* TensorHandle);
   EBandStatus CopyFromFrameBuffer(
-      std::unique_ptr<Band::FrameBuffer> SourceFrameBuffer,
+      std::unique_ptr<band::FrameBuffer> SourceFrameBuffer,
       FBandBoundingBox RoI, float Mean, float Std);
   virtual void BeginDestroy() override;
 

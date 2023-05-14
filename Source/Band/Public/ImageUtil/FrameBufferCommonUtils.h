@@ -22,8 +22,7 @@ limitations under the License.
 #include "FrameBuffer.h"
 #include "AndroidCameraFrame.h"
 
-namespace Band {
-
+namespace band {
 constexpr int kRgbaPixelBytes = 4, kRgbPixelBytes = 3, kGrayPixelBytes = 1;
 // Default stride value for creating frame buffer from raw buffer. When using
 // this default value, the default row stride and pixel stride values will be
@@ -105,28 +104,28 @@ bool ValidateConvertFormats(FrameBuffer::Format from_format,
 // -----------------------------------------------------------------
 
 // Creates a FrameBuffer from raw RGBA buffer and passing arguments.
-std::unique_ptr<FrameBuffer> CreateFromRgbaRawBuffer(
+BAND_API std::unique_ptr<FrameBuffer> CreateFromRgbaRawBuffer(
     const uint8* input, FrameBuffer::Dimension dimension,
     FrameBuffer::Orientation orientation = FrameBuffer::Orientation::kTopLeft,
     uint64 timestamp = FPlatformTime::Cycles64(),
     FrameBuffer::Stride stride = kDefaultStride);
 
 // Creates a FrameBuffer from raw RGB buffer and passing arguments.
-std::unique_ptr<FrameBuffer> CreateFromRgbRawBuffer(
+BAND_API std::unique_ptr<FrameBuffer> CreateFromRgbRawBuffer(
     const uint8* input, FrameBuffer::Dimension dimension,
     FrameBuffer::Orientation orientation = FrameBuffer::Orientation::kTopLeft,
     uint64 timestamp = FPlatformTime::Cycles64(),
     FrameBuffer::Stride stride = kDefaultStride);
 
 // Creates a FrameBuffer from raw grayscale buffer and passing arguments.
-std::unique_ptr<FrameBuffer> CreateFromGrayRawBuffer(
+BAND_API std::unique_ptr<FrameBuffer> CreateFromGrayRawBuffer(
     const uint8* input, FrameBuffer::Dimension dimension,
     FrameBuffer::Orientation orientation = FrameBuffer::Orientation::kTopLeft,
     uint64 timestamp = FPlatformTime::Cycles64(),
     FrameBuffer::Stride stride = kDefaultStride);
 
 // Creates a FrameBuffer from raw YUV buffer and passing arguments.
-std::unique_ptr<FrameBuffer> CreateFromYuvRawBuffer(
+BAND_API std::unique_ptr<FrameBuffer> CreateFromYuvRawBuffer(
     const uint8* y_plane, const uint8* u_plane, const uint8* v_plane,
     FrameBuffer::Format format, FrameBuffer::Dimension dimension,
     int row_stride_y, int row_stride_uv, int pixel_stride_uv,
@@ -134,13 +133,12 @@ std::unique_ptr<FrameBuffer> CreateFromYuvRawBuffer(
     uint64 timestamp = FPlatformTime::Cycles64());
 
 // Creates an instance of FrameBuffer from raw buffer and passing arguments.
-std::unique_ptr<FrameBuffer> CreateFromRawBuffer(
+BAND_API std::unique_ptr<FrameBuffer> CreateFromRawBuffer(
     const uint8* buffer, FrameBuffer::Dimension dimension,
     FrameBuffer::Format target_format,
     FrameBuffer::Orientation orientation = FrameBuffer::Orientation::kTopLeft,
     uint64 timestamp = FPlatformTime::Cycles64());
 
-std::unique_ptr<FrameBuffer> CreateFromAndroidCameraFrame(
+BAND_API std::unique_ptr<FrameBuffer> CreateFromAndroidCameraFrame(
     const UAndroidCameraFrame& camera_frame);
-
 } // namespace Band

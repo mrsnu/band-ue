@@ -26,9 +26,8 @@ limitations under the License.
 #include "ImageUtil/FrameBufferCommonUtils.h"
 #include "ImageUtil/LibyuvFrameBufferUtils.h"
 
-namespace Band {
+namespace band {
 namespace {
-
 // Converts NV12 `buffer` to the `output_buffer` of the target color space.
 // Supported output format includes RGB24 and YV21.
 bool ConvertFromNv12(const FrameBuffer& buffer,
@@ -431,7 +430,6 @@ bool ConvertRgbaToArgb(const FrameBuffer& buffer, uint8* dest_argb,
                        int dest_stride_argb) {
   RETURN_IF_ERROR(ValidateBufferPlaneMetadata(buffer));
   if (buffer.format() != FrameBuffer::Format::kRGBA) {
-
     UE_LOG(LogBand, Display, TEXT("RGBA input format is expected."));
     return false;
   }
@@ -454,7 +452,6 @@ bool ConvertRgbaToArgb(const FrameBuffer& buffer, uint8* dest_argb,
       dest_argb, dest_stride_argb, buffer.dimension().width,
       buffer.dimension().height);
   if (ret != 0) {
-
     UE_LOG(LogBand, Display, TEXT("Libyuv ABGRToARGB operation failed."));
     return false;
   }
@@ -471,7 +468,6 @@ bool ConvertFromRgb(const FrameBuffer& buffer,
         output_buffer->plane(0).stride.row_stride_bytes,
         buffer.dimension().width, buffer.dimension().height);
     if (ret != 0) {
-
       UE_LOG(LogBand, Display, TEXT("Libyuv RAWToJ400 operation failed."));
       return false;
     }
@@ -510,7 +506,6 @@ bool ConvertFromRgb(const FrameBuffer& buffer,
         const_cast<uint8*>(yuv_data.v_buffer), yuv_data.uv_row_stride,
         buffer.dimension().width, buffer.dimension().height);
     if (ret != 0) {
-
       UE_LOG(LogBand, Display, TEXT("Libyuv RAWToI420 operation failed."));
       return false;
     }
@@ -551,7 +546,6 @@ bool ConvertFromRgba(const FrameBuffer& buffer,
           output_buffer->plane(0).stride.row_stride_bytes,
           buffer.dimension().width, buffer.dimension().height);
       if (ret != 0) {
-
         UE_LOG(LogBand, Display, TEXT("Libyuv ARGBToJ400 operation failed."));
         return false;
       }
@@ -566,7 +560,6 @@ bool ConvertFromRgba(const FrameBuffer& buffer,
           const_cast<uint8*>(output_data.u_buffer), output_data.uv_row_stride,
           buffer.dimension().width, buffer.dimension().height);
       if (ret != 0) {
-
         UE_LOG(LogBand, Display, TEXT("Libyuv ABGRToNV12 operation failed."));
         return false;
       }
@@ -581,7 +574,6 @@ bool ConvertFromRgba(const FrameBuffer& buffer,
           const_cast<uint8*>(output_data.v_buffer), output_data.uv_row_stride,
           buffer.dimension().width, buffer.dimension().height);
       if (ret != 0) {
-
         UE_LOG(LogBand, Display, TEXT("Libyuv ABGRToNV21 operation failed."));
         return false;
       }
@@ -598,7 +590,6 @@ bool ConvertFromRgba(const FrameBuffer& buffer,
           const_cast<uint8*>(output_data.v_buffer), output_data.uv_row_stride,
           buffer.dimension().width, buffer.dimension().height);
       if (ret != 0) {
-
         UE_LOG(LogBand, Display, TEXT("Libyuv ABGRToI420 operation failed."));
         return false;
       }
@@ -613,7 +604,6 @@ bool ConvertFromRgba(const FrameBuffer& buffer,
           output_buffer->plane(0).stride.row_stride_bytes,
           buffer.dimension().width, buffer.dimension().height);
       if (ret != 0) {
-
         UE_LOG(LogBand, Display, TEXT("Libyuv ABGRToRGB24 operation failed."));
         return false;
       }
@@ -658,7 +648,6 @@ bool RotateRgba(const FrameBuffer& buffer, int angle_deg,
       output_buffer->plane(0).stride.row_stride_bytes, buffer.dimension().width,
       buffer.dimension().height, GetLibyuvRotationMode(angle_deg % 360));
   if (ret != 0) {
-
     UE_LOG(LogBand, Display, TEXT("Libyuv ARGBRotate operation failed."));
     return false;
   }
@@ -688,7 +677,6 @@ bool RotateRgb(const FrameBuffer& buffer, int angle_deg,
       rotated_row_bytes, buffer.dimension().width, buffer.dimension().height,
       GetLibyuvRotationMode(angle_deg % 360));
   if (ret != 0) {
-
     UE_LOG(LogBand, Display, TEXT("Libyuv ARGBRotate operation failed."));
     return false;
   }
@@ -712,7 +700,6 @@ bool RotateGray(const FrameBuffer& buffer, int angle_deg,
       output_buffer->plane(0).stride.row_stride_bytes, buffer.dimension().width,
       buffer.dimension().height, GetLibyuvRotationMode(angle_deg % 360));
   if (ret != 0) {
-
     UE_LOG(LogBand, Display, TEXT("Libyuv RotatePlane operation failed."));
     return false;
   }
@@ -735,7 +722,6 @@ bool RotateYv(const FrameBuffer& buffer, int angle_deg,
       buffer.dimension().width, buffer.dimension().height,
       GetLibyuvRotationMode(angle_deg));
   if (ret != 0) {
-
     UE_LOG(LogBand, Display, TEXT("Libyuv I420Rotate operation failed."));
     return false;
   }
@@ -788,7 +774,6 @@ bool RotateNv(const FrameBuffer& buffer, int angle_deg,
       rotated_yuv_data.uv_row_stride, buffer.dimension().width,
       buffer.dimension().height, GetLibyuvRotationMode(angle_deg % 360));
   if (ret != 0) {
-
     UE_LOG(LogBand, Display, TEXT("Libyuv Nv12ToI420Rotate operation failed."));
     return false;
   }
@@ -1016,7 +1001,6 @@ bool FlipHorizontallyRgba(const FrameBuffer& buffer,
       output_buffer->dimension().width, output_buffer->dimension().height);
 
   if (ret != 0) {
-
     UE_LOG(LogBand, Display, TEXT("Libyuv ARGBMirror operation failed."));
     return false;
   }
@@ -1075,7 +1059,6 @@ bool ResizeRgb(const FrameBuffer& buffer, FrameBuffer* output_buffer) {
       resized_argb_row_bytes, output_buffer->dimension().width,
       output_buffer->dimension().height, libyuv::FilterMode::kFilterBilinear);
   if (ret != 0) {
-
     UE_LOG(LogBand, Display, TEXT("Libyuv ARGBScale operation failed."));
     return false;
   }
@@ -1127,7 +1110,6 @@ bool ResizeRgba(const FrameBuffer& buffer, FrameBuffer* output_buffer) {
       output_buffer->dimension().width, output_buffer->dimension().height,
       libyuv::FilterMode::kFilterBilinear);
   if (ret != 0) {
-
     UE_LOG(LogBand, Display, TEXT("Libyuv ARGBScale operation failed."));
     return false;
   }
@@ -1153,7 +1135,6 @@ bool FlipHorizontallyNv(const FrameBuffer& buffer,
       buffer.dimension().height);
 
   if (ret != 0) {
-
     UE_LOG(LogBand, Display, TEXT("Libyuv NV12Mirror operation failed."));
     return false;
   }
@@ -1176,7 +1157,6 @@ bool FlipHorizontallyYv(const FrameBuffer& buffer,
       const_cast<uint8*>(output_data.v_buffer), output_data.uv_row_stride,
       buffer.dimension().width, buffer.dimension().height);
   if (ret != 0) {
-
     UE_LOG(LogBand, Display, TEXT("Libyuv I420Mirror operation failed."));
     return false;
   }
@@ -1642,5 +1622,4 @@ bool LibyuvFrameBufferUtils::Convert(const FrameBuffer& buffer,
       return false;
   }
 }
-
 } // namespace Band

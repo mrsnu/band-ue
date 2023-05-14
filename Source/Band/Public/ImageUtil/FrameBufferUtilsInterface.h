@@ -17,8 +17,7 @@ limitations under the License.
 
 #include "FrameBuffer.h"
 
-namespace Band {
-
+namespace band {
 // Interface for the FrameBuffer image processing library.
 class FrameBufferUtilsInterface {
 public:

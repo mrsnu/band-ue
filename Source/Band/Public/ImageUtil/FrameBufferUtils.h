@@ -23,22 +23,22 @@ limitations under the License.
 #include "FrameBuffer.h"
 #include "FrameBufferUtilsInterface.h"
 
-namespace Band {
-
+namespace band {
 // Returns the minimal buffer size for a plane in bytes based on the given
 // format and dimensions.
-int GetBufferByteSize(FrameBuffer::Dimension dimension,
-                      FrameBuffer::Format format);
+BAND_API int GetBufferByteSize(FrameBuffer::Dimension dimension,
+                               FrameBuffer::Format format);
 
 // Rotates the `from_box` in `from_orientation` to `to_orientation` within an
 // image of size `from_dimension`.
-BoundingBox OrientBoundingBox(const BoundingBox& from_box,
-                              FrameBuffer::Orientation from_orientation,
-                              FrameBuffer::Orientation to_orientation,
-                              FrameBuffer::Dimension from_dimension);
+BAND_API BoundingBox OrientBoundingBox(const BoundingBox& from_box,
+                                       FrameBuffer::Orientation
+                                       from_orientation,
+                                       FrameBuffer::Orientation to_orientation,
+                                       FrameBuffer::Dimension from_dimension);
 
 // Same as OrientBoundingBox but from normalized coordinates.
-BoundingBox OrientAndDenormalizeBoundingBox(
+BAND_API BoundingBox OrientAndDenormalizeBoundingBox(
     float from_left, float from_top, float from_right, float from_bottom,
     FrameBuffer::Orientation from_orientation,
     FrameBuffer::Orientation to_orientation,
@@ -47,19 +47,20 @@ BoundingBox OrientAndDenormalizeBoundingBox(
 // Rotates `(from_x, from_y)` coordinates from an image of dimension
 // `from_dimension` and orientation `from_orientation` into `(to_x, to_y)`
 // coordinates with orientation `to_orientation`.
-void OrientCoordinates(int from_x, int from_y,
-                       FrameBuffer::Orientation from_orientation,
-                       FrameBuffer::Orientation to_orientation,
-                       FrameBuffer::Dimension from_dimension, int* to_x,
-                       int* to_y);
+BAND_API void OrientCoordinates(int from_x, int from_y,
+                                FrameBuffer::Orientation from_orientation,
+                                FrameBuffer::Orientation to_orientation,
+                                FrameBuffer::Dimension from_dimension,
+                                int* to_x,
+                                int* to_y);
 
 // Returns whether the conversion from from_orientation to to_orientation
 // requires 90 or 270 degrees rotation.
-bool RequireDimensionSwap(FrameBuffer::Orientation from_orientation,
-                          FrameBuffer::Orientation to_orientation);
+BAND_API bool RequireDimensionSwap(FrameBuffer::Orientation from_orientation,
+                                   FrameBuffer::Orientation to_orientation);
 
 // Structure to express parameters needed to achieve orientation conversion.
-struct OrientParams {
+struct BAND_API OrientParams {
   // Counterclockwise rotation angle in degrees. This is expressed as a
   // multiple of 90 degrees.
   int rotation_angle_deg;
@@ -75,7 +76,7 @@ struct OrientParams {
 OrientParams GetOrientParams(FrameBuffer::Orientation from_orientation,
                              FrameBuffer::Orientation to_orientation);
 
-struct FrameBufferOperation {
+struct BAND_API FrameBufferOperation {
   virtual ~FrameBufferOperation() {
   }
 
@@ -102,7 +103,7 @@ struct FrameBufferOperation {
 //
 // To perform just cropping, the `crop_width` and `crop_height` should be the
 // same as `resize_width` `and resize_height`.
-struct CropResizeOperation : public FrameBufferOperation {
+struct BAND_API CropResizeOperation : public FrameBufferOperation {
   CropResizeOperation(int crop_origin_x, int crop_origin_y,
                       FrameBuffer::Dimension crop_dimension,
                       FrameBuffer::Dimension resize_dimension)
@@ -137,7 +138,7 @@ struct CropResizeOperation : public FrameBufferOperation {
 // match the size of the given `output_dimension` in both x and y dimensions.
 // The resized region is aligned to the upper left pixel of the output buffer.
 // The unfilled area of the output buffer remains untouched.
-struct UniformCropResizeOperation : public FrameBufferOperation {
+struct BAND_API UniformCropResizeOperation : public FrameBufferOperation {
   UniformCropResizeOperation(int crop_origin_x, int crop_origin_y,
                              FrameBuffer::Dimension crop_dimension,
                              FrameBuffer::Dimension output_dimension)
@@ -200,7 +201,7 @@ struct OrientOperation : public FrameBufferOperation {
 //                          /*resize_width=*/10, /*resize_height=*/10),
 //      OrientOperation(FrameBuffer::Orientation::kLeftTop)};
 //  utils->Execute(*input, operations, output.get());
-class FrameBufferUtils {
+class BAND_API FrameBufferUtils {
 public:
   // Counter-clockwise rotation in degree.
   enum class RotationDegree { k0 = 0, k90 = 1, k180 = 2, k270 = 3 };
@@ -346,5 +347,4 @@ private:
   // Execution engine conforms to FrameBufferUtilsInterface.
   std::unique_ptr<FrameBufferUtilsInterface> utils_;
 };
-
 } // namespace Band

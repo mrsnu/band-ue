@@ -16,9 +16,8 @@ limitations under the License.
 #include "ImageUtil/FrameBuffer.h"
 #include "Band.h"
 
-namespace Band {
+namespace band {
 namespace {
-
 // Returns whether the input `format` is a supported YUV format.
 bool IsSupportedYuvFormat(FrameBuffer::Format format) {
   return format == FrameBuffer::Format::kNV21 ||
@@ -153,7 +152,6 @@ FrameBuffer::YuvData GetYuvDataFromThreePlaneFrameBuffer(
   }
   return result;
 }
-
 } // namespace
 
 FrameBuffer::YuvData FrameBuffer::GetYuvDataFromFrameBuffer(
@@ -175,5 +173,4 @@ FrameBuffer::YuvData FrameBuffer::GetYuvDataFromFrameBuffer(
          TEXT("The source FrameBuffer must be consisted by 1, 2, or 3 planes"));
   return {};
 }
-
 } // namespace Band

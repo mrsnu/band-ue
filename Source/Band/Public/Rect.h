@@ -6,11 +6,22 @@ USTRUCT(BlueprintType)
 struct FRect {
   GENERATED_BODY()
 
+  const float Width() const { return Right - Left; }
+  const float Height() const { return Bottom - Top; }
+
   bool operator==(const FRect& Rhs) const {
     return Left == Rhs.Left &&
            Right == Rhs.Right &&
            Top == Rhs.Top &&
            Bottom == Rhs.Bottom;
+  }
+
+  // Returns the intersection of two rectangles.
+  FRect operator+(const FRect& Rhs) {
+    return {FGenericPlatformMath::Min(Left, Rhs.Left),
+            FGenericPlatformMath::Max(Right, Rhs.Right),
+            FGenericPlatformMath::Min(Top, Rhs.Top),
+            FGenericPlatformMath::Max(Bottom, Rhs.Bottom)};
   }
 
   UPROPERTY()

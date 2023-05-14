@@ -45,13 +45,11 @@
   COMMON_MACROS_IMPL_CONCAT_(COMMON_MACROS_IMPL_IF_, _Cond) \
   (_Then, _Else)
 
-namespace Band {
-
+namespace band {
 struct BoundingBox {
   int32_t origin_x;
   int32_t origin_y;
   int32_t width;
   int32_t height;
 };
-
 }

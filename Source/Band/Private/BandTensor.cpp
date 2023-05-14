@@ -44,8 +44,8 @@ void UBandTensor::FromCameraFrameWithCrop(UPARAM(ref)
   }
   SCOPE_CYCLE_COUNTER(STAT_BandCameraToTensor);
 
-  std::unique_ptr<Band::FrameBuffer> Buffer =
-      Band::CreateFromAndroidCameraFrame(*Frame);
+  std::unique_ptr<band::FrameBuffer> Buffer =
+      band::CreateFromAndroidCameraFrame(*Frame);
 
   if (Buffer.get()) {
     CopyFromFrameBuffer(std::move(Buffer), RoI, Mean, Std);
@@ -161,11 +161,11 @@ void UBandTensor::Initialize(BandTensor* NewTensorHandle) {
 }
 
 EBandStatus UBandTensor::CopyFromFrameBuffer(
-    std::unique_ptr<Band::FrameBuffer> Src, FBandBoundingBox RoI,
+    std::unique_ptr<band::FrameBuffer> Src, FBandBoundingBox RoI,
     const float Mean, const float Std) {
-  std::unique_ptr<Band::FrameBufferUtils> utils =
-      Band::FrameBufferUtils::Create(
-          Band::FrameBufferUtils::ProcessEngine::kLibyuv);;
+  std::unique_ptr<band::FrameBufferUtils> utils =
+      band::FrameBufferUtils::Create(
+          band::FrameBufferUtils::ProcessEngine::kLibyuv);
   // BWHC format
   const int tensor_width = Dim(1);
   const int tensor_height = Dim(2);
@@ -173,12 +173,12 @@ EBandStatus UBandTensor::CopyFromFrameBuffer(
   // Directly update uint8 Buffer
   uint8* TargetBufferPtr =
       Type() == EBandTensorType::UInt8 ? Data() : RGBBuffer;
-  std::unique_ptr<Band::FrameBuffer> OutputBuffer =
-      Band::CreateFromRgbRawBuffer(TargetBufferPtr,
+  std::unique_ptr<band::FrameBuffer> OutputBuffer =
+      band::CreateFromRgbRawBuffer(TargetBufferPtr,
                                    {tensor_width, tensor_height});
 
   // Get BoundingBox to put to FrameBufferUtils::Preprocess
-  Band::BoundingBox target_bbox;
+  band::BoundingBox target_bbox;
   if (RoI == FBandBoundingBox()) {
     target_bbox.origin_x = 0;
     target_bbox.origin_y = 0;
@@ -384,8 +384,8 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
             break;
         }
       } else {
-        std::unique_ptr<Band::FrameBuffer> Buffer =
-            Band::CreateFromRgbaRawBuffer(SourceData, {SizeX, SizeY});
+        std::unique_ptr<band::FrameBuffer> Buffer =
+            band::CreateFromRgbaRawBuffer(SourceData, {SizeX, SizeY});
         if (CopyFromFrameBuffer(std::move(Buffer), RoI, Mean, Std) ==
             EBandStatus::Error) {
           Processed = false;
