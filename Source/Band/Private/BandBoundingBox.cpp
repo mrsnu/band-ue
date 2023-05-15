@@ -29,63 +29,61 @@ bool FBandBoundingBox::operator==(const FBandBoundingBox& Rhs) const {
 FString FBandBoundingBox::ToString() const {
   FString json_string;
   json_string += TEXT("{");
-  
+
   json_string += FString::Printf(
-        TEXT("\"confidence\": %f"), Confidence);
+      TEXT("\"confidence\": %f"), Confidence);
 
   json_string += TEXT(", ");
   json_string += FString::Printf(
-    TEXT("\"position\": [%f, %f, %f, %f]"), Position.Top, Position.Left, Position.Bottom, Position.Right
-    );
+      TEXT("\"position\": [%f, %f, %f, %f]"), Position.Top, Position.Left,
+      Position.Bottom, Position.Right
+      );
 
   json_string += TEXT(", ");
   json_string += FString::Printf(
-    TEXT("\"label\": \"%s\""), *Label);
+      TEXT("\"label\": \"%s\""), *Label);
 
   json_string += TEXT(", ");
   json_string += TEXT("\"landmark\": [");
-  for(int i=0; i<Landmark.Num(); i++)
-  {
+  for (int i = 0; i < Landmark.Num(); i++) {
     json_string += TEXT("{");
-    json_string += FString::Printf(TEXT("\"confidence\": %f,"), Landmark[i].Confidence);
+    json_string += FString::Printf(
+        TEXT("\"confidence\": %f,"), Landmark[i].Confidence);
     json_string += TEXT("\"Point\": ");
     json_string += FString::Printf(
-     TEXT("[%f, %f]"), Landmark[i].Point.X, Landmark[i].Point.Y //, Landmark[i].Point.Z
-     );
+        TEXT("[%f, %f]"), Landmark[i].Point.X,
+        Landmark[i].Point.Y //, Landmark[i].Point.Z
+        );
     json_string += TEXT("}");
-    if(i != Landmark.Num()-1)
-    {
+    if (i != Landmark.Num() - 1) {
       json_string += TEXT(", ");
     }
   }
   json_string += TEXT("]");
-  
-  // json_string += TEXT(", ");
-  // json_string += TEXT("\"landmarkEdge\": [");
-  // for(int i=0; i<LandmarkEdge.Num(); i++)
-  // {
-  //   json_string += FString::Printf(
-  //    TEXT("(%d, %d)"), LandmarkEdge[i].X, LandmarkEdge[i].Y
-  //    );
-  //   if(i != LandmarkEdge.Num()-1)
-  //   {
-  //     json_string += TEXT(", ");
-  //   }
-  // }
-  // json_string += TEXT("] ");
-
-  // json_string += TEXT(",");
-  // json_string += FString::Printf(
-  //   TEXT("\"displacement\": \"%f\""), Displacement
-  //   );
 
   json_string += TEXT(", ");
   json_string += TEXT("\"processing_end_ts\": ");
-  json_string += std::to_string(std::chrono::system_clock::now().time_since_epoch().count()).c_str();
-  
+  json_string += std::to_string(
+      std::chrono::system_clock::now().time_since_epoch().count()).c_str();
+
   json_string += TEXT("}");
-  // FJsonObjectConverter::UStructToJsonObjectString(*this, json_string);
   return json_string;
+}
+
+FVector FBandBoundingBox::GetSize() const {
+  return {GetWidth(), GetHeight(), 0};
+}
+
+FVector FBandBoundingBox::GetCenter() const {
+  return {GetCenterX(), GetCenterY(), 0};
+}
+
+FVector FBandBoundingBox::GetOrigin() const {
+  return {Position.Left, Position.Top, 0};
+}
+
+float FBandBoundingBox::GetDiagonal() const {
+  return std::sqrt(std::pow(GetWidth(), 2) + std::pow(GetHeight(), 2));
 }
 
 float FBandBoundingBox::GetWidth() const {

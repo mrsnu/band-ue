@@ -17,7 +17,7 @@ struct FRect {
   }
 
   // Returns the intersection of two rectangles.
-  FRect operator+(const FRect& Rhs) {
+  FRect operator+(const FRect& Rhs) const {
     return {FGenericPlatformMath::Min(Left, Rhs.Left),
             FGenericPlatformMath::Max(Right, Rhs.Right),
             FGenericPlatformMath::Min(Top, Rhs.Top),

@@ -25,6 +25,11 @@ struct BAND_API FBandBoundingBox {
   bool operator==(const FBandBoundingBox& Rhs) const;
   FString ToString() const;
 
+  FVector GetSize() const;
+  FVector GetCenter() const;
+  FVector GetOrigin() const;
+
+  float GetDiagonal() const;
   float GetWidth() const;
   float GetHeight() const;
   float GetCenterX() const;
