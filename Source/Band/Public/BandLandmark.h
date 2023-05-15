@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "UObject/ObjectMacros.h"
-#include "Rect.h"
+#include <vector>
+
+#include "BandEnum.h"
 #include "BandLandmark.generated.h"
 
 // Based on Mediapipe's landmark.proto
@@ -12,21 +13,15 @@ struct BAND_API FBandLandmark {
   GENERATED_BODY()
 
   FBandLandmark() = default;
+  FBandLandmark(float X, float Y, float Z, float Confidence);
 
-  FBandLandmark(float X, float Y, float Z, float Confidence)
-    : Confidence(Confidence),
-      Point(X, Y, Z) {
-  };
+  float GetDistance(const FBandLandmark &Rhs) const;
+  bool operator==(const FBandLandmark &rhs) const;
 
-  float GetDistance(const FBandLandmark& Rhs) const;
-
-  bool operator==(const FBandLandmark& rhs) const {
-    return (Confidence == rhs.Confidence) && (Point == rhs.Point);
-  }
+  const std::vector<size_t> &GetImportantLandmarks(EBandLandmark Type) const;
 
   UPROPERTY(EditAnywhere, BlueprintReadOnly)
   float Confidence = 0.0;
-
   UPROPERTY(EditAnywhere, BlueprintReadOnly)
   FVector Point; // Merges X, Y, Z into a single FVector
 };
