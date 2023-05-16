@@ -34,11 +34,11 @@ struct FRect {
   float Bottom;
 };
 
-inline float BoxArea(FRect Rect) {
+inline float BoxArea(const FRect& Rect) {
   return (Rect.Right - Rect.Left) * (Rect.Bottom - Rect.Top);
 }
 
-inline float BoxIntersection(FRect Lhs, FRect Rhs) {
+inline float BoxIntersection(const FRect& Lhs, const FRect& Rhs) {
   if (Lhs.Right <= Rhs.Left || Rhs.Right <= Lhs.Left) {
     return 0.0f;
   }
@@ -52,10 +52,10 @@ inline float BoxIntersection(FRect Lhs, FRect Rhs) {
 }
 
 
-inline float BoxUnion(FRect Lhs, FRect Rhs) {
+inline float BoxUnion(const FRect& Lhs, const FRect& Rhs) {
   return BoxArea(Lhs) + BoxArea(Rhs) - BoxIntersection(Lhs, Rhs);
 }
 
-inline float BoxIou(FRect Lhs, FRect Rhs) {
+inline float BoxIou(const FRect& Lhs, const FRect& Rhs) {
   return BoxIntersection(Lhs, Rhs) / BoxUnion(Lhs, Rhs);
 }
