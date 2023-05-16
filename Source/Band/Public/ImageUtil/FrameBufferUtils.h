@@ -157,7 +157,7 @@ struct BAND_API UniformCropResizeOperation : public FrameBufferOperation {
 };
 
 // The parameters needed to convert to the specified format.
-struct ConvertOperation : public FrameBufferOperation {
+struct BAND_API ConvertOperation : public FrameBufferOperation {
   explicit ConvertOperation(FrameBuffer::Format to_format)
     : to_format(to_format) {
   }
