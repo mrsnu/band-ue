@@ -193,6 +193,10 @@ EBandStatus UBandTensor::CopyFromFrameBuffer(
                         Src->dimension().width;
     target_bbox.height = std::abs(RoI.Position.Bottom - RoI.Position.Top) *
                          Src->dimension().height;
+    target_bbox.origin_x = std::max(0, target_bbox.origin_x);
+    target_bbox.origin_y = std::max(0, target_bbox.origin_y);
+    target_bbox.width = std::min(Src->dimension().width - target_bbox.origin_x, target_bbox.width);
+    target_bbox.height = std::min(Src->dimension().height - target_bbox.origin_y, target_bbox.height);
   }
 
   // TODO: we might need to crop and resize while preserving aspect ratio of the input RoI
