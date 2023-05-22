@@ -82,6 +82,10 @@ FVector FBandBoundingBox::GetOrigin() const {
   return {Position.Left, Position.Top, 0};
 }
 
+FVector FBandBoundingBox::GetEnd() const {
+  return {Position.Right, Position.Bottom, 0};
+}
+
 float FBandBoundingBox::GetDiagonal() const {
   return std::sqrt(std::pow(GetWidth(), 2) + std::pow(GetHeight(), 2));
 }
@@ -124,4 +128,15 @@ float FBandBoundingBox::GetLandmarkDistance(const FBandBoundingBox& Rhs) const {
     result += Landmark[i].GetDistance(Rhs.Landmark[i]);
   }
   return result / static_cast<float>(Landmark.Num());
+}
+
+void FBandBoundingBox::GetLandmarkFrom(const FBandBoundingBox& Rhs) {
+  Landmark = Rhs.Landmark;
+  LandmarkEdge = Rhs.LandmarkEdge;
+
+  // normalize landmark to current bounding box
+  for (auto& landmark : Landmark) {
+    FVector GlobalPoint = landmark.Point * Rhs.GetSize() + Rhs.GetOrigin();
+    landmark.Point = (GlobalPoint - GetOrigin()) / GetSize();
+  }
 }

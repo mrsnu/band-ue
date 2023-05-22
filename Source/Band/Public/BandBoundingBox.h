@@ -27,7 +27,10 @@ struct BAND_API FBandBoundingBox {
 
   FVector GetSize() const;
   FVector GetCenter() const;
+  // [Left, Top, 0]
   FVector GetOrigin() const;
+  // [Right, Bottom, 0]
+  FVector GetEnd() const;
 
   float GetDiagonal() const;
   float GetWidth() const;
@@ -37,6 +40,8 @@ struct BAND_API FBandBoundingBox {
   float GetSimilarity(const FBandBoundingBox& Rhs) const;
   float GetDistance(const FBandBoundingBox& Rhs) const;
   float GetLandmarkDistance(const FBandBoundingBox& Rhs) const;
+
+  void GetLandmarkFrom(const FBandBoundingBox& Rhs);
 
   static std::function<bool(const FBandBoundingBox&, const FBandBoundingBox&)>
   GetPositionBasedComparator() {
