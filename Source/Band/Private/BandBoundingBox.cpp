@@ -15,9 +15,9 @@ FBandBoundingBox::FBandBoundingBox(float Confidence, FRect Position,
   : Confidence(Confidence),
     Position(Position),
     Label(Label),
-    Displacement(Displacement),
     Landmark(Landmark),
-    LandmarkEdge(LandmarkEdge) {
+    LandmarkEdge(LandmarkEdge),
+    EventId(0) {
 }
 
 bool FBandBoundingBox::operator==(const FBandBoundingBox& Rhs) const {
@@ -29,6 +29,10 @@ bool FBandBoundingBox::operator==(const FBandBoundingBox& Rhs) const {
 FString FBandBoundingBox::ToString() const {
   FString json_string;
   json_string += TEXT("{");
+
+  json_string += FString::Printf(
+      TEXT("\"event_id\": %d"), EventId);
+  json_string += TEXT(", ");
 
   json_string += FString::Printf(
       TEXT("\"confidence\": %f"), Confidence);

@@ -89,10 +89,16 @@ struct BAND_API FBandBoundingBox {
   TArray<FIntPoint> LandmarkEdge;
 
   UPROPERTY(EditAnywhere, BlueprintReadOnly)
-  float Displacement;
+  float NormalizedPriority;
 
   UPROPERTY(EditAnywhere, BlueprintReadOnly)
-  float LandmarkDisplacement;
+  float Priority;
+
+  UPROPERTY(EditAnywhere, BlueprintReadOnly)
+  int EventId;
+
+  UPROPERTY(EditAnywhere, BlueprintReadOnly)
+  bool IsNewEvent;
 };
 
 inline bool operator<(const FBandBoundingBox& Lhs,
