@@ -18,6 +18,10 @@ public:
   static FString GetVersion();
 
   UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
+  static FString GetLabel(UPARAM(ref) TArray<UBandTensor*> OutputTensors,
+                          UBandLabel* Label);
+
+  UFUNCTION(BlueprintCallable, Category = "Band | Postprocessing")
   static TArray<FBandBoundingBox> GetDetectedBoxes(
       UPARAM(ref) TArray<UBandTensor*> OutputTensors,
       EBandDetector DetectorType, UBandLabel* Label = nullptr);

@@ -73,11 +73,11 @@ void UBandTensor::FromBoundingBox(UPARAM(ref) const FBandBoundingBox BBox) {
     SrcElements.Push(BBox.Landmark[i].Point.Y);
   }
 
-  if (Type() != EBandTensorType::UInt8) {
+  if (Type() != EBandTensorDataType::UInt8) {
     const UEnum* EnumPtr =
         FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
     switch (Type()) {
-      case EBandTensorType::Float32: {
+      case EBandTensorDataType::Float32: {
         BandTensorUtil::FromTArray<float, float>(
             SrcElements, reinterpret_cast<float*>(Data()), NumElements());
         break;
@@ -105,35 +105,35 @@ std::pair<size_t, T> TemplatedArgMax(T* Buffer, size_t Length) {
 
 void UBandTensor::ArgMax(int32& Index, float& Value) {
   switch (Type()) {
-    case EBandTensorType::Float32:
+    case EBandTensorDataType::Float32:
       std::tie(Index, Value) = TemplatedArgMax<float>(
           reinterpret_cast<float*>(Data()), NumElements());
       break;
-    case EBandTensorType::Int32:
+    case EBandTensorDataType::Int32:
       std::tie(Index, Value) = TemplatedArgMax<int32>(
           reinterpret_cast<int32*>(Data()), NumElements());
       break;
-    case EBandTensorType::UInt8:
+    case EBandTensorDataType::UInt8:
       std::tie(Index, Value) = TemplatedArgMax<uint8>(
           reinterpret_cast<uint8*>(Data()), NumElements());
       break;
-    case EBandTensorType::Int64:
+    case EBandTensorDataType::Int64:
       std::tie(Index, Value) = TemplatedArgMax<int64>(
           reinterpret_cast<int64*>(Data()), NumElements());
       break;
-    case EBandTensorType::Int16:
+    case EBandTensorDataType::Int16:
       std::tie(Index, Value) = TemplatedArgMax<int16>(
           reinterpret_cast<int16*>(Data()), NumElements());
       break;
-    case EBandTensorType::Complex64:
+    case EBandTensorDataType::Complex64:
       std::tie(Index, Value) = TemplatedArgMax<double>(
           reinterpret_cast<double*>(Data()), NumElements());
       break;
-    case EBandTensorType::Int8:
+    case EBandTensorDataType::Int8:
       std::tie(Index, Value) =
           TemplatedArgMax<int8>(reinterpret_cast<int8*>(Data()), NumElements());
       break;
-    case EBandTensorType::Float64:
+    case EBandTensorDataType::Float64:
       std::tie(Index, Value) = TemplatedArgMax<double>(
           reinterpret_cast<double*>(Data()), NumElements());
       break;
@@ -172,7 +172,7 @@ EBandStatus UBandTensor::CopyFromFrameBuffer(
 
   // Directly update uint8 Buffer
   uint8* TargetBufferPtr =
-      Type() == EBandTensorType::UInt8 ? Data() : RGBBuffer;
+      Type() == EBandTensorDataType::UInt8 ? Data() : RGBBuffer;
   std::unique_ptr<band::FrameBuffer> OutputBuffer =
       band::CreateFromRgbRawBuffer(TargetBufferPtr,
                                    {tensor_width, tensor_height});
@@ -207,11 +207,11 @@ EBandStatus UBandTensor::CopyFromFrameBuffer(
   }
 
   // Type conversion (RGB8 to tensor type)
-  if (Type() != EBandTensorType::UInt8) {
+  if (Type() != EBandTensorDataType::UInt8) {
     const UEnum* EnumPtr =
         FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
     switch (Type()) {
-      case EBandTensorType::Float32:
+      case EBandTensorDataType::Float32:
         BandTensorUtil::RGB8ToRGBArray<float>(
             TargetBufferPtr, reinterpret_cast<float*>(Data()),
             tensor_width * tensor_height, Mean, Std);
@@ -227,8 +227,8 @@ EBandStatus UBandTensor::CopyFromFrameBuffer(
   return EBandStatus::Ok;
 }
 
-EBandTensorType UBandTensor::Type() {
-  return EBandTensorType(FBandModule::Get().BandTensorGetType(TensorHandle));
+EBandTensorDataType UBandTensor::Type() {
+  return EBandTensorDataType(FBandModule::Get().BandTensorGetType(TensorHandle));
 }
 
 int32 UBandTensor::Dim(int32 Index) {
@@ -326,7 +326,7 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
       Texture->UpdateResource();
     }
 
-    const EBandTensorType TensorType = Type();
+    const EBandTensorDataType TensorType = Type();
     const size_t TypeBytes = BandEnum::TensorTypeBytes(TensorType);
     const int32 SizeX = Texture->PlatformData->Mips[0].SizeX;
     const int32 SizeY = Texture->PlatformData->Mips[0].SizeY;
@@ -351,10 +351,10 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
       // directly copy from the source to tensor
       if (!RequiresResize) {
         const UEnum* EnumPtr =
-            FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+            FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorDataType"), true);
 
         switch (TensorType) {
-          case EBandTensorType::Float32:
+          case EBandTensorDataType::Float32:
             UE_LOG(
                 LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"),
                 *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
@@ -362,7 +362,7 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
                 SourceData, TargetPixelFormat, reinterpret_cast<float*>(Data()),
                 NumTensorElements, Mean, Std);
             break;
-          case EBandTensorType::UInt8:
+          case EBandTensorDataType::UInt8:
             UE_LOG(
                 LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"),
                 *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
@@ -370,7 +370,7 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
                 SourceData, TargetPixelFormat, Data(), NumTensorElements, Mean,
                 Std);
             break;
-          case EBandTensorType::Int8:
+          case EBandTensorDataType::Int8:
             UE_LOG(
                 LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"),
                 *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));

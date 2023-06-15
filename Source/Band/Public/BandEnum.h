@@ -8,7 +8,7 @@
 	UEnum for TfLiteType in common.h
 */
 UENUM(BlueprintType)
-enum class EBandTensorType : uint8 {
+enum class EBandTensorDataType : uint8 {
   NoType UMETA(DisplayName = "NoType"),
   Float32 UMETA(DisplayName = "Float32"),
   Int32 UMETA(DisplayName = "Int32"),
@@ -60,6 +60,6 @@ enum class EBandLandmark : uint8 {
 };
 
 namespace BandEnum {
-size_t TensorTypeBytes(const EBandTensorType& Type);
+size_t TensorTypeBytes(const EBandTensorDataType& Type);
 EBandStatus ToBandStatus(BandStatus Status);
 } // namespace BandEnum

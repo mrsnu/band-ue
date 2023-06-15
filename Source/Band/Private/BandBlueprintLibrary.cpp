@@ -1,5 +1,6 @@
 #include "BandBlueprintLibrary.h"
 
+#include <algorithm>
 #include <functional>
 #include <list>
 
@@ -7,10 +8,72 @@
 #include "libband.h"
 #include "BandModel.h"
 #include "Rect.h"
+#include "Algo/MaxElement.h"
 
 
 FString UBandBlueprintLibrary::GetVersion() {
   return FBandModule::Get().GetVersion();
+}
+
+template <typename T>
+FString GetLabelInternal(const TArray<T>& OutputTensor, const UBandLabel* Label) {
+  
+  FString Result;
+  if (Label == nullptr) {
+    return Result;
+  }
+
+  const int32 NumClasses = Label->GetNumClasses();
+  if (NumClasses <= 0) {
+    return Result;
+  }
+
+  if (OutputTensor.Num() < NumClasses) {
+    UE_LOG(LogBand, Error,
+           TEXT("UBandBlueprintLibrary: GetLabel: Given tensor size %d is "
+             "smaller than number of classes %d"),
+           OutputTensor.Num(), NumClasses);
+    return Result;
+  }
+  
+  int32 ClassIndex;
+  FMath::Max(OutputTensor, &ClassIndex);
+  return Label->GetClassName(ClassIndex);
+}
+
+
+FString UBandBlueprintLibrary::GetLabel(TArray<UBandTensor*> OutputTensors,
+    UBandLabel* Label) {
+  // Assumption: (1) x [1] x [NumClasses]
+  if (OutputTensors.Num() <= 0) {
+    UE_LOG(LogBand, Error,
+           TEXT("UBandBlueprintLibrary: GetLabel: Given empty tensor array"));
+    return FString();
+  }
+
+  if (OutputTensors[0] == nullptr) {
+    UE_LOG(LogBand, Error,
+           TEXT("UBandBlueprintLibrary: GetLabel: Given null tensor"));
+    return FString();
+  }
+
+  const EBandTensorDataType TensorType = OutputTensors[0]->Type();
+  switch (TensorType) {
+    case EBandTensorDataType::Float32:
+      return GetLabelInternal<float>(
+          OutputTensors[0]->GetF32Buffer(), Label);
+    case EBandTensorDataType::Int8:
+      return GetLabelInternal<int8>(
+          OutputTensors[0]->GetBuffer<int8>(), Label);
+    case EBandTensorDataType::UInt8:
+      return GetLabelInternal<uint8>(
+          OutputTensors[0]->GetUInt8Buffer(), Label);
+    default:
+      UE_LOG(LogBand, Error,
+             TEXT("UBandBlueprintLibrary: GetLabel: Unsupported tensor type"));
+      return FString();
+  }
+  
 }
 
 /* BBox offsets: Offset of Left, Bottom, Right, Top (in this order) */
@@ -190,9 +253,9 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(
     BBoxOffsets = {0, 3, 2, 1}; // xmin, ymin, xmax, ymax
   }
 
-  const EBandTensorType TensorType = Tensors[DetectionTensorIndex]->Type();
+  const EBandTensorDataType TensorType = Tensors[DetectionTensorIndex]->Type();
   switch (TensorType) {
-    case EBandTensorType::Float32:
+    case EBandTensorDataType::Float32:
       Boxes = GetDetectedBoxesInternal<float>(
           DetectorType,
           Tensors,
@@ -276,9 +339,9 @@ TArray<FVector2D> UBandBlueprintLibrary::Get2DLandmarks(
     return Landmarks;
   }
 
-  const EBandTensorType TensorType = Tensors[LandmarkTensorIndex]->Type();
+  const EBandTensorDataType TensorType = Tensors[LandmarkTensorIndex]->Type();
   switch (TensorType) {
-    case EBandTensorType::Float32:
+    case EBandTensorDataType::Float32:
       Landmarks = Get2DLandmarksInternal<float>(
           Tensors, LandmarkTensorIndex, TensorDim, NumLandmarks, Offsets);
       break;
@@ -381,9 +444,9 @@ FBandBoundingBox UBandBlueprintLibrary::GetLandmarks(
     return Landmarks;
   }
 
-  const EBandTensorType TensorType = Tensors[LandmarkTensorIndex]->Type();
+  const EBandTensorDataType TensorType = Tensors[LandmarkTensorIndex]->Type();
   switch (TensorType) {
-    case EBandTensorType::Float32:
+    case EBandTensorDataType::Float32:
       Landmarks = GetLandmarksInternal<float>(Tensors, LandmarkTensorIndex,
                                               TensorDim, NumLandmarks,
                                               NumCoords, Offsets, ConfOffset);

@@ -1,43 +1,43 @@
 #include "BandEnum.h"
 
 namespace BandEnum {
-size_t TensorTypeBytes(const EBandTensorType& Type) {
+size_t TensorTypeBytes(const EBandTensorDataType& Type) {
   size_t Size = 0;
   switch (Type) {
-    case EBandTensorType::NoType:
+    case EBandTensorDataType::NoType:
       Size = 0;
       break;
-    case EBandTensorType::Float32:
+    case EBandTensorDataType::Float32:
       Size = sizeof(float);
       break;
-    case EBandTensorType::Int32:
+    case EBandTensorDataType::Int32:
       Size = sizeof(int32);
       break;
-    case EBandTensorType::UInt8:
+    case EBandTensorDataType::UInt8:
       Size = sizeof(uint8);
       break;
-    case EBandTensorType::Int64:
+    case EBandTensorDataType::Int64:
       Size = sizeof(int64);
       break;
-    case EBandTensorType::String:
+    case EBandTensorDataType::String:
       Size = sizeof(char);
       break;
-    case EBandTensorType::Bool:
+    case EBandTensorDataType::Bool:
       Size = sizeof(bool);
       break;
-    case EBandTensorType::Int16:
+    case EBandTensorDataType::Int16:
       Size = sizeof(int16);
       break;
-    case EBandTensorType::Complex64:
+    case EBandTensorDataType::Complex64:
       Size = sizeof(double);
       break;
-    case EBandTensorType::Int8:
+    case EBandTensorDataType::Int8:
       Size = sizeof(int8);
       break;
-    case EBandTensorType::Float16:
+    case EBandTensorDataType::Float16:
       Size = 2;
       break;
-    case EBandTensorType::Float64:
+    case EBandTensorDataType::Float64:
       Size = sizeof(double);
       break;
     default:

@@ -35,7 +35,7 @@ public:
   void ArgMax(int32& Index, float& Value);
 
   UFUNCTION(BlueprintCallable, Category = "Band")
-  EBandTensorType Type();
+  EBandTensorDataType Type();
   UFUNCTION(BlueprintCallable, Category = "Band")
   int32 Dim(int32 Index);
   UFUNCTION(BlueprintCallable, Category = "Band")
