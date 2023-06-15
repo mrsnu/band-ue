@@ -3,7 +3,7 @@
 #include <fstream>
 
 #include "Band.h"
-#include "BandLibrary.h"
+#include "libband.h"
 #include "BandTensorUtil.h"
 #include "ImageUtil/FrameBufferCommonUtils.h"
 #include "ImageUtil/FrameBufferUtils.h"

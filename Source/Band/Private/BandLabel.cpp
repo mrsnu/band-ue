@@ -1,6 +1,6 @@
 #include "BandLabel.h"
 #include "Band.h"
-#include "BandLibrary.h"
+#include "libband.h"
 
 #include <fstream>
 #include <string> // getline

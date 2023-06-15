@@ -12,18 +12,18 @@ public class Band : ModuleRules
 		// TODO(dostos): change `Data` dir to better name/structure
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{
-			RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Data/Release/band_c.dll"));
+			RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Library/lib/band_c.dll"));
 			PublicDelayLoadDLLs.Add("band_c.dll");
 		}
 		// TODO(dostos): not tested on iOS yet
 		else if (Target.Platform == UnrealTargetPlatform.Mac)
 		{
-			RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Data/Release/libtensorflowlite_c.dylib"));
+			RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Library/lib/libband_c.dylib"));
 			PublicDelayLoadDLLs.Add("libtensorflowlite_c.dylib");
 		}
 		else if (Target.Platform == UnrealTargetPlatform.Android)
 		{
-			string ExampleSoPath = Path.Combine(ModuleDirectory, "Data/Release/libband_c.so");
+			string ExampleSoPath = Path.Combine(ModuleDirectory, "Library/lib/libband_c.so");
 			PublicAdditionalLibraries.Add(ExampleSoPath);
 			RuntimeDependencies.Add(ExampleSoPath);
 			PublicDelayLoadDLLs.Add("libband_c.so");
@@ -35,7 +35,7 @@ public class Band : ModuleRules
 		PublicIncludePaths.AddRange(
 			new string[]
 			{
-				Path.Combine(ModuleDirectory, "Library"),
+				Path.Combine(ModuleDirectory, "Library/include"),
 				Path.Combine(ModuleDirectory, "ThirdParty")
 				// ... add public include paths required here ...
 			}

@@ -4,7 +4,7 @@
 #include <list>
 
 #include "Band.h"
-#include "BandLibrary.h"
+#include "libband.h"
 #include "BandModel.h"
 #include "Rect.h"
 

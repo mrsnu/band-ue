@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "BandEnum.h"
-#include "BandLibrary.h"
+#include "libband.h"
 #include "BandInterfaceComponent.generated.h"
 
 class UBandModel;

@@ -4,7 +4,7 @@
 
 #include "Engine.h"
 #include "Modules/ModuleManager.h"
-#include "BandLibrary.h"
+#include "libband.h"
 #include "BandEnum.h"
 #include "BandInterfaceComponent.h"
 

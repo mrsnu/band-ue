@@ -3,7 +3,7 @@
 #include "Band.h"
 #include "BandModel.h"
 #include "BandTensor.h"
-#include "BandLibrary.h"
+#include "libband.h"
 
 #include "Core.h"
 #include "Modules/ModuleManager.h"
@@ -24,9 +24,9 @@ void FBandModule::StartupModule() {
   FString LibraryPath;
 #if PLATFORM_WINDOWS
   LibraryPath = FPaths::Combine(*BaseDir,
-                                TEXT("Source/Band/Data/Release/band_c.dll"));
+                                TEXT("Source/Band/Library/lib/band_c.dll"));
 #elif PLATFORM_MAC
-	LibraryPath = FString("libtensorflowlite_c.dylib");
+	LibraryPath = FString("libband_c.dylib");
 #elif PLATFORM_ANDROID
 	LibraryPath = FString("libband_c.so");
 #endif // PLATFORM_WINDOWS

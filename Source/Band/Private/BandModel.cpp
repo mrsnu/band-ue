@@ -1,6 +1,6 @@
 #include "BandModel.h"
 #include "Band.h"
-#include "BandLibrary.h"
+#include "libband.h"
 
 bool UBandModel::IsRegistered() const {
   std::unique_lock<std::mutex> RegisterLock(RegisterMutex);

@@ -5,7 +5,7 @@
 #include "AndroidCameraFrame.h"
 #include "BandBoundingBox.h"
 #include "BandEnum.h"
-#include "BandLibrary.h"
+#include "libband.h"
 #include "UObject/ObjectMacros.h"
 #include "BandTensor.generated.h"
 
