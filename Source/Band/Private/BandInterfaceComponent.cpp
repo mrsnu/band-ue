@@ -81,7 +81,7 @@ void UBandInterfaceComponent::InvokeSync(
   } else if (Model->IsRegistered() && GetInputTensorCount(Model) == InputTensors
              .Num() && GetOutputTensorCount(Model) == OutputTensors.Num()) {
     FBandModule::Get().BandEngineRequestSyncOptions(
-        GetHandle(), Model->GetHandle(), {DeviceFlag, false, -1, -1},
+        GetHandle(), Model->GetHandle(), {DeviceFlag, true, -1, -1},
         BandTensorUtil::TensorsFromTArray(InputTensors).GetData(),
         BandTensorUtil::TensorsFromTArray(OutputTensors).GetData());
   } else {
@@ -100,13 +100,13 @@ int32 UBandInterfaceComponent::InvokeAsync(
     UPARAM(ref) TArray<UBandTensor*> InputTensors, int DeviceFlag) {
   if (Model->IsRegistered() && InputTensors.Num() == 0) {
     const int32 JobId = FBandModule::Get().BandEngineRequestAsyncOptions(
-        GetHandle(), Model->GetHandle(), {DeviceFlag, false, -1, -1}, nullptr);
+        GetHandle(), Model->GetHandle(), {DeviceFlag, true, -1, -1}, nullptr);
     JobToModel[JobId] = Model->GetHandle();
     return JobId;
   } else if (Model->IsRegistered() && GetInputTensorCount(Model) == InputTensors
              .Num()) {
     const int32 JobId = FBandModule::Get().BandEngineRequestAsyncOptions(
-        GetHandle(), Model->GetHandle(), {DeviceFlag, false, -1, -1},
+        GetHandle(), Model->GetHandle(), {DeviceFlag, true, -1, -1},
         BandTensorUtil::TensorsFromTArray(InputTensors).GetData());
     JobToModel[JobId] = Model->GetHandle();
     return JobId;

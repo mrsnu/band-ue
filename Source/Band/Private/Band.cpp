@@ -24,7 +24,7 @@ void FBandModule::StartupModule() {
   FString LibraryPath;
 #if PLATFORM_WINDOWS
   LibraryPath = FPaths::Combine(*BaseDir,
-                                TEXT("Source/Band/Library/lib/band_c.dll"));
+                                TEXT("Source/Band/Library/Debug/lib/band_c.dll"));
 #elif PLATFORM_MAC
 	LibraryPath = FString("libband_c.dylib");
 #elif PLATFORM_ANDROID
