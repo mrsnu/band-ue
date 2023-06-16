@@ -276,7 +276,7 @@ TArray<FBandBoundingBox> UBandBlueprintLibrary::GetDetectedBoxes(
       break;
     default:
       const UEnum* EnumPtr =
-          FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+          FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorDataType"), true);
       UE_LOG(LogBand, Error, TEXT("GetDetectedBoxes: Unsupported tensor type %s"),
              *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
   }
@@ -347,7 +347,7 @@ TArray<FVector2D> UBandBlueprintLibrary::Get2DLandmarks(
       break;
     default:
       const UEnum* EnumPtr =
-          FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+          FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorDataType"), true);
       UE_LOG(LogBand, Error, TEXT("Get2DLandmarks: Unsupported tensor type %s"),
              *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
   }
@@ -453,7 +453,7 @@ FBandBoundingBox UBandBlueprintLibrary::GetLandmarks(
       break;
     default:
       const UEnum* EnumPtr =
-          FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+          FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorDataType"), true);
       UE_LOG(LogBand, Error, TEXT("GetLandmarks: Unsupported tensor type %s"),
              *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
   }

@@ -75,7 +75,7 @@ void UBandTensor::FromBoundingBox(UPARAM(ref) const FBandBoundingBox BBox) {
 
   if (Type() != EBandTensorDataType::UInt8) {
     const UEnum* EnumPtr =
-        FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+        FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorDataType"), true);
     switch (Type()) {
       case EBandTensorDataType::Float32: {
         BandTensorUtil::FromTArray<float, float>(
@@ -139,7 +139,7 @@ void UBandTensor::ArgMax(int32& Index, float& Value) {
       break;
     default:
       const UEnum* EnumPtr =
-          FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+          FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorDataType"), true);
       UE_LOG(LogBand, Error, TEXT("ArgMax: Unsupported tensor type %s"),
              *EnumPtr->GetNameStringByValue(static_cast<int64>(Type())));
       break;
@@ -149,7 +149,7 @@ void UBandTensor::ArgMax(int32& Index, float& Value) {
 void UBandTensor::Initialize(BandTensor* NewTensorHandle) {
   TensorHandle = NewTensorHandle;
   const UEnum* EnumPtr =
-      FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+      FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorDataType"), true);
   FString DimensionString;
   for (int32 i = 0; i < NumDims(); i++) {
     DimensionString += FString::FromInt(Dim(i));
@@ -209,7 +209,7 @@ EBandStatus UBandTensor::CopyFromFrameBuffer(
   // Type conversion (RGB8 to tensor type)
   if (Type() != EBandTensorDataType::UInt8) {
     const UEnum* EnumPtr =
-        FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorType"), true);
+        FindObject<UEnum>(ANY_PACKAGE, TEXT("EBandTensorDataType"), true);
     switch (Type()) {
       case EBandTensorDataType::Float32:
         BandTensorUtil::RGB8ToRGBArray<float>(
@@ -356,7 +356,7 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
         switch (TensorType) {
           case EBandTensorDataType::Float32:
             UE_LOG(
-                LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"),
+                LogBand, Log, TEXT("CopyFromTexture: EBandTensorDataType: %s"),
                 *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
             BandTensorUtil::TextureToRGBArray<float>(
                 SourceData, TargetPixelFormat, reinterpret_cast<float*>(Data()),
@@ -364,7 +364,7 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
             break;
           case EBandTensorDataType::UInt8:
             UE_LOG(
-                LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"),
+                LogBand, Log, TEXT("CopyFromTexture: EBandTensorDataType: %s"),
                 *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
             BandTensorUtil::TextureToRGBArray<uint8>(
                 SourceData, TargetPixelFormat, Data(), NumTensorElements, Mean,
@@ -372,7 +372,7 @@ EBandStatus UBandTensor::CopyFromTextureWithCrop(UPARAM(ref)
             break;
           case EBandTensorDataType::Int8:
             UE_LOG(
-                LogBand, Log, TEXT("CopyFromTexture: EBandTensorType: %s"),
+                LogBand, Log, TEXT("CopyFromTexture: EBandTensorDataType: %s"),
                 *EnumPtr->GetNameStringByValue(static_cast<int64>(TensorType)));
             BandTensorUtil::TextureToRGBArray<int8>(
                 SourceData, TargetPixelFormat,

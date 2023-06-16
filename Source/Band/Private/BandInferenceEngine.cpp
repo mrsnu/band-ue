@@ -115,7 +115,7 @@ void ABandInferenceEngine::OnFrameAvailable(
 
   {
     UE_SCOPED_BANDTIMER(Inference);
-    Interpreter->InvokeSync(Model, InputTensors, OutputTensors);
+    Interpreter->RequestSync(Model, InputTensors, OutputTensors);
   }
 
   int ClassIndex = -1;

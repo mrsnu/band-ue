@@ -56,18 +56,27 @@ UBandTensor* UBandInterfaceComponent::AllocateOutputTensor(
   return Tensor;
 }
 
-void UBandInterfaceComponent::InvokeSyncSingleIO(
-    const UBandModel* Model, UBandTensor* InputTensor,
-    UBandTensor* OutputTensor) {
-  InvokeSync(Model, {InputTensor}, {OutputTensor});
+TArray<UBandTensor*> UBandInterfaceComponent::AllocateInputTensors(
+  const UBandModel* Model) {
+  TArray<UBandTensor*> Tensors;
+  int32 InputTensorCount = GetInputTensorCount(Model);
+  for (int32 i = 0; i < InputTensorCount; ++i) {
+    Tensors.Add(AllocateInputTensor(Model, i));
+  }
+  return Tensors;
 }
 
-int32 UBandInterfaceComponent::InvokeAsyncSingleInput(
-    const UBandModel* Model, UBandTensor* InputTensor) {
-  return InvokeAsync(Model, {InputTensor});
+TArray<UBandTensor*> UBandInterfaceComponent::AllocateOutputTensors(
+  const UBandModel* Model) {
+  TArray<UBandTensor*> Tensors;
+  int32 OutputTensorCount = GetOutputTensorCount(Model);
+  for (int32 i = 0; i < OutputTensorCount; ++i) {
+    Tensors.Add(AllocateOutputTensor(Model, i));
+  }
+  return Tensors;
 }
 
-void UBandInterfaceComponent::InvokeSync(
+void UBandInterfaceComponent::RequestSync(
     UPARAM(ref) const UBandModel* Model,
     UPARAM(ref) TArray<UBandTensor*> InputTensors,
     UPARAM(ref) TArray<UBandTensor*> OutputTensors, int DeviceFlag) {
@@ -95,7 +104,7 @@ void UBandInterfaceComponent::InvokeSync(
   }
 }
 
-int32 UBandInterfaceComponent::InvokeAsync(
+int32 UBandInterfaceComponent::RequestAsync(
     UPARAM(ref) const UBandModel* Model,
     UPARAM(ref) TArray<UBandTensor*> InputTensors, int DeviceFlag) {
   if (Model->IsRegistered() && InputTensors.Num() == 0) {
@@ -121,7 +130,7 @@ int32 UBandInterfaceComponent::InvokeAsync(
   }
 }
 
-EBandStatus UBandInterfaceComponent::Wait(int32 JobId,
+EBandStatus UBandInterfaceComponent::GetOutputs(int32 JobId,
                                           UPARAM(ref) TArray<UBandTensor*>
                                           OutputTensors) {
   // TODO(dostos): Add `GetJob(int32 jobId)` to C API?

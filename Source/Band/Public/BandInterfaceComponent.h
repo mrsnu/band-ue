@@ -35,6 +35,7 @@ public:
   int32 GetInputTensorCount(UPARAM(ref) const UBandModel* Model);
   UFUNCTION(BlueprintCallable, Category = "Band")
   int32 GetOutputTensorCount(UPARAM(ref) const UBandModel* Model);
+  
   UFUNCTION(BlueprintCallable, Category = "Band")
   UBandTensor* AllocateInputTensor(UPARAM(ref) const UBandModel* Model,
                                    int32 InputIndex);
@@ -42,26 +43,25 @@ public:
   UBandTensor* AllocateOutputTensor(UPARAM(ref) const UBandModel* Model,
                                     int32 OutputIndex);
 
+  UFUNCTION(BlueprintCallable, Category = "Band")
+  TArray<UBandTensor*> AllocateInputTensors(
+      UPARAM(ref) const UBandModel* Model);
+  UFUNCTION(BlueprintCallable, Category = "Band")
+  TArray<UBandTensor*> AllocateOutputTensors(
+      UPARAM(ref) const UBandModel* Model);
 
   UFUNCTION(BlueprintCallable, Category = "Band")
-  void InvokeSyncSingleIO(UPARAM(ref) const UBandModel* Model,
-                          UBandTensor* InputTensor, UBandTensor* OutputTensor);
-  UFUNCTION(BlueprintCallable, Category = "Band")
-  int32 InvokeAsyncSingleInput(UPARAM(ref) const UBandModel* Model,
-                               UBandTensor* InputTensor);
-
-  UFUNCTION(BlueprintCallable, Category = "Band")
-  void InvokeSync(UPARAM(ref) const UBandModel* Model,
+  void RequestSync(UPARAM(ref) const UBandModel* Model,
                   UPARAM(ref) TArray<UBandTensor*> InputTensors,
                   UPARAM(ref) TArray<UBandTensor*> OutputTensors,
                   int DeviceFlag = 0);
   UFUNCTION(BlueprintCallable, Category = "Band")
-  int32 InvokeAsync(UPARAM(ref) const UBandModel* Model,
+  int32 RequestAsync(UPARAM(ref) const UBandModel* Model,
                     UPARAM(ref) TArray<UBandTensor*> InputTensors,
                     int DeviceFlag = 0);
 
   UFUNCTION(BlueprintCallable, Category = "Band")
-  EBandStatus Wait(int32 JobId, UPARAM(ref) TArray<UBandTensor*> OutputTensors);
+  EBandStatus GetOutputs(int32 JobId, UPARAM(ref) TArray<UBandTensor*> OutputTensors);
 
   UFUNCTION(BlueprintCallable, Category = "Band")
   int32 GetNumWorkers() const;
