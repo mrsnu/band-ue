@@ -12,13 +12,13 @@ public class Band : ModuleRules
 		// TODO(dostos): change `Data` dir to better name/structure
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{
-			RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Library/Debug/lib/band_c.dll"));
+			RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Library/Release/lib/band_c.dll"));
 			PublicDelayLoadDLLs.Add("band_c.dll");
 		}
 		// TODO(dostos): not tested on iOS yet
 		else if (Target.Platform == UnrealTargetPlatform.Mac)
 		{
-			RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Library/Debug/lib/libband_c.dylib"));
+			RuntimeDependencies.Add(Path.Combine(ModuleDirectory, "Library/Release/lib/libband_c.dylib"));
 			PublicDelayLoadDLLs.Add("libtensorflowlite_c.dylib");
 		}
 		else if (Target.Platform == UnrealTargetPlatform.Android)
