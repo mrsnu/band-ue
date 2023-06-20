@@ -5,9 +5,10 @@
 #include "AndroidCameraFrame.h"
 #include "BandBoundingBox.h"
 #include "BandEnum.h"
-#include "libband.h"
-#include "UObject/ObjectMacros.h"
 #include "BandTensor.generated.h"
+#include "UObject/ObjectMacros.h"
+#include "libband.h"
+
 
 namespace band {
 class FrameBuffer;
@@ -19,20 +20,18 @@ class BAND_API UBandTensor : public UObject {
 
 public:
   UFUNCTION(BlueprintCallable, Category = Band)
-  void FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame* Frame,
-                       const float Mean = 0.0f,
-                       const float Std = 1.0f);
+  void FromCameraFrame(UPARAM(ref) const UAndroidCameraFrame *Frame,
+                       const float Mean = 0.0f, const float Std = 1.0f);
   UFUNCTION(BlueprintCallable, Category = Band)
-  void FromCameraFrameWithCrop(UPARAM(ref) const UAndroidCameraFrame* Frame,
-                               FBandBoundingBox RoI,
-                               const float Mean = 0.0f,
+  void FromCameraFrameWithCrop(UPARAM(ref) const UAndroidCameraFrame *Frame,
+                               FBandBoundingBox RoI, const float Mean = 0.0f,
                                const float Std = 1.0f);
 
   UFUNCTION(BlueprintCallable, Category = Band)
   void FromBoundingBox(UPARAM(ref) const FBandBoundingBox Box);
 
   UFUNCTION(BlueprintCallable, Category = Band)
-  void ArgMax(int32& Index, float& Value);
+  void ArgMax(int32 &Index, float &Value);
 
   UFUNCTION(BlueprintCallable, Category = "Band")
   EBandTensorDataType Type();
@@ -46,11 +45,10 @@ public:
   int32 ByteSize();
   UFUNCTION(BlueprintCallable, Category = "Band")
   FString Name();
-  uint8* Data();
+  uint8 *Data();
 
-  template <typename T>
-  TArray<T> GetBuffer() {
-    return TArray<T>(reinterpret_cast<T*>(Data()), ByteSize() / sizeof(T));
+  template <typename T> TArray<T> GetBuffer() {
+    return TArray<T>(reinterpret_cast<T *>(Data()), ByteSize() / sizeof(T));
   }
 
   UFUNCTION(BlueprintCallable, Category = "Band")
@@ -58,32 +56,29 @@ public:
   UFUNCTION(BlueprintCallable, Category = "Band")
   TArray<float> GetF32Buffer();
 
-  EBandStatus CopyFromBuffer(uint8* Buffer, int32 Bytes);
+  EBandStatus CopyFromBuffer(uint8 *Buffer, int32 Bytes);
   UFUNCTION(BlueprintCallable, Category = "Band")
   EBandStatus CopyFromBuffer(TArray<uint8> Buffer);
   UFUNCTION(BlueprintCallable, Category = "Band")
-  EBandStatus CopyFromTexture(UPARAM(ref) UTexture2D* Texture, float Mean,
+  EBandStatus CopyFromTexture(UPARAM(ref) UTexture2D *Texture, float Mean,
                               float Std = 1.f);
   UFUNCTION(BlueprintCallable, Category = "Band")
-  EBandStatus CopyFromTextureWithCrop(UPARAM(ref) UTexture2D* Texture,
+  EBandStatus CopyFromTextureWithCrop(UPARAM(ref) UTexture2D *Texture,
                                       FBandBoundingBox BBox,
-                                      float Mean = 127.5f,
-                                      float Std = 127.5f);
+                                      float Mean = 127.5f, float Std = 127.5f);
   UFUNCTION(BlueprintCallable, Category = "Band")
   EBandStatus CopyToBuffer(TArray<uint8> Buffer);
 
-  BandTensor* Handle() const;
-
 private:
-  friend class UBandInterfaceComponent;
+  friend class FBandModule;
 
-  void Initialize(BandTensor* TensorHandle);
-  EBandStatus CopyFromFrameBuffer(
-      std::unique_ptr<band::FrameBuffer> SourceFrameBuffer,
-      FBandBoundingBox RoI, float Mean, float Std);
+  void Initialize(BandTensor *TensorHandle);
+  EBandStatus
+  CopyFromFrameBuffer(std::unique_ptr<band::FrameBuffer> SourceFrameBuffer,
+                      FBandBoundingBox RoI, float Mean, float Std);
   virtual void BeginDestroy() override;
 
-  BandTensor* TensorHandle = nullptr;
+  BandTensor *Handle = nullptr;
 
-  uint8* RGBBuffer = nullptr;
+  uint8 *RGBBuffer = nullptr;
 };

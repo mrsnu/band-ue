@@ -15,11 +15,10 @@ struct BAND_API FBandLandmark {
   FBandLandmark() = default;
   FBandLandmark(float X, float Y, float Z, float Confidence);
 
-  float GetDistance(const FBandLandmark& Rhs) const;
-  bool operator==(const FBandLandmark& rhs) const;
+  float GetDistance(const FBandLandmark &Rhs) const;
+  bool operator==(const FBandLandmark &rhs) const;
 
-  static std::vector<size_t> GetImportantLandmarks(
-      EBandLandmark Type);
+  static std::vector<size_t> GetImportantLandmarks(EBandLandmark Type);
 
   UPROPERTY(EditAnywhere, BlueprintReadOnly)
   float Confidence = 0.0;

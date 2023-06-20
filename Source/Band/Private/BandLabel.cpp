@@ -15,12 +15,12 @@ FString UBandLabel::GetClassName(int32 Index) const {
   }
 }
 
-UBandLabel* UBandLabel::LoadLabel(UObject* InParent, FName InName,
-                                  EObjectFlags Flags, const FString& Filename,
-                                  bool& bOutOperationCanceled) {
+UBandLabel *UBandLabel::LoadLabel(UObject *InParent, FName InName,
+                                  EObjectFlags Flags, const FString &Filename,
+                                  bool &bOutOperationCanceled) {
   std::ifstream InputFile(TCHAR_TO_ANSI(*Filename));
   if (InputFile.is_open()) {
-    UBandLabel* Label = NewObject<UBandLabel>(InParent, InName, Flags);
+    UBandLabel *Label = NewObject<UBandLabel>(InParent, InName, Flags);
     std::string ClassName;
     while (std::getline(InputFile, ClassName)) {
       Label->Labels.Push(ANSI_TO_TCHAR(ClassName.c_str()));

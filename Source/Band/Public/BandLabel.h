@@ -1,8 +1,9 @@
 #pragma once
 
-#include "UObject/ObjectMacros.h"
-#include "Modules/ModuleManager.h"
 #include "BandLabel.generated.h"
+#include "Modules/ModuleManager.h"
+#include "UObject/ObjectMacros.h"
+
 
 UCLASS(Blueprintable)
 class BAND_API UBandLabel : public UDataAsset {
@@ -18,7 +19,7 @@ public:
   UFUNCTION(BlueprintCallable, Category = Band)
   int32 GetNumClasses() const { return Labels.Num(); }
 
-  static UBandLabel* LoadLabel(UObject* InParent, FName InName,
-                               EObjectFlags Flags, const FString& Filename,
-                               bool& bOutOperationCanceled);
+  static UBandLabel *LoadLabel(UObject *InParent, FName InName,
+                               EObjectFlags Flags, const FString &Filename,
+                               bool &bOutOperationCanceled);
 };

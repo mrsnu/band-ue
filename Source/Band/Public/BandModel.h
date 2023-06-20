@@ -2,9 +2,10 @@
 
 #include <mutex>
 
-#include "UObject/ObjectMacros.h"
-#include "Modules/ModuleManager.h"
 #include "BandModel.generated.h"
+#include "Modules/ModuleManager.h"
+#include "UObject/ObjectMacros.h"
+
 
 class UBandTensor;
 struct BandModel;
@@ -17,21 +18,34 @@ class BAND_API UBandModel : public UDataAsset {
 public:
   virtual void BeginDestroy() override;
 
-  BandModel* GetHandle() const;
-  const TArray<uint8>& GetBinary() const;
+  UFUNCTION(BlueprintCallable, Category = "Band")
+  int32 GetInputTensorCount() const;
+  UFUNCTION(BlueprintCallable, Category = "Band")
+  int32 GetOutputTensorCount() const;
 
   UFUNCTION(BlueprintCallable, Category = "Band")
-  bool IsRegistered() const;
+  UBandTensor *AllocateInputTensor(int32 InputIndex) const;
   UFUNCTION(BlueprintCallable, Category = "Band")
-  void RegisterModel() const;
+  UBandTensor *AllocateOutputTensor(int32 OutputIndex) const;
 
-  static UBandModel* LoadModel(UObject* InParent, FName InName,
-                               EObjectFlags Flags, const uint8*& Buffer,
-                               size_t Size);
+  UFUNCTION(BlueprintCallable, Category = "Band")
+  TArray<UBandTensor *> AllocateInputTensors() const;
+  UFUNCTION(BlueprintCallable, Category = "Band")
+  TArray<UBandTensor *> AllocateOutputTensors() const;
 
 private:
-  mutable BandModel* ModelHandle = nullptr;
+  friend class FBandModule;
+  friend class UBandModelFactory;
+
+  BandModel *GetHandle() const;
+  static UBandModel *LoadModel(UObject *InParent, FName InName,
+                               EObjectFlags Flags, const uint8 *&Buffer,
+                               size_t Size);
+
+  const TArray<uint8> &GetBinary() const;
+
   mutable std::mutex RegisterMutex;
+  mutable BandModel *Handle = nullptr;
 
   UPROPERTY()
   TArray<uint8> ModelBinary;

@@ -1,53 +1,64 @@
 #include "BandModel.h"
 #include "Band.h"
+#include "BandTensor.h"
 #include "libband.h"
 
-bool UBandModel::IsRegistered() const {
-  std::unique_lock<std::mutex> RegisterLock(RegisterMutex);
-  return ModelHandle != nullptr;
-}
 
 void UBandModel::BeginDestroy() {
-  if (ModelHandle) {
-    FBandModule::Get().BandModelDelete(ModelHandle);
+  if (Handle) {
+    FBandModule::Get().DeleteModel(this);
   }
   Super::BeginDestroy();
 }
 
-BandModel* UBandModel::GetHandle() const {
-  // Delay-register model
-  // TODO(dostos): figure out how to register
-  // when UObject imported to editor as an uasset
-  if (!IsRegistered()) {
-    RegisterModel();
+int32 UBandModel::GetInputTensorCount() const {
+  return FBandModule::Get().GetInputTensorCount(this);
+}
+
+int32 UBandModel::GetOutputTensorCount() const {
+  return FBandModule::Get().GetOutputTensorCount(this);
+}
+
+UBandTensor *UBandModel::AllocateInputTensor(int32 InputIndex) const {
+  return FBandModule::Get().CreateInputTensor(this, InputIndex);
+}
+
+UBandTensor *UBandModel::AllocateOutputTensor(int32 OutputIndex) const {
+  return FBandModule::Get().CreateOutputTensor(this, OutputIndex);
+}
+
+TArray<UBandTensor *> UBandModel::AllocateInputTensors() const {
+  TArray<UBandTensor *> Tensors;
+  int32 InputTensorCount = GetInputTensorCount();
+  for (int32 i = 0; i < InputTensorCount; ++i) {
+    Tensors.Add(AllocateInputTensor(i));
   }
-  return ModelHandle;
+  return Tensors;
 }
 
-const TArray<uint8>& UBandModel::GetBinary() const {
-  return ModelBinary;
-}
-
-void UBandModel::RegisterModel() const {
-  std::unique_lock<std::mutex> RegisterLock(RegisterMutex);
-  if (ModelBinary.Num() && ModelHandle == nullptr) {
-    ModelHandle = FBandModule::Get().BandModelCreate();
-    if (FBandModule::Get().BandModelAddFromBuffer(
-            ModelHandle, kBandTfLite, ModelBinary.GetData(),
-            ModelBinary.Num()) == kBandOk
-        && FBandModule::Get().BandEngineRegisterModel(
-            FBandModule::Get().GetEngineHandle(), ModelHandle) == kBandOk) {
-    } else {
-      FBandModule::Get().BandModelDelete(ModelHandle);
-    }
+TArray<UBandTensor *> UBandModel::AllocateOutputTensors() const {
+  TArray<UBandTensor *> Tensors;
+  int32 OutputTensorCount = GetOutputTensorCount();
+  for (int32 i = 0; i < OutputTensorCount; ++i) {
+    Tensors.Add(AllocateOutputTensor(i));
   }
+  return Tensors;
 }
 
-UBandModel* UBandModel::LoadModel(UObject* InParent, FName InName,
-                                  EObjectFlags Flags, const uint8*& Buffer,
+BandModel *UBandModel::GetHandle() const {
+  if (Handle == nullptr) {
+    FBandModule::Get().RegisterModel(this);
+  }
+  return Handle;
+}
+
+UBandModel *UBandModel::LoadModel(UObject *InParent, FName InName,
+                                  EObjectFlags Flags, const uint8 *&Buffer,
                                   size_t Size) {
-  UBandModel* Model = NewObject<UBandModel>(InParent, InName, Flags);
+  UBandModel *Model = NewObject<UBandModel>(InParent, InName, Flags);
   Model->ModelBinary = TArray<uint8>(Buffer, Size);
-  Model->RegisterModel();
+  FBandModule::Get().RegisterModel(Model);
   return Model;
 }
+
+const TArray<uint8> &UBandModel::GetBinary() const { return ModelBinary; }

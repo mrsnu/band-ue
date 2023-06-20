@@ -1,11 +1,12 @@
 #pragma once
 
-#include "c_api_type.h"
-#include "Modules/ModuleManager.h"
 #include "BandEnum.generated.h"
+#include "Modules/ModuleManager.h"
+#include "c_api_type.h"
+
 
 /*
-	UEnum for TfLiteType in common.h
+        UEnum for TfLiteType in common.h
 */
 UENUM(BlueprintType)
 enum class EBandTensorDataType : uint8 {
@@ -32,7 +33,7 @@ enum class EBandDeviceType : uint8 {
 };
 
 /*
-	UEnum for BandStatus in common.h
+        UEnum for BandStatus in common.h
 */
 UENUM(BlueprintType)
 enum class EBandStatus : uint8 {
@@ -60,6 +61,6 @@ enum class EBandLandmark : uint8 {
 };
 
 namespace BandEnum {
-size_t TensorTypeBytes(const EBandTensorDataType& Type);
+size_t TensorTypeBytes(const EBandTensorDataType &Type);
 EBandStatus ToBandStatus(BandStatus Status);
 } // namespace BandEnum
