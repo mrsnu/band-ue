@@ -47,8 +47,6 @@ void UBandTensor::FromCameraFrameWithCrop(UPARAM(ref)
 
   if (Buffer.get()) {
     CopyFromFrameBuffer(std::move(Buffer), RoI, Mean, Std);
-  } else if (Frame->GetTexture2D()) {
-    CopyFromTextureWithCrop(Frame->GetTexture2D(), RoI, Mean, Std);
   } else {
     UE_LOG(LogBand, Display,
            TEXT("FromCameraFrame: Failed to copy from both Buffer (YUV or "

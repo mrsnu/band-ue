@@ -1,10 +1,10 @@
 #pragma once
 
+#include "Modules/ModuleManager.h"
+#include "UObject/ObjectMacros.h"
 #include <mutex>
 
 #include "BandModel.generated.h"
-#include "Modules/ModuleManager.h"
-#include "UObject/ObjectMacros.h"
 
 
 class UBandTensor;

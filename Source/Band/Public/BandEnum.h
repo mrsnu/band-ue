@@ -1,8 +1,8 @@
 #pragma once
 
-#include "BandEnum.generated.h"
 #include "Modules/ModuleManager.h"
 #include "c_api_type.h"
+#include "BandEnum.generated.h"
 
 
 /*

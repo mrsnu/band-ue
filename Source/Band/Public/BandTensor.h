@@ -5,9 +5,9 @@
 #include "AndroidCameraFrame.h"
 #include "BandBoundingBox.h"
 #include "BandEnum.h"
-#include "BandTensor.generated.h"
 #include "UObject/ObjectMacros.h"
 #include "libband.h"
+#include "BandTensor.generated.h"
 
 
 namespace band {

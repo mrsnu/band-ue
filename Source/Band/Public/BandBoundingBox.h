@@ -4,10 +4,10 @@
 
 #include <functional>
 
-#include "BandBoundingBox.generated.h"
 #include "BandLandmark.h"
 #include "Rect.h"
 #include "UObject/ObjectMacros.h"
+#include "BandBoundingBox.generated.h"
 
 
 USTRUCT(BlueprintType)

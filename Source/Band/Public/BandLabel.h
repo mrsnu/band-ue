@@ -1,8 +1,8 @@
 #pragma once
 
-#include "BandLabel.generated.h"
 #include "Modules/ModuleManager.h"
 #include "UObject/ObjectMacros.h"
+#include "BandLabel.generated.h"
 
 
 UCLASS(Blueprintable)

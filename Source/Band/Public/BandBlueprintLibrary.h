@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Band.h"
-#include "BandBlueprintLibrary.generated.h"
 #include "BandBoundingBox.h"
 #include "BandEnum.h"
 #include "BandLabel.h"
 #include "BandLandmark.h"
 #include "BandTensor.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "BandBlueprintLibrary.generated.h"
 
 
 UCLASS()

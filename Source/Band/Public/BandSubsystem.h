@@ -5,9 +5,9 @@
 #include <unordered_map>
 
 #include "BandEnum.h"
-#include "BandSubsystem.generated.h"
 #include "CoreMinimal.h"
 #include "libband.h"
+#include "BandSubsystem.generated.h"
 
 
 class UBandModel;
