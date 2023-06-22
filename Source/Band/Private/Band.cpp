@@ -28,7 +28,7 @@ private:
   // Function pointer registered to BandEngine
   void OnEndInvokeInternal(int32 JobId, BandStatus Status) const;
 
-  TSet<TWeakObjectPtr<UBandSubSystem>> RegisteredSubSystems;
+  TSet<UBandSubSystem*> RegisteredSubSystems;
 
   BandEngine *EngineHandle = nullptr;
   void *LibraryHandle = nullptr;
@@ -255,19 +255,20 @@ void FBandModuleImpl::OnEndInvokeInternal(int32 JobId,
                                           BandStatus Status) const {
   // Propagate callback to actor for delegation
   for (auto &BandEngine : RegisteredSubSystems) {
-    if (BandEngine.Get()) {
+      UE_LOG(LogBand, Display, TEXT("OnEndInvokeInternal"));
       BandEngine->OnEndInvokeInternal(JobId, Status);
-    }
   }
 }
 
 void FBandModule::RegisterSubSystem(UBandSubSystem *BandEngineComponent) {
-  Impl->RegisteredSubSystems.Add(MakeWeakObjectPtr(BandEngineComponent));
+  UE_LOG(LogBand, Display, TEXT("RegisterSubSystem"));
+  Impl->RegisteredSubSystems.Add(BandEngineComponent);
 }
 
 void FBandModule::UnregisterSubSystem(UBandSubSystem *BandEngineComponent) {
+  UE_LOG(LogBand, Display, TEXT("UnregisterSubSystem"));
   for (auto &BandEngine : Impl->RegisteredSubSystems) {
-    if (BandEngine.Get() == BandEngineComponent) {
+    if (BandEngine == BandEngineComponent) {
       Impl->RegisteredSubSystems.Remove(BandEngine);
       break;
     }
